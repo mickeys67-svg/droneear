@@ -1,0 +1,91 @@
+{
+  "expo": {
+    "name": "DroneEar",
+    "slug": "DroneEar",
+    "version": "2.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "droneear",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.droneear.app",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "DroneEar uses microphone access to analyze acoustic patterns and identify similar drone types by sound. All audio is processed on-device only.",
+        "NSLocationWhenInUseUsageDescription": "DroneEar uses your location to determine indoor/outdoor environment and improve acoustic analysis accuracy. Location data stays on your device.",
+        "NSMotionUsageDescription": "DroneEar uses the compass sensor to estimate the direction of identified sound sources.",
+        "UIBackgroundModes": ["audio"],
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.droneear.app"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "useAndroidX": true,
+            "enableJetifier": true
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "DroneEar uses your location to determine indoor/outdoor environment for acoustic analysis accuracy."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "DroneEar uses motion sensors to estimate sound source direction."
+        }
+      ],
+      "./withAppComponentFactory"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": false
+    }
+  }
+}

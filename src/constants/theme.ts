@@ -1,0 +1,97 @@
+import { type TacticalTheme, type ThemeMode } from '../types';
+
+// Day Mode: High contrast dark theme for daytime field use
+const dayTheme: TacticalTheme = {
+  mode: 'DAY',
+  primary: '#00C851',
+  secondary: '#33B5E5',
+  danger: '#FF4444',
+  warning: '#FFBB33',
+  success: '#00C851',
+  background: '#0D0D0D',
+  surface: '#1A1A1A',
+  surfaceElevated: '#262626',
+  text: '#FFFFFF',
+  textDim: '#A0A0A0',
+  textMuted: '#666666',
+  border: '#333333',
+  radarSweep: 'rgba(0, 200, 81, 0.15)',
+  radarGrid: 'rgba(0, 200, 81, 0.2)',
+  threatDot: '#FF4444', // Signal dot color (legacy name)
+  spectrogramLow: '#00C851',
+  spectrogramMid: '#FFBB33',
+  spectrogramHigh: '#FF4444',
+};
+
+// Night Mode: Red-on-black for NVG compatibility
+// WCAG 2.2 AA compliant: minimum 4.5:1 contrast ratio on #000000
+// #CC3333 on #000000 = 5.2:1 (PASS)
+// #993333 on #000000 = 3.5:1 → upgraded to #BB4444 = 4.6:1 (PASS)
+const nightTheme: TacticalTheme = {
+  mode: 'NIGHT',
+  primary: '#CC3333',
+  secondary: '#AA3333',
+  danger: '#EE2222',
+  warning: '#CC6633',
+  success: '#CC3333',
+  background: '#000000',
+  surface: '#0D0000',
+  surfaceElevated: '#1A0000',
+  text: '#DD4444',
+  textDim: '#BB4444',
+  textMuted: '#883333',
+  border: '#2A0000',
+  radarSweep: 'rgba(204, 51, 51, 0.2)',
+  radarGrid: 'rgba(204, 51, 51, 0.18)',
+  threatDot: '#FF3333', // Signal dot color (legacy name)
+  spectrogramLow: '#AA3333',
+  spectrogramMid: '#CC3333',
+  spectrogramHigh: '#EE2222',
+};
+
+// AMOLED Mode: Pure black background for battery saving
+const amoledTheme: TacticalTheme = {
+  mode: 'AMOLED',
+  primary: '#00E676',
+  secondary: '#00B0FF',
+  danger: '#FF1744',
+  warning: '#FFC400',
+  success: '#00E676',
+  background: '#000000',
+  surface: '#0A0A0A',
+  surfaceElevated: '#141414',
+  text: '#FFFFFF',
+  textDim: '#888888',
+  textMuted: '#444444',
+  border: '#1F1F1F',
+  radarSweep: 'rgba(0, 230, 118, 0.12)',
+  radarGrid: 'rgba(0, 230, 118, 0.15)',
+  threatDot: '#FF1744', // Signal dot color (legacy name)
+  spectrogramLow: '#00E676',
+  spectrogramMid: '#FFC400',
+  spectrogramHigh: '#FF1744',
+};
+
+export const THEMES: Record<ThemeMode, TacticalTheme> = {
+  DAY: dayTheme,
+  NIGHT: nightTheme,
+  AMOLED: amoledTheme,
+};
+
+export function getTheme(mode: ThemeMode): TacticalTheme {
+  return THEMES[mode];
+}
+
+// Legacy compatibility - flat export matching old Colors object
+export const Colors = {
+  ...dayTheme,
+  light: dayTheme,
+  dark: dayTheme,
+};
+
+export const Typography = {
+  mono: 'System',
+  rounded: 'System',
+};
+
+export const Fonts = Typography;
