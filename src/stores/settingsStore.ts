@@ -23,6 +23,7 @@ interface SettingsState extends AppSettings {
   setAutoRecord: (enabled: boolean) => void;
   setMaxHistoryItems: (count: number) => void;
   setDebugMode: (enabled: boolean) => void;
+  setBLEScanEnabled: (enabled: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -37,6 +38,7 @@ const DEFAULT_SETTINGS: AppSettings & { locale: SupportedLocale; voiceAlert: boo
   maxHistoryItems: 100,
   modelAutoUpdate: true,
   debugMode: false,
+  bleScanEnabled: true,
   locale: 'ko',
   onboardingComplete: false,
 };
@@ -65,6 +67,7 @@ export const useSettingsStore = create<SettingsState>()(
       setAutoRecord: (enabled) => set({ autoRecord: enabled }),
       setMaxHistoryItems: (count) => set({ maxHistoryItems: Math.max(10, Math.min(1000, count)) }),
       setDebugMode: (enabled) => set({ debugMode: enabled }),
+      setBLEScanEnabled: (enabled) => set({ bleScanEnabled: enabled }),
       resetToDefaults: () => set(DEFAULT_SETTINGS),
     }),
     {
@@ -82,6 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
         modelAutoUpdate: state.modelAutoUpdate,
         debugMode: state.debugMode,
         locale: state.locale,
+        bleScanEnabled: state.bleScanEnabled,
         onboardingComplete: state.onboardingComplete,
       }),
     }

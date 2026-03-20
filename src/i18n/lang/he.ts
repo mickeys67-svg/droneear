@@ -57,6 +57,9 @@ export const he: Translations = {
   noDetections: 'לא נרשמו זיהויים בהפעלה זו.',
   startScanningHint: 'התחל האזנה כדי לזהות דפוסים אקוסטיים.',
   total: 'סה"כ',
+  todaysDetections: 'היום',
+  thisWeek: 'השבוע',
+  avgConfidence: 'ביטחון ממוצע',
 
   settings: 'הגדרות',
   displayTheme: 'ערכת נושא',
@@ -196,4 +199,120 @@ export const he: Translations = {
 
   acousticDisclaimer: 'הערכה המבוססת על מאפיינים אקוסטיים. כלי הטיס בפועל עשוי להיות שונה.',
   similarDrones: 'רחפנים דומים',
+
+  // Onboarding BLE
+  onboardingBLE: 'זיהוי רחפנים באמצעות Bluetooth',
+  onboardingBLEDesc: 'הפעל סריקת BLE Remote ID כדי לקלוט אותות זיהוי של רחפנים בסביבה. נדרשת הרשאת Bluetooth.',
+  onboardingBLESkip: 'המשך ללא Bluetooth',
+
+  // Export
+  exportData: 'ייצוא נתונים',
+  exportCSV: 'ייצוא כ-CSV',
+  exportJSON: 'ייצוא כ-JSON',
+  exportSuccess: 'הייצוא הושלם!',
+
+  // BLE Remote ID
+  bleScan: 'סריקת BLE Remote ID',
+  bleScanDesc: 'סריקת אותות זיהוי מרחוק של רחפנים דרך Bluetooth',
+  bleEnabled: 'סריקת BLE פעילה',
+  bleDisabled: 'סריקת BLE כבויה',
+  bleUnavailable: 'Bluetooth לא זמין',
+  bleRemoteID: 'זיהוי מרחוק',
+  bleDeviceFound: 'רחפן BLE נמצא',
+  bleSerialNumber: 'מספר סידורי',
+  bleOperatorLocation: 'מיקום מפעיל',
+  bleNoDevices: 'לא נמצאו מכשירי BLE',
+
+  // Map
+  mapTab: 'מפה',
+  mapTitle: 'מפת רחפנים',
+  mapNoLocation: 'המיקום לא זמין',
+  mapAcousticRadius: 'רדיוס זיהוי אקוסטי',
+  mapFusedDetection: 'זיהוי משולב',
+  mapBLEDevice: 'מכשיר BLE',
+  mapOperator: 'מפעיל',
+  mapAltitude: 'גובה',
+  mapSpeed: 'מהירות',
+  mapHeading: 'כיוון',
+  mapSerial: 'מספר סידורי',
+  mapNoDetections: 'לא זוהו רחפנים',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'נדרשת גישה למיקרופון לזיהוי רחפנים. ללא גישה, האפליקציה לא יכולה לפעול.',
+  micPermissionGranted: '✓ גישה למיקרופון ניתנה',
+  micPermissionBlockedDesc: 'DroneEar משתמש במיקרופון לזיהוי חתימות אקוסטיות של רחפנים. האפליקציה לא יכולה לפעול ללא גישה למיקרופון.',
+  tryAgain: 'נסה שוב',
+  continueWithout: 'המשך ללא מיקרופון',
+  track: 'עקוב',
+  dismiss: 'בטל',
+  frequency: 'תדר',
+  detectionDetails: 'פרטי זיהוי',
+  acousticSignature: 'חתימה אקוסטית',
+  viewOnMap: 'הצג במפה',
+
+  // Error Boundary
+  systemError: 'שגיאת מערכת',
+  unexpectedError: 'אירעה שגיאה בלתי צפויה.',
+  restart: 'הפעלה מחדש',
+
+  // Tab Navigation
+  tabScan: 'סריקה',
+  tabMap: 'מפה',
+  tabLog: 'יומן',
+  tabSet: 'הגדרות',
+  tabGuide: 'מדריך',
+  tabScanDesc: 'מסך סריקת רחפנים',
+  tabMapDesc: 'תצוגת מפת רחפנים',
+  tabLogDesc: 'יומן זיהויים',
+
+  // Map
+  active: 'פעיל',
+  close: 'סגור',
+
+  // Settings sections
+  appearance: 'מראה',
+  aboutSection: 'אודות',
+  profileSection: 'פרופיל',
+  modelLabel: 'מודל',
+  quantizationLabel: 'קוונטיזציה',
+  classesLabel: 'מחלקות',
+  patternsCount: '6 דפוסים',
+  resetOnboarding: 'איפוס הדרכה',
+
+  // History
+  historyTab: 'היסטוריה',
+  noFilterResults: 'אין זיהויים למסנן זה',
+  meters: 'מטר',
+
+  // Onboarding extra
+  welcome: 'ברוך הבא',
+  acousticDroneDetection: 'זיהוי אקוסטי של רחפנים',
+  stepOf: (step: number, total: number) => `שלב ${step} מתוך ${total}`,
+  allow: 'אפשר',
+  selectDevice: 'בחר מכשיר',
+  continueBtn: 'המשך',
+  speakOrMakeSound: 'דבר או השמע צליל',
+  listeningTest: 'מאזין...',
+  detectControllersDesc: 'זיהוי שלטי רחפנים בקרבת מקום',
+  enableBLE: 'הפעל',
+  startScanningBtn: 'התחל סריקה',
+
+  // Tracking overlay
+  tracking: 'מעקב',
+  closeTracking: 'סגור מעקב',
+
+  // Index screen extras
+  permissionBlocked: 'הרשאה חסומה',
+  micAccessRequired: 'נדרשת גישה\nלמיקרופון',
+  howToEnable: 'איך להפעיל:',
+  permStep1: '1. פתח הגדרות',
+  permStep2: '2. מצא את DroneEar',
+  permStep3: '3. הפעל מיקרופון',
+  loadingAcousticModel: 'טוען מודל ניתוח אקוסטי...',
+  engineError: 'שגיאת מנוע',
+  engineErrorDesc: 'מנוע ניתוח האודיו לא אותחל. בדוק הרשאות מיקרופון ונסה שוב.',
+  retry: 'נסה שוב',
+  stereo: 'סטריאו',
+  similarModels: 'דגמים דומים',
+  loadingDefault: 'טוען...',
 };

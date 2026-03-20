@@ -153,7 +153,7 @@ export function EnvironmentWarningBanner({
             accessibilityLabel={t.enableMicNow}
             accessibilityRole="button"
           >
-            <Text style={styles.primaryBtnText}>{t.enableMicNow}</Text>
+            <Text style={[styles.primaryBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.enableMicNow}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.secondaryBtn, { borderColor: theme.danger }]}
@@ -265,7 +265,7 @@ export function EnvironmentWarningBanner({
                     backgroundColor: isCompleted ? theme.success : 'transparent',
                     borderColor: stepColor,
                   }]}>
-                    <Text style={[styles.stepNum, { color: isCompleted ? '#000' : stepColor }]}>
+                    <Text style={[styles.stepNum, { color: isCompleted ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : stepColor }]}>
                       {isCompleted ? '✓' : idx + 1}
                     </Text>
                   </View>
@@ -323,7 +323,7 @@ export function EnvironmentWarningBanner({
                 accessibilityRole="button"
                 accessibilityLabel={currentStep === 'shelter' ? t.stepMoveOutdoor : t.stepPositionMic}
               >
-                <Text style={styles.primaryBtnText}>
+                <Text style={[styles.primaryBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>
                   {currentStep === 'shelter' ? t.stepMoveOutdoor : t.stepPositionMic} →
                 </Text>
               </TouchableOpacity>

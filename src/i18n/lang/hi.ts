@@ -57,6 +57,9 @@ export const hi: Translations = {
   noDetections: 'इस सत्र में कोई डिटेक्शन दर्ज नहीं।',
   startScanningHint: 'ध्वनि पैटर्न पहचानने के लिए सुनना शुरू करें।',
   total: 'कुल',
+  todaysDetections: 'आज',
+  thisWeek: 'इस सप्ताह',
+  avgConfidence: 'औसत विश्वास',
 
   settings: 'सेटिंग्स',
   displayTheme: 'डिस्प्ले थीम',
@@ -194,4 +197,120 @@ export const hi: Translations = {
 
   acousticDisclaimer: 'ध्वनि विशेषताओं के आधार पर अनुमान। वास्तविक विमान भिन्न हो सकता है।',
   similarDrones: 'समान ड्रोन',
+
+  // Onboarding BLE
+  onboardingBLE: 'ब्लूटूथ ड्रोन डिटेक्शन',
+  onboardingBLEDesc: 'आसपास के ड्रोन पहचान संकेत प्राप्त करने के लिए BLE रिमोट ID स्कैनिंग सक्षम करें। ब्लूटूथ अनुमति आवश्यक है।',
+  onboardingBLESkip: 'ब्लूटूथ के बिना जारी रखें',
+
+  // Export
+  exportData: 'डेटा निर्यात करें',
+  exportCSV: 'CSV के रूप में निर्यात',
+  exportJSON: 'JSON के रूप में निर्यात',
+  exportSuccess: 'निर्यात पूर्ण!',
+
+  // BLE Remote ID
+  bleScan: 'BLE रिमोट ID स्कैन',
+  bleScanDesc: 'ब्लूटूथ से ड्रोन रिमोट ID सिग्नल स्कैन करें',
+  bleEnabled: 'BLE स्कैन सक्रिय',
+  bleDisabled: 'BLE स्कैन निष्क्रिय',
+  bleUnavailable: 'ब्लूटूथ उपलब्ध नहीं',
+  bleRemoteID: 'रिमोट ID',
+  bleDeviceFound: 'BLE ड्रोन मिला',
+  bleSerialNumber: 'सीरियल नंबर',
+  bleOperatorLocation: 'ऑपरेटर स्थान',
+  bleNoDevices: 'कोई BLE डिवाइस नहीं मिला',
+
+  // Map
+  mapTab: 'मानचित्र',
+  mapTitle: 'ड्रोन मानचित्र',
+  mapNoLocation: 'स्थान उपलब्ध नहीं',
+  mapAcousticRadius: 'ध्वनि पहचान त्रिज्या',
+  mapFusedDetection: 'संयुक्त पहचान',
+  mapBLEDevice: 'BLE डिवाइस',
+  mapOperator: 'ऑपरेटर',
+  mapAltitude: 'ऊंचाई',
+  mapSpeed: 'गति',
+  mapHeading: 'दिशा',
+  mapSerial: 'सीरियल',
+  mapNoDetections: 'कोई ड्रोन नहीं मिला',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'ड्रोन डिटेक्शन के लिए माइक्रोफ़ोन एक्सेस आवश्यक है। इसके बिना, ऐप काम नहीं कर सकता।',
+  micPermissionGranted: '✓ माइक्रोफ़ोन एक्सेस दी गई',
+  micPermissionBlockedDesc: 'DroneEar ड्रोन की ध्वनि पहचान के लिए आपके माइक्रोफ़ोन का उपयोग करता है। माइक्रोफ़ोन एक्सेस के बिना ऐप काम नहीं कर सकता।',
+  tryAgain: 'पुनः प्रयास करें',
+  continueWithout: 'माइक्रोफ़ोन के बिना जारी रखें',
+  track: 'ट्रैक',
+  dismiss: 'खारिज',
+  frequency: 'आवृत्ति',
+  detectionDetails: 'डिटेक्शन विवरण',
+  acousticSignature: 'ध्वनि हस्ताक्षर',
+  viewOnMap: 'मानचित्र पर देखें',
+
+  // Error Boundary
+  systemError: 'सिस्टम त्रुटि',
+  unexpectedError: 'एक अप्रत्याशित त्रुटि हुई।',
+  restart: 'पुनः आरंभ',
+
+  // Tab Navigation
+  tabScan: 'स्कैन',
+  tabMap: 'मैप',
+  tabLog: 'लॉग',
+  tabSet: 'सेटिंग',
+  tabGuide: 'गाइड',
+  tabScanDesc: 'ड्रोन स्कैन स्क्रीन',
+  tabMapDesc: 'ड्रोन मैप व्यू',
+  tabLogDesc: 'डिटेक्शन हिस्ट्री लॉग',
+
+  // Map
+  active: 'सक्रिय',
+  close: 'बंद करें',
+
+  // Settings sections
+  appearance: 'दिखावट',
+  aboutSection: 'जानकारी',
+  profileSection: 'प्रोफ़ाइल',
+  modelLabel: 'मॉडल',
+  quantizationLabel: 'क्वांटाइज़ेशन',
+  classesLabel: 'कक्षाएँ',
+  patternsCount: '6 पैटर्न',
+  resetOnboarding: 'ऑनबोर्डिंग रीसेट करें',
+
+  // History
+  historyTab: 'इतिहास',
+  noFilterResults: 'इस फ़िल्टर के लिए कोई डिटेक्शन नहीं',
+  meters: 'मीटर',
+
+  // Onboarding extra
+  welcome: 'स्वागत है',
+  acousticDroneDetection: 'ध्वनि आधारित ड्रोन डिटेक्शन',
+  stepOf: (step: number, total: number) => `चरण ${step} / ${total}`,
+  allow: 'अनुमति दें',
+  selectDevice: 'डिवाइस चुनें',
+  continueBtn: 'जारी रखें',
+  speakOrMakeSound: 'बोलें या आवाज़ करें',
+  listeningTest: 'सुन रहे हैं...',
+  detectControllersDesc: 'आसपास ड्रोन कंट्रोलर का पता लगाएं',
+  enableBLE: 'सक्रिय करें',
+  startScanningBtn: 'स्कैनिंग शुरू करें',
+
+  // Tracking overlay
+  tracking: 'ट्रैकिंग',
+  closeTracking: 'ट्रैकिंग बंद करें',
+
+  // Index screen extras
+  permissionBlocked: 'अनुमति अवरुद्ध',
+  micAccessRequired: 'माइक्रोफ़ोन एक्सेस\nआवश्यक',
+  howToEnable: 'सक्रिय कैसे करें:',
+  permStep1: '1. सेटिंग्स खोलें',
+  permStep2: '2. DroneEar खोजें',
+  permStep3: '3. माइक्रोफ़ोन सक्रिय करें',
+  loadingAcousticModel: 'ध्वनि विश्लेषण मॉडल लोड हो रहा है...',
+  engineError: 'इंजन त्रुटि',
+  engineErrorDesc: 'ऑडियो विश्लेषण इंजन आरंभ करने में विफल। माइक्रोफ़ोन अनुमतियाँ जाँचें और पुनः प्रयास करें।',
+  retry: 'पुनः प्रयास',
+  stereo: 'स्टीरियो',
+  similarModels: 'समान मॉडल',
+  loadingDefault: 'लोड हो रहा है...',
 };

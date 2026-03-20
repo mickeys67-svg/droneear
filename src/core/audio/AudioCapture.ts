@@ -80,6 +80,7 @@ export class AudioCapture {
 
       // Decode base64 to PCM samples
       const pcmData = this.decodeBase64ToPCM(base64Data);
+      if (pcmData.length === 0) return; // Skip empty frames
 
       // Calculate audio levels
       const rmsLevel = this.calculateRMS(pcmData) * this.config.gainMultiplier;

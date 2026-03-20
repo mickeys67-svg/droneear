@@ -57,6 +57,9 @@ export const tl: Translations = {
   noDetections: 'Walang naitala na detection sa session na ito.',
   startScanningHint: 'Magsimulang makinig para makita ang acoustic patterns.',
   total: 'Kabuuan',
+  todaysDetections: 'Ngayon',
+  thisWeek: 'Ngayong Linggo',
+  avgConfidence: 'Avg Kumpiyansa',
 
   settings: 'Mga Setting',
   displayTheme: 'Display Theme',
@@ -194,4 +197,120 @@ export const tl: Translations = {
 
   acousticDisclaimer: 'Tinatayang base sa acoustic na katangian. Maaaring iba ang aktwal na sasakyang panghimpapawid.',
   similarDrones: 'Katulad na Drone',
+
+  // Onboarding BLE
+  onboardingBLE: 'Bluetooth Drone Detection',
+  onboardingBLEDesc: 'I-enable ang BLE Remote ID scanning para makatanggap ng mga signal ng pagkakakilanlan ng drone sa malapit. Kailangan ang Bluetooth permission.',
+  onboardingBLESkip: 'Magpatuloy nang walang Bluetooth',
+
+  // Export
+  exportData: 'I-export ang Data',
+  exportCSV: 'I-export bilang CSV',
+  exportJSON: 'I-export bilang JSON',
+  exportSuccess: 'Kumpleto na ang pag-export!',
+
+  // BLE Remote ID
+  bleScan: 'BLE Remote ID Scan',
+  bleScanDesc: 'I-scan ang Remote ID signal ng drone sa pamamagitan ng Bluetooth',
+  bleEnabled: 'BLE Scan aktibo',
+  bleDisabled: 'BLE Scan hindi aktibo',
+  bleUnavailable: 'Hindi available ang Bluetooth',
+  bleRemoteID: 'Remote ID',
+  bleDeviceFound: 'Nakita ang BLE drone',
+  bleSerialNumber: 'Serial Number',
+  bleOperatorLocation: 'Lokasyon ng operator',
+  bleNoDevices: 'Walang nakitang BLE device',
+
+  // Map
+  mapTab: 'MAPA',
+  mapTitle: 'Mapa ng Drone',
+  mapNoLocation: 'Hindi available ang lokasyon',
+  mapAcousticRadius: 'Radius ng acoustic detection',
+  mapFusedDetection: 'Pinagsamang Deteksyon',
+  mapBLEDevice: 'BLE Device',
+  mapOperator: 'Operator',
+  mapAltitude: 'Altitude',
+  mapSpeed: 'Bilis',
+  mapHeading: 'Direksyon',
+  mapSerial: 'Serial',
+  mapNoDetections: 'Walang nakitang drone',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'Kailangan ang access sa mikropono para sa drone detection. Hindi gagana ang app kung wala ito.',
+  micPermissionGranted: '✓ Na-grant ang access sa mikropono',
+  micPermissionBlockedDesc: 'Gumagamit ang DroneEar ng mikropono para ma-detect ang acoustic signature ng mga drone. Hindi gagana ang app kung walang access sa mikropono.',
+  tryAgain: 'SUBUKAN MULI',
+  continueWithout: 'Magpatuloy nang walang mikropono',
+  track: 'TRACK',
+  dismiss: 'DISMISS',
+  frequency: 'Frequency',
+  detectionDetails: 'Mga Detalye ng Detection',
+  acousticSignature: 'Acoustic Signature',
+  viewOnMap: 'TINGNAN SA MAPA',
+
+  // Error Boundary
+  systemError: 'Error sa System',
+  unexpectedError: 'May hindi inaasahang error na naganap.',
+  restart: 'I-RESTART',
+
+  // Tab Navigation
+  tabScan: 'SCAN',
+  tabMap: 'MAPA',
+  tabLog: 'LOG',
+  tabSet: 'SET',
+  tabGuide: 'GABAY',
+  tabScanDesc: 'Screen ng drone scan',
+  tabMapDesc: 'View ng drone map',
+  tabLogDesc: 'Log ng detection history',
+
+  // Map
+  active: 'AKTIBO',
+  close: 'Isara',
+
+  // Settings sections
+  appearance: 'HITSURA',
+  aboutSection: 'TUNGKOL',
+  profileSection: 'PROFILE',
+  modelLabel: 'Modelo',
+  quantizationLabel: 'Quantization',
+  classesLabel: 'Mga Klase',
+  patternsCount: '6 na pattern',
+  resetOnboarding: 'I-reset ang Onboarding',
+
+  // History
+  historyTab: 'KASAYSAYAN',
+  noFilterResults: 'Walang detection para sa filter na ito',
+  meters: 'metro',
+
+  // Onboarding extra
+  welcome: 'Maligayang pagdating',
+  acousticDroneDetection: 'Acoustic Drone Detection',
+  stepOf: (step: number, total: number) => `Hakbang ${step} ng ${total}`,
+  allow: 'PAYAGAN',
+  selectDevice: 'Pumili ng Device',
+  continueBtn: 'MAGPATULOY',
+  speakOrMakeSound: 'Magsalita o gumawa ng tunog',
+  listeningTest: 'NAKIKINIG...',
+  detectControllersDesc: 'Mag-detect ng drone controllers sa malapit',
+  enableBLE: 'I-ENABLE',
+  startScanningBtn: 'MAGSIMULANG MAG-SCAN',
+
+  // Tracking overlay
+  tracking: 'SINUSUBAYBAYAN',
+  closeTracking: 'Isara ang pagsubaybay',
+
+  // Index screen extras
+  permissionBlocked: 'Na-block ang Permission',
+  micAccessRequired: 'Kailangan ng Access\nsa Microphone',
+  howToEnable: 'Paano i-enable:',
+  permStep1: '1. Buksan ang Settings',
+  permStep2: '2. Hanapin ang DroneEar',
+  permStep3: '3. I-enable ang Microphone',
+  loadingAcousticModel: 'Naglo-load ng acoustic analysis model...',
+  engineError: 'Error sa Engine',
+  engineErrorDesc: 'Hindi na-initialize ang audio analysis engine. Suriin ang microphone permissions at subukan muli.',
+  retry: 'SUBUKAN MULI',
+  stereo: 'STEREO',
+  similarModels: 'KATULAD NA MODELO',
+  loadingDefault: 'Naglo-load...',
 };

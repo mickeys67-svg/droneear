@@ -57,6 +57,9 @@ export const ur: Translations = {
   noDetections: 'اس سیشن میں کوئی ڈٹیکشن ریکارڈ نہیں۔',
   startScanningHint: 'صوتی پیٹرن پہچاننے کے لیے سننا شروع کریں۔',
   total: 'کل',
+  todaysDetections: 'آج',
+  thisWeek: 'اس ہفتے',
+  avgConfidence: 'اوسط اعتماد',
 
   settings: 'سیٹنگز',
   displayTheme: 'ڈسپلے تھیم',
@@ -194,4 +197,120 @@ export const ur: Translations = {
 
   acousticDisclaimer: 'آواز کی خصوصیات پر مبنی تخمینہ۔ اصل طیارہ مختلف ہو سکتا ہے۔',
   similarDrones: 'ملتے جلتے ڈرونز',
+
+  // Onboarding BLE
+  onboardingBLE: 'بلوٹوتھ ڈرون ڈٹیکشن',
+  onboardingBLEDesc: 'قریبی ڈرون شناختی سگنلز وصول کرنے کے لیے BLE ریموٹ ID اسکیننگ فعال کریں۔ بلوٹوتھ کی اجازت ضروری ہے۔',
+  onboardingBLESkip: 'بلوٹوتھ کے بغیر جاری رکھیں',
+
+  // Export
+  exportData: 'ڈیٹا برآمد کریں',
+  exportCSV: 'CSV کے طور پر برآمد',
+  exportJSON: 'JSON کے طور پر برآمد',
+  exportSuccess: 'برآمد مکمل!',
+
+  // BLE Remote ID
+  bleScan: 'BLE ریموٹ ID اسکین',
+  bleScanDesc: 'بلوٹوتھ کے ذریعے ڈرون ریموٹ ID سگنلز اسکین کریں',
+  bleEnabled: 'BLE اسکین فعال',
+  bleDisabled: 'BLE اسکین غیر فعال',
+  bleUnavailable: 'بلوٹوتھ دستیاب نہیں',
+  bleRemoteID: 'ریموٹ ID',
+  bleDeviceFound: 'BLE ڈرون ملا',
+  bleSerialNumber: 'سیریل نمبر',
+  bleOperatorLocation: 'آپریٹر مقام',
+  bleNoDevices: 'کوئی BLE ڈیوائس نہیں ملی',
+
+  // Map
+  mapTab: 'نقشہ',
+  mapTitle: 'ڈرون نقشہ',
+  mapNoLocation: 'مقام دستیاب نہیں',
+  mapAcousticRadius: 'صوتی شناخت کا دائرہ',
+  mapFusedDetection: 'مشترکہ شناخت',
+  mapBLEDevice: 'BLE ڈیوائس',
+  mapOperator: 'آپریٹر',
+  mapAltitude: 'اونچائی',
+  mapSpeed: 'رفتار',
+  mapHeading: 'سمت',
+  mapSerial: 'سیریل',
+  mapNoDetections: 'کوئی ڈرون نہیں ملا',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'ڈرون کی نشاندہی کے لیے مائیکروفون تک رسائی ضروری ہے۔ اس کے بغیر ایپ کام نہیں کر سکتی۔',
+  micPermissionGranted: '✓ مائیکروفون تک رسائی دی گئی',
+  micPermissionBlockedDesc: 'DroneEar ڈرون کی صوتی شناخت کے لیے آپ کا مائیکروفون استعمال کرتا ہے۔ مائیکروفون تک رسائی کے بغیر ایپ کام نہیں کر سکتی۔',
+  tryAgain: 'دوبارہ کوشش کریں',
+  continueWithout: 'مائیکروفون کے بغیر جاری رکھیں',
+  track: 'ٹریک',
+  dismiss: 'مسترد',
+  frequency: 'فریکوئنسی',
+  detectionDetails: 'نشاندہی کی تفصیلات',
+  acousticSignature: 'صوتی دستخط',
+  viewOnMap: 'نقشے پر دیکھیں',
+
+  // Error Boundary
+  systemError: 'سسٹم ایرر',
+  unexpectedError: 'ایک غیر متوقع خرابی پیش آئی۔',
+  restart: 'دوبارہ شروع کریں',
+
+  // Tab Navigation
+  tabScan: 'اسکین',
+  tabMap: 'نقشہ',
+  tabLog: 'لاگ',
+  tabSet: 'ترتیبات',
+  tabGuide: 'رہنما',
+  tabScanDesc: 'ڈرون اسکین اسکرین',
+  tabMapDesc: 'ڈرون نقشہ منظر',
+  tabLogDesc: 'شناخت تاریخ لاگ',
+
+  // Map
+  active: 'فعال',
+  close: 'بند کریں',
+
+  // Settings sections
+  appearance: 'ظاہری شکل',
+  aboutSection: 'تعارف',
+  profileSection: 'پروفائل',
+  modelLabel: 'ماڈل',
+  quantizationLabel: 'کوانٹائزیشن',
+  classesLabel: 'کلاسز',
+  patternsCount: '6 پیٹرنز',
+  resetOnboarding: 'آن بورڈنگ ری سیٹ',
+
+  // History
+  historyTab: 'تاریخ',
+  noFilterResults: 'اس فلٹر کے لیے کوئی شناخت نہیں',
+  meters: 'میٹر',
+
+  // Onboarding extra
+  welcome: 'خوش آمدید',
+  acousticDroneDetection: 'صوتی ڈرون شناخت',
+  stepOf: (step: number, total: number) => `مرحلہ ${step} از ${total}`,
+  allow: 'اجازت دیں',
+  selectDevice: 'ڈیوائس منتخب کریں',
+  continueBtn: 'جاری رکھیں',
+  speakOrMakeSound: 'بولیں یا آواز نکالیں',
+  listeningTest: 'سن رہے ہیں...',
+  detectControllersDesc: 'قریبی ڈرون کنٹرولرز کا پتہ لگائیں',
+  enableBLE: 'فعال کریں',
+  startScanningBtn: 'اسکیننگ شروع کریں',
+
+  // Tracking overlay
+  tracking: 'ٹریکنگ',
+  closeTracking: 'ٹریکنگ بند کریں',
+
+  // Index screen extras
+  permissionBlocked: 'اجازت مسدود',
+  micAccessRequired: 'مائیکروفون تک\nرسائی ضروری',
+  howToEnable: 'فعال کرنے کا طریقہ:',
+  permStep1: '1. سیٹنگز کھولیں',
+  permStep2: '2. DroneEar تلاش کریں',
+  permStep3: '3. مائیکروفون فعال کریں',
+  loadingAcousticModel: 'صوتی تجزیہ ماڈل لوڈ ہو رہا ہے...',
+  engineError: 'انجن کی خرابی',
+  engineErrorDesc: 'آڈیو تجزیہ انجن شروع نہیں ہو سکا۔ مائیکروفون کی اجازتیں چیک کریں اور دوبارہ کوشش کریں۔',
+  retry: 'دوبارہ کوشش',
+  stereo: 'سٹیریو',
+  similarModels: 'ملتے جلتے ماڈلز',
+  loadingDefault: 'لوڈ ہو رہا ہے...',
 };

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1773838830647" clover="3.2.0">
+  <project timestamp="1773838830648" name="All files">
+    <metrics statements="311" coveredstatements="300" conditionals="76" coveredconditionals="56" methods="58" coveredmethods="49" elements="445" coveredelements="405" complexity="0" loc="311" ncloc="311" packages="5" files="7" classes="7"/>
+    <package name="constants">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="micConfig.ts" path="E:\dronefinder\DroneFinder\src\constants\micConfig.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="56" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="core.audio">
+      <metrics statements="129" coveredstatements="128" conditionals="26" coveredconditionals="18" methods="20" coveredmethods="18"/>
+      <file name="FFTProcessor.ts" path="E:\dronefinder\DroneFinder\src\core\audio\FFTProcessor.ts">
+        <metrics statements="59" coveredstatements="59" conditionals="10" coveredconditionals="9" methods="9" coveredmethods="9"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="17" count="20" type="cond" truecount="2" falsecount="0"/>
+        <line num="18" count="3" type="stmt"/>
+        <line num="20" count="17" type="stmt"/>
+        <line num="21" count="17" type="stmt"/>
+        <line num="24" count="17" type="stmt"/>
+        <line num="25" count="17" type="stmt"/>
+        <line num="26" count="17" type="stmt"/>
+        <line num="27" count="7168" type="stmt"/>
+        <line num="28" count="7168" type="stmt"/>
+        <line num="32" count="17" type="stmt"/>
+        <line num="33" count="17" type="stmt"/>
+        <line num="34" count="14336" type="stmt"/>
+        <line num="42" count="113" type="stmt"/>
+        <line num="43" count="113" type="stmt"/>
+        <line num="44" count="113" type="stmt"/>
+        <line num="45" count="215040" type="stmt"/>
+        <line num="47" count="113" type="stmt"/>
+        <line num="55" count="110" type="stmt"/>
+        <line num="56" count="110" type="stmt"/>
+        <line num="58" count="110" type="stmt"/>
+        <line num="59" count="110" type="stmt"/>
+        <line num="60" count="107246" type="stmt"/>
+        <line num="62" count="110" type="stmt"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="70" count="2" type="stmt"/>
+        <line num="71" count="2" type="stmt"/>
+        <line num="72" count="258" type="stmt"/>
+        <line num="74" count="2" type="stmt"/>
+        <line num="82" count="3" type="stmt"/>
+        <line num="83" count="3" type="stmt"/>
+        <line num="85" count="3" type="stmt"/>
+        <line num="86" count="1655" type="cond" truecount="2" falsecount="0"/>
+        <line num="92" count="243" type="stmt"/>
+        <line num="96" count="1200" type="stmt"/>
+        <line num="103" count="110" type="stmt"/>
+        <line num="104" count="110" type="stmt"/>
+        <line num="105" count="110" type="stmt"/>
+        <line num="108" count="110" type="stmt"/>
+        <line num="109" count="214272" type="stmt"/>
+        <line num="113" count="110" type="stmt"/>
+        <line num="114" count="1193" type="stmt"/>
+        <line num="115" count="1193" type="stmt"/>
+        <line num="117" count="1193" type="stmt"/>
+        <line num="118" count="214162" type="stmt"/>
+        <line num="119" count="1175552" type="stmt"/>
+        <line num="120" count="1175552" type="stmt"/>
+        <line num="121" count="1175552" type="stmt"/>
+        <line num="123" count="1175552" type="stmt"/>
+        <line num="124" count="1175552" type="stmt"/>
+        <line num="125" count="1175552" type="stmt"/>
+        <line num="126" count="1175552" type="stmt"/>
+        <line num="131" count="110" type="stmt"/>
+        <line num="135" count="214272" type="stmt"/>
+        <line num="136" count="214272" type="stmt"/>
+        <line num="137" count="2351104" type="stmt"/>
+        <line num="138" count="2351104" type="stmt"/>
+        <line num="140" count="214272" type="stmt"/>
+        <line num="144" count="5" type="stmt"/>
+      </file>
+      <file name="MelSpectrogram.ts" path="E:\dronefinder\DroneFinder\src\core\audio\MelSpectrogram.ts">
+        <metrics statements="70" coveredstatements="69" conditionals="16" coveredconditionals="9" methods="11" coveredmethods="9"/>
+        <line num="10" count="2" type="stmt"/>
+        <line num="28" count="2" type="stmt"/>
+        <line num="29" count="2" type="stmt"/>
+        <line num="30" count="2" type="stmt"/>
+        <line num="31" count="2" type="stmt"/>
+        <line num="32" count="2" type="stmt"/>
+        <line num="33" count="2" type="stmt"/>
+        <line num="36" count="2" type="stmt"/>
+        <line num="39" count="2" type="stmt"/>
+        <line num="46" count="109" type="stmt"/>
+        <line num="48" count="109" type="stmt"/>
+        <line num="49" count="13952" type="stmt"/>
+        <line num="50" count="13952" type="stmt"/>
+        <line num="51" count="13952" type="stmt"/>
+        <line num="52" count="14300800" type="cond" truecount="1" falsecount="1"/>
+        <line num="53" count="14300800" type="stmt"/>
+        <line num="57" count="13952" type="stmt"/>
+        <line num="60" count="109" type="stmt"/>
+        <line num="68" count="4" type="stmt"/>
+        <line num="70" count="4" type="stmt"/>
+        <line num="71" count="120" type="stmt"/>
+        <line num="72" count="120" type="stmt"/>
+        <line num="73" count="120" type="stmt"/>
+        <line num="74" count="15360" type="stmt"/>
+        <line num="76" count="120" type="stmt"/>
+        <line num="79" count="4" type="stmt"/>
+        <line num="86" count="528" type="stmt"/>
+        <line num="87" count="6" type="stmt"/>
+        <line num="88" count="6" type="stmt"/>
+        <line num="89" count="528" type="stmt"/>
+        <line num="91" count="6" type="stmt"/>
+        <line num="92" count="6" type="stmt"/>
+        <line num="94" count="6" type="stmt"/>
+        <line num="95" count="6" type="stmt"/>
+        <line num="96" count="528" type="stmt"/>
+        <line num="98" count="6" type="stmt"/>
+        <line num="106" count="0" type="stmt"/>
+        <line num="112" count="4" type="stmt"/>
+        <line num="116" count="260" type="stmt"/>
+        <line num="120" count="2" type="stmt"/>
+        <line num="121" count="2" type="stmt"/>
+        <line num="122" count="2" type="stmt"/>
+        <line num="125" count="2" type="stmt"/>
+        <line num="126" count="2" type="stmt"/>
+        <line num="127" count="260" type="stmt"/>
+        <line num="131" count="2" type="stmt"/>
+        <line num="132" count="2" type="stmt"/>
+        <line num="133" count="260" type="stmt"/>
+        <line num="134" count="260" type="stmt"/>
+        <line num="138" count="2" type="stmt"/>
+        <line num="139" count="2" type="stmt"/>
+        <line num="140" count="256" type="stmt"/>
+        <line num="141" count="256" type="stmt"/>
+        <line num="142" count="256" type="stmt"/>
+        <line num="143" count="256" type="stmt"/>
+        <line num="146" count="256" type="cond" truecount="2" falsecount="0"/>
+        <line num="147" count="718" type="cond" truecount="1" falsecount="1"/>
+        <line num="148" count="718" type="stmt"/>
+        <line num="153" count="256" type="cond" truecount="2" falsecount="0"/>
+        <line num="154" count="986" type="cond" truecount="2" falsecount="0"/>
+        <line num="155" count="980" type="stmt"/>
+        <line num="159" count="256" type="stmt"/>
+        <line num="162" count="2" type="stmt"/>
+        <line num="166" count="2" type="stmt"/>
+        <line num="167" count="2" type="stmt"/>
+        <line num="168" count="60" type="stmt"/>
+        <line num="169" count="60" type="stmt"/>
+        <line num="170" count="7680" type="stmt"/>
+        <line num="172" count="60" type="stmt"/>
+        <line num="174" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="core.detection">
+      <metrics statements="77" coveredstatements="77" conditionals="24" coveredconditionals="19" methods="11" coveredmethods="11"/>
+      <file name="DOAEstimator.ts" path="E:\dronefinder\DroneFinder\src\core\detection\DOAEstimator.ts">
+        <metrics statements="32" coveredstatements="32" conditionals="15" coveredconditionals="11" methods="4" coveredmethods="4"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="37" count="6" type="stmt"/>
+        <line num="40" count="6" type="stmt"/>
+        <line num="41" count="6" type="stmt"/>
+        <line num="42" count="6" type="stmt"/>
+        <line num="44" count="6" type="stmt"/>
+        <line num="45" count="198" type="stmt"/>
+        <line num="46" count="198" type="stmt"/>
+        <line num="48" count="198" type="stmt"/>
+        <line num="49" count="160512" type="stmt"/>
+        <line num="50" count="160512" type="cond" truecount="4" falsecount="0"/>
+        <line num="51" count="158880" type="stmt"/>
+        <line num="52" count="158880" type="stmt"/>
+        <line num="56" count="198" type="cond" truecount="1" falsecount="1"/>
+        <line num="58" count="198" type="cond" truecount="2" falsecount="0"/>
+        <line num="59" count="78" type="stmt"/>
+        <line num="60" count="78" type="stmt"/>
+        <line num="65" count="6" type="stmt"/>
+        <line num="66" count="6" type="stmt"/>
+        <line num="67" count="6" type="stmt"/>
+        <line num="68" count="6" type="stmt"/>
+        <line num="70" count="6" type="stmt"/>
+        <line num="82" count="4" type="stmt"/>
+        <line num="83" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="84" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="85" count="4" type="stmt"/>
+        <line num="100" count="3" type="stmt"/>
+        <line num="101" count="3" type="stmt"/>
+        <line num="102" count="3" type="stmt"/>
+      </file>
+      <file name="KalmanFilter.ts" path="E:\dronefinder\DroneFinder\src\core\detection\KalmanFilter.ts">
+        <metrics statements="45" coveredstatements="45" conditionals="9" coveredconditionals="8" methods="7" coveredmethods="7"/>
+        <line num="12" count="2" type="stmt"/>
+        <line num="21" count="15" type="stmt"/>
+        <line num="22" count="15" type="stmt"/>
+        <line num="23" count="15" type="stmt"/>
+        <line num="30" count="15" type="stmt"/>
+        <line num="48" count="35" type="stmt"/>
+        <line num="49" count="35" type="stmt"/>
+        <line num="50" count="35" type="stmt"/>
+        <line num="54" count="35" type="stmt"/>
+        <line num="55" count="35" type="stmt"/>
+        <line num="60" count="35" type="stmt"/>
+        <line num="68" count="35" type="stmt"/>
+        <line num="75" count="35" type="stmt"/>
+        <line num="82" count="33" type="stmt"/>
+        <line num="83" count="33" type="stmt"/>
+        <line num="86" count="33" type="stmt"/>
+        <line num="87" count="33" type="stmt"/>
+        <line num="90" count="33" type="stmt"/>
+        <line num="91" count="33" type="stmt"/>
+        <line num="92" count="33" type="stmt"/>
+        <line num="93" count="33" type="stmt"/>
+        <line num="96" count="33" type="stmt"/>
+        <line num="97" count="33" type="cond" truecount="1" falsecount="1"/>
+        <line num="99" count="33" type="stmt"/>
+        <line num="100" count="33" type="stmt"/>
+        <line num="101" count="33" type="stmt"/>
+        <line num="102" count="33" type="stmt"/>
+        <line num="105" count="33" type="stmt"/>
+        <line num="113" count="33" type="stmt"/>
+        <line num="114" count="33" type="stmt"/>
+        <line num="115" count="33" type="stmt"/>
+        <line num="116" count="33" type="stmt"/>
+        <line num="119" count="132" type="stmt"/>
+        <line num="120" count="33" type="stmt"/>
+        <line num="121" count="132" type="stmt"/>
+        <line num="122" count="528" type="stmt"/>
+        <line num="126" count="33" type="stmt"/>
+        <line num="134" count="4" type="stmt"/>
+        <line num="135" count="4" type="stmt"/>
+        <line num="137" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="140" count="3" type="stmt"/>
+        <line num="141" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="143" count="2" type="stmt"/>
+        <line num="150" count="4" type="stmt"/>
+        <line num="151" count="4" type="stmt"/>
+      </file>
+    </package>
+    <package name="core.ml">
+      <metrics statements="81" coveredstatements="76" conditionals="14" coveredconditionals="12" methods="11" coveredmethods="11"/>
+      <file name="ModelManager.ts" path="E:\dronefinder\DroneFinder\src\core\ml\ModelManager.ts">
+        <metrics statements="81" coveredstatements="76" conditionals="14" coveredconditionals="12" methods="11" coveredmethods="11"/>
+        <line num="13" count="2" type="stmt"/>
+        <line num="14" count="13" type="stmt"/>
+        <line num="15" count="13" type="stmt"/>
+        <line num="16" count="13" type="stmt"/>
+        <line num="17" count="13" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+        <line num="21" count="2" type="stmt"/>
+        <line num="31" count="13" type="stmt"/>
+        <line num="46" count="11" type="cond" truecount="4" falsecount="0"/>
+        <line num="48" count="10" type="stmt"/>
+        <line num="49" count="10" type="stmt"/>
+        <line num="51" count="10" type="stmt"/>
+        <line num="54" count="10" type="stmt"/>
+        <line num="56" count="10" type="stmt"/>
+        <line num="57" count="10" type="stmt"/>
+        <line num="59" count="0" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="71" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="72" count="1" type="stmt"/>
+        <line num="75" count="8" type="stmt"/>
+        <line num="76" count="8" type="stmt"/>
+        <line num="78" count="8" type="stmt"/>
+        <line num="81" count="8" type="stmt"/>
+        <line num="83" count="8" type="stmt"/>
+        <line num="84" count="8" type="stmt"/>
+        <line num="86" count="8" type="stmt"/>
+        <line num="87" count="8" type="stmt"/>
+        <line num="89" count="0" type="stmt"/>
+        <line num="90" count="0" type="stmt"/>
+        <line num="98" count="1" type="stmt"/>
+        <line num="102" count="3" type="stmt"/>
+        <line num="106" count="1" type="stmt"/>
+        <line num="112" count="36" type="stmt"/>
+        <line num="113" count="36" type="stmt"/>
+        <line num="122" count="10" type="stmt"/>
+        <line num="126" count="10" type="stmt"/>
+        <line num="127" count="10" type="stmt"/>
+        <line num="128" count="10" type="stmt"/>
+        <line num="131" count="10" type="stmt"/>
+        <line num="133" count="10" type="stmt"/>
+        <line num="135" count="10" type="stmt"/>
+        <line num="137" count="10" type="stmt"/>
+        <line num="139" count="10" type="stmt"/>
+        <line num="141" count="10" type="stmt"/>
+        <line num="145" count="60" type="cond" truecount="1" falsecount="1"/>
+        <line num="146" count="60" type="stmt"/>
+        <line num="147" count="60" type="cond" truecount="2" falsecount="0"/>
+        <line num="149" count="5480" type="stmt"/>
+        <line num="150" count="5480" type="stmt"/>
+        <line num="151" count="5480" type="stmt"/>
+        <line num="160" count="8" type="cond" truecount="1" falsecount="1"/>
+        <line num="163" count="8" type="stmt"/>
+        <line num="164" count="8" type="stmt"/>
+        <line num="165" count="148" type="stmt"/>
+        <line num="166" count="18944" type="stmt"/>
+        <line num="171" count="8" type="stmt"/>
+        <line num="172" count="8" type="stmt"/>
+        <line num="174" count="8" type="stmt"/>
+        <line num="175" count="48" type="stmt"/>
+        <line num="176" count="48" type="stmt"/>
+        <line num="177" count="48" type="stmt"/>
+        <line num="178" count="48" type="stmt"/>
+        <line num="180" count="48" type="stmt"/>
+        <line num="181" count="6144" type="stmt"/>
+        <line num="182" count="6144" type="stmt"/>
+        <line num="183" count="6144" type="stmt"/>
+        <line num="186" count="48" type="stmt"/>
+        <line num="187" count="48" type="stmt"/>
+        <line num="188" count="48" type="stmt"/>
+        <line num="189" count="48" type="cond" truecount="2" falsecount="0"/>
+        <line num="193" count="8" type="stmt"/>
+        <line num="194" count="8" type="stmt"/>
+        <line num="195" count="8" type="stmt"/>
+        <line num="196" count="48" type="stmt"/>
+        <line num="197" count="48" type="stmt"/>
+        <line num="198" count="48" type="stmt"/>
+        <line num="201" count="8" type="stmt"/>
+        <line num="202" count="8" type="stmt"/>
+        <line num="203" count="48" type="stmt"/>
+        <line num="206" count="8" type="stmt"/>
+      </file>
+    </package>
+    <package name="stores">
+      <metrics statements="21" coveredstatements="16" conditionals="12" coveredconditionals="7" methods="16" coveredmethods="9"/>
+      <file name="detectionStore.ts" path="E:\dronefinder\DroneFinder\src\stores\detectionStore.ts">
+        <metrics statements="21" coveredstatements="16" conditionals="12" coveredconditionals="7" methods="16" coveredmethods="9"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="33" count="2" type="stmt"/>
+        <line num="36" count="23" type="stmt"/>
+        <line num="39" count="23" type="stmt"/>
+        <line num="41" count="98" type="cond" truecount="4" falsecount="0"/>
+        <line num="47" count="23" type="cond" truecount="2" falsecount="0"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="50" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="61" count="22" type="stmt"/>
+        <line num="70" count="22" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="80" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="92" count="0" type="stmt"/>
+        <line num="94" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="99" count="1" type="stmt"/>
+        <line num="101" count="1" type="stmt"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="105" count="1" type="stmt"/>
+        <line num="107" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

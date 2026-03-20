@@ -34,6 +34,17 @@ export class MicQualityMonitor {
    * Analyze an audio frame and return quality report.
    */
   analyze(pcmData: Float32Array): MicQualityReport {
+    if (pcmData.length === 0) {
+      return {
+        quality: 'POOR',
+        snrDb: 0,
+        noiseFloorDb: -60,
+        clippingRatio: 0,
+        windDetected: false,
+        warning: null,
+      };
+    }
+
     const rms = this.calculateRMS(pcmData);
     const peak = this.calculatePeak(pcmData);
 

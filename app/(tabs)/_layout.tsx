@@ -1,22 +1,26 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { useTheme } from '@/src/hooks/useTheme';
+import { useTranslation } from '@/src/i18n/useTranslation';
+import { GLASS, BLUR_INTENSITY } from '@/src/constants/glass';
 
 /**
- * Tab Navigation — Icon-first design for emergency use
+ * Tab Navigation — Glass design (777.svg)
  *
- * Large icons (32px) with short labels (11px)
- * High contrast active/inactive states
- * 80px tab bar height for easy touch targets
- * Active tab: icon + colored underline indicator
+ * 5 tabs: SCAN / MAP / LOG / SET / GUIDE
+ * Glassmorphism tab bar with blur background
+ * Active tab: filled glass card + cyan accent + underline
+ * Large icons (28px) with short labels (10px)
  */
 
 export default function TabLayout() {
   const theme = useTheme();
+  const t = useTranslation();
 
   return (
     <Tabs
@@ -26,35 +30,68 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: theme.background,
-          borderTopColor: theme.border,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: GLASS.panelBg,
+          borderTopColor: GLASS.borderSubtle,
           borderTopWidth: 1,
-          height: 80,
-          paddingBottom: 12,
+          height: 82,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
           paddingTop: 8,
+          paddingHorizontal: 8,
+          elevation: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '700',
-          letterSpacing: 0.5,
+          letterSpacing: 0.8,
           marginTop: 4,
         },
         tabBarIconStyle: {
           marginBottom: 0,
         },
+        // Use blur background on iOS
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <BlurView
+              intensity={BLUR_INTENSITY}
+              tint="dark"
+              style={StyleSheet.absoluteFill}
+            />
+          ) : (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: GLASS.panelBg }]} />
+          ),
       }}>
 
       {/* SCAN — radar icon */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'SCAN',
+          title: t.tabScan || 'SCAN',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? [tabStyles.activeWrap, { borderBottomColor: theme.primary }] : tabStyles.wrap}>
-              <MaterialIcons name="radar" size={32} color={color} />
+            <View style={[tabStyles.iconWrap, focused && tabStyles.iconWrapActive, focused && { backgroundColor: `${theme.primary}15` }]}>
+              <MaterialIcons name="radar" size={28} color={color} />
+              {focused && <View style={[tabStyles.activeIndicator, { backgroundColor: theme.primary }]} />}
             </View>
           ),
-          tabBarAccessibilityLabel: 'Drone scan screen',
+          tabBarAccessibilityLabel: t.tabScanDesc || 'Drone scan screen',
+        }}
+      />
+
+      {/* MAP — map icon */}
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: t.tabMap || 'MAP',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[tabStyles.iconWrap, focused && tabStyles.iconWrapActive, focused && { backgroundColor: `${theme.primary}15` }]}>
+              <MaterialIcons name="location-on" size={28} color={color} />
+              {focused && <View style={[tabStyles.activeIndicator, { backgroundColor: theme.primary }]} />}
+            </View>
+          ),
+          tabBarAccessibilityLabel: t.tabMapDesc || 'Drone map view',
         }}
       />
 
@@ -62,13 +99,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'LOG',
+          title: t.tabLog || 'LOG',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? [tabStyles.activeWrap, { borderBottomColor: theme.primary }] : tabStyles.wrap}>
-              <MaterialIcons name="history" size={32} color={color} />
+            <View style={[tabStyles.iconWrap, focused && tabStyles.iconWrapActive, focused && { backgroundColor: `${theme.primary}15` }]}>
+              <MaterialIcons name="format-list-bulleted" size={28} color={color} />
+              {focused && <View style={[tabStyles.activeIndicator, { backgroundColor: theme.primary }]} />}
             </View>
           ),
-          tabBarAccessibilityLabel: 'Detection history log',
+          tabBarAccessibilityLabel: t.tabLogDesc || 'Detection history log',
         }}
       />
 
@@ -76,13 +114,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'SET',
+          title: t.tabSet || 'SET',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? [tabStyles.activeWrap, { borderBottomColor: theme.primary }] : tabStyles.wrap}>
-              <MaterialIcons name="tune" size={32} color={color} />
+            <View style={[tabStyles.iconWrap, focused && tabStyles.iconWrapActive, focused && { backgroundColor: `${theme.primary}15` }]}>
+              <MaterialIcons name="settings" size={28} color={color} />
+              {focused && <View style={[tabStyles.activeIndicator, { backgroundColor: theme.primary }]} />}
             </View>
           ),
-          tabBarAccessibilityLabel: 'Settings',
+          tabBarAccessibilityLabel: t.settings || 'Settings',
         }}
       />
 
@@ -90,13 +129,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'GUIDE',
+          title: t.tabGuide || 'GUIDE',
           tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? [tabStyles.activeWrap, { borderBottomColor: theme.primary }] : tabStyles.wrap}>
-              <MaterialIcons name="menu-book" size={32} color={color} />
+            <View style={[tabStyles.iconWrap, focused && tabStyles.iconWrapActive, focused && { backgroundColor: `${theme.primary}15` }]}>
+              <MaterialIcons name="menu-book" size={28} color={color} />
+              {focused && <View style={[tabStyles.activeIndicator, { backgroundColor: theme.primary }]} />}
             </View>
           ),
-          tabBarAccessibilityLabel: 'Usage guide',
+          tabBarAccessibilityLabel: t.guideTitle || 'Usage guide',
         }}
       />
     </Tabs>
@@ -104,18 +144,23 @@ export default function TabLayout() {
 }
 
 const tabStyles = StyleSheet.create({
-  wrap: {
+  iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 48,
+    width: 52,
     height: 40,
+    borderRadius: 10,
   },
-  activeWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 48,
-    height: 40,
-    borderBottomWidth: 3,
-    borderBottomColor: '#00FF88',
+  iconWrapActive: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: GLASS.borderSubtle,
+  },
+  activeIndicator: {
+    position: 'absolute',
+    bottom: -10,
+    width: 20,
+    height: 3,
+    borderRadius: 1.5,
   },
 });

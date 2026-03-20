@@ -57,6 +57,9 @@ export const zh: Translations = {
   noDetections: '本次会话无检测记录。',
   startScanningHint: '开始监听以检测声学模式。',
   total: '总计',
+  todaysDetections: '今天',
+  thisWeek: '本周',
+  avgConfidence: '平均置信度',
 
   settings: '设置',
   displayTheme: '显示主题',
@@ -194,4 +197,120 @@ export const zh: Translations = {
 
   acousticDisclaimer: '基于声学特征的估计。实际飞行器可能不同。',
   similarDrones: '相似无人机',
+
+  // Onboarding BLE
+  onboardingBLE: '蓝牙无人机检测',
+  onboardingBLEDesc: '启用BLE远程ID扫描以接收附近无人机的识别信号。需要蓝牙权限。',
+  onboardingBLESkip: '不使用蓝牙继续',
+
+  // Export
+  exportData: '导出数据',
+  exportCSV: '导出为CSV',
+  exportJSON: '导出为JSON',
+  exportSuccess: '导出完成！',
+
+  // BLE Remote ID
+  bleScan: 'BLE远程ID扫描',
+  bleScanDesc: '通过蓝牙扫描无人机远程ID信号',
+  bleEnabled: 'BLE扫描已启用',
+  bleDisabled: 'BLE扫描已禁用',
+  bleUnavailable: '蓝牙不可用',
+  bleRemoteID: '远程ID',
+  bleDeviceFound: '发现BLE无人机',
+  bleSerialNumber: '序列号',
+  bleOperatorLocation: '操作员位置',
+  bleNoDevices: '未发现BLE设备',
+
+  // Map
+  mapTab: '地图',
+  mapTitle: '无人机地图',
+  mapNoLocation: '位置不可用',
+  mapAcousticRadius: '声学探测半径',
+  mapFusedDetection: '融合探测',
+  mapBLEDevice: 'BLE设备',
+  mapOperator: '操作员',
+  mapAltitude: '高度',
+  mapSpeed: '速度',
+  mapHeading: '航向',
+  mapSerial: '序列号',
+  mapNoDetections: '未探测到无人机',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: '无人机检测需要麦克风权限。没有麦克风，应用无法正常工作。',
+  micPermissionGranted: '✓ 已授予麦克风权限',
+  micPermissionBlockedDesc: 'DroneEar使用麦克风检测无人机声学特征。没有麦克风权限，应用无法工作。',
+  tryAgain: '重试',
+  continueWithout: '不使用麦克风继续',
+  track: '追踪',
+  dismiss: '忽略',
+  frequency: '频率',
+  detectionDetails: '检测详情',
+  acousticSignature: '声学特征',
+  viewOnMap: '在地图上查看',
+
+  // Error Boundary
+  systemError: '系统错误',
+  unexpectedError: '发生意外错误。',
+  restart: '重启',
+
+  // Tab Navigation
+  tabScan: '扫描',
+  tabMap: '地图',
+  tabLog: '日志',
+  tabSet: '设置',
+  tabGuide: '指南',
+  tabScanDesc: '无人机扫描界面',
+  tabMapDesc: '无人机地图视图',
+  tabLogDesc: '检测历史日志',
+
+  // Map
+  active: '活跃',
+  close: '关闭',
+
+  // Settings sections
+  appearance: '外观',
+  aboutSection: '关于',
+  profileSection: '配置',
+  modelLabel: '模型',
+  quantizationLabel: '量化',
+  classesLabel: '类别',
+  patternsCount: '6个模式',
+  resetOnboarding: '重置引导',
+
+  // History
+  historyTab: '历史',
+  noFilterResults: '该筛选条件下无检测结果',
+  meters: '米',
+
+  // Onboarding extra
+  welcome: '欢迎',
+  acousticDroneDetection: '声学无人机检测',
+  stepOf: (step: number, total: number) => `第${step}步，共${total}步`,
+  allow: '允许',
+  selectDevice: '选择设备',
+  continueBtn: '继续',
+  speakOrMakeSound: '请说话或发出声音',
+  listeningTest: '聆听中...',
+  detectControllersDesc: '检测附近的无人机遥控器',
+  enableBLE: '启用',
+  startScanningBtn: '开始扫描',
+
+  // Tracking overlay
+  tracking: '追踪中',
+  closeTracking: '关闭追踪',
+
+  // Index screen extras
+  permissionBlocked: '权限被阻止',
+  micAccessRequired: '需要麦克风\n访问权限',
+  howToEnable: '如何启用：',
+  permStep1: '1. 打开设置',
+  permStep2: '2. 找到DroneEar',
+  permStep3: '3. 启用麦克风',
+  loadingAcousticModel: '正在加载声学分析模型...',
+  engineError: '引擎错误',
+  engineErrorDesc: '音频分析引擎初始化失败。请检查麦克风权限后重试。',
+  retry: '重试',
+  stereo: '立体声',
+  similarModels: '相似型号',
+  loadingDefault: '加载中...',
 };

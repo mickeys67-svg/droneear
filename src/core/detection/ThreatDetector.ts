@@ -121,11 +121,15 @@ export class ThreatDetector {
         this.frameSkipCounter++;
         if (this.frameSkipCounter % this.frameSkipRate !== 0) return;
 
-        // ML pipeline
-        this.classifier.processFrame(frame).catch((err) => {
-          console.warn('[DroneMonitor] Frame processing error:', err);
-          this.callbacks.onRecordingError?.(`Inference error: ${err instanceof Error ? err.message : String(err)}`);
-        });
+        // ML pipeline (try/catch guards synchronous throws before promise)
+        try {
+          this.classifier.processFrame(frame).catch((err) => {
+            console.warn('[DroneMonitor] Frame processing error:', err);
+            this.callbacks.onRecordingError?.(`Inference error: ${err instanceof Error ? err.message : String(err)}`);
+          });
+        } catch (err) {
+          console.warn('[DroneMonitor] Sync frame error:', err);
+        }
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

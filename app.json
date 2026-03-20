@@ -19,15 +19,22 @@
         "NSMicrophoneUsageDescription": "DroneEar uses microphone access to analyze acoustic patterns and identify similar drone types by sound. All audio is processed on-device only.",
         "NSLocationWhenInUseUsageDescription": "DroneEar uses your location to determine indoor/outdoor environment and improve acoustic analysis accuracy. Location data stays on your device.",
         "NSMotionUsageDescription": "DroneEar uses the compass sensor to estimate the direction of identified sound sources.",
-        "UIBackgroundModes": ["audio"],
-        "ITSAppUsesNonExemptEncryption": false
+        "UIBackgroundModes": [
+          "audio"
+        ],
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSBluetoothAlwaysUsageDescription": "DroneEar uses Bluetooth to detect nearby drones broadcasting Remote ID signals.",
+        "NSBluetoothPeripheralUsageDescription": "DroneEar uses Bluetooth to scan for drone Remote ID broadcasts."
       }
     },
     "android": {
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_ADVERTISE"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -81,7 +88,8 @@
           "motionPermission": "DroneEar uses motion sensors to estimate sound source direction."
         }
       ],
-      "./withAppComponentFactory"
+      "./withAppComponentFactory",
+      "react-native-ble-plx"
     ],
     "experiments": {
       "typedRoutes": true,

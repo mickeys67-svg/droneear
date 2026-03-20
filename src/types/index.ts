@@ -46,6 +46,10 @@ export interface DetectionResult {
   frequencyPeaks: number[];    // Dominant frequency peaks in Hz
   /** Similar drone models with probability (from DroneDatabase) */
   similarDrones?: SimilarDrone[];
+  /** Detection source (acoustic, BLE Remote ID, or fused) */
+  source?: DetectionSource;
+  /** BLE Remote ID data (if detected via BLE) */
+  remoteIdData?: RemoteIDData;
 }
 
 export interface SimilarDrone {
@@ -53,6 +57,67 @@ export interface SimilarDrone {
   probability: number;  // 0.0 - 1.0
   category: 'civilian' | 'industrial' | 'military' | 'racing' | 'other';
 }
+
+// ===== BLE Remote ID Types =====
+
+/** Detection source discriminator */
+export type DetectionSource = 'ACOUSTIC' | 'BLE_REMOTE_ID' | 'FUSED';
+
+/** ASTM F3411 Remote ID data parsed from BLE advertising packets */
+export interface RemoteIDData {
+  /** UAS serial number or CAA registration ID */
+  serialNumber?: string;
+  /** Registration/session ID */
+  registrationId?: string;
+  /** UAV position */
+  uavLatitude?: number;
+  uavLongitude?: number;
+  uavAltitude?: number;        // meters above WGS84 ellipsoid
+  /** Operator position */
+  operatorLatitude?: number;
+  operatorLongitude?: number;
+  /** Flight dynamics */
+  speed?: number;              // m/s ground speed
+  heading?: number;            // 0-360 degrees
+  verticalSpeed?: number;      // m/s (positive = ascending)
+  /** UA type per ASTM F3411 */
+  uaType?: UAType;
+  /** ID type: how the UAS is identified */
+  idType?: RemoteIDType;
+  /** RSSI signal strength (dBm) */
+  rssi?: number;
+  /** Manufacturer name (decoded from OUI or Remote ID) */
+  manufacturer?: string;
+  /** Last update timestamp */
+  lastSeen?: number;
+}
+
+/** ASTM F3411 UA (Unmanned Aircraft) type codes */
+export type UAType =
+  | 0   // None/undeclared
+  | 1   // Aeroplane
+  | 2   // Helicopter/Multirotor
+  | 3   // Gyroplane
+  | 4   // Hybrid lift (VTOL)
+  | 5   // Ornithopter
+  | 6   // Glider
+  | 7   // Kite
+  | 8   // Free balloon
+  | 9   // Captive balloon
+  | 10  // Airship
+  | 11  // Free fall / parachute
+  | 12  // Rocket
+  | 13  // Tethered powered aircraft
+  | 14  // Ground obstacle
+  | 15; // Other
+
+/** ASTM F3411 Remote ID type codes */
+export type RemoteIDType =
+  | 0   // None
+  | 1   // Serial Number (ANSI/CTA-2063-A)
+  | 2   // CAA Assigned Registration ID
+  | 3   // UTM Assigned (UUID)
+  | 4;  // Specific Session ID
 
 export interface SignalTrack {
   id: string;
@@ -62,6 +127,16 @@ export interface SignalTrack {
   predictedETA: number | null;  // seconds until closest approach
   kalmanState: KalmanState | null;
   isActive: boolean;
+  /** Track duration in seconds (lastSeen - firstSeen) */
+  trackDurationSec?: number;
+  /** Minimum distance observed during this track */
+  minDistanceMeters?: number;
+  /** Maximum confidence observed during this track */
+  maxConfidence?: number;
+  /** Peak approach speed observed (m/s, negative = approaching) */
+  peakApproachRate?: number;
+  /** BLE Remote ID data associated with this track */
+  remoteIdData?: RemoteIDData;
 }
 
 /** @deprecated Use SignalTrack instead */
@@ -171,6 +246,8 @@ export interface AppSettings {
   maxHistoryItems: number;
   modelAutoUpdate: boolean;
   debugMode: boolean;
+  /** Enable BLE Remote ID scanning alongside acoustic detection */
+  bleScanEnabled?: boolean;
 }
 
 // ===== Inference Metrics =====

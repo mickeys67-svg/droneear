@@ -1,25 +1,24 @@
 /**
- * Main Detection Screen - v3.0
+ * Main Detection Screen - v5.0 (Decomposed)
  *
- * Global UX improvements:
- * - Voice alert (TTS) + sound alert integration
- * - Mic quality indicator with warnings
- * - Battery level display
- * - Scan duration timer
- * - Accuracy disclaimers on distance/bearing
- * - Detection feedback (false positive reporting)
- * - Error recovery with "Open Settings" button
- * - Confidence level text labels (not just percentages)
- * - Long-press to start scan (prevent accidental activation)
- * - Accessibility labels throughout
- * - i18n ready
+ * Design: 9.svg + AA.svg tone & manner
+ * - Glassmorphism cards + blur backgrounds
+ * - 2-tone brand logo (Drone=white, Ear=cyan)
+ * - Large stat numbers (36-48px)
+ * - Cyan glow scan button
+ * - Glass mic quality bar
+ * - Glass threat summary cards
+ *
+ * v5.0: Extracted sub-components for maintainability
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, ScrollView,
-  SafeAreaView, StatusBar, ActivityIndicator, Alert, Linking,
+  StyleSheet, Text, View, ScrollView,
+  SafeAreaView, StatusBar, Linking,
+  PermissionsAndroid, Platform, AppState,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useThreatDetector } from '@/src/hooks/useThreatDetector';
 import { TacticalRadar } from '@/src/components/radar/TacticalRadar';
@@ -28,6 +27,21 @@ import { ThreatAlert } from '@/src/components/alerts/ThreatAlert';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTranslation } from '@/src/i18n/useTranslation';
 import { EnvironmentWarningBanner } from '@/src/components/alerts/EnvironmentWarningBanner';
+import { GLASS, glassStyles } from '@/src/constants/glass';
+import { TrackingOverlay } from '@/src/components/TrackingOverlay';
+import { useDetectionStore } from '@/src/stores/detectionStore';
+
+// Extracted sub-components
+import { MicPermissionOverlay } from '@/src/components/scan/MicPermissionOverlay';
+import { ModelLoadingCard } from '@/src/components/scan/ModelLoadingCard';
+import { EngineErrorCard } from '@/src/components/scan/EngineErrorCard';
+import { MicQualityPanel } from '@/src/components/scan/MicQualityPanel';
+import { SensorIssuesPanel } from '@/src/components/scan/SensorIssuesPanel';
+import { ScanButton } from '@/src/components/scan/ScanButton';
+import { FeedbackPrompt } from '@/src/components/scan/FeedbackPrompt';
+import { ActiveThreatsList } from '@/src/components/scan/ActiveThreatsList';
+
+import type { TacticalTheme } from '@/src/types';
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -58,6 +72,26 @@ export default function HomeScreen() {
 
   const activeThreats = currentThreats.filter((t) => t.isActive);
 
+  // Track selection from store
+  const selectedTrackId = useDetectionStore((s) => s.selectedTrackId);
+  const selectTrack = useDetectionStore((s) => s.selectTrack);
+  const feedbackDetectionId = useDetectionStore((s) => s.feedbackDetectionId);
+
+  // Derive tracking data from selected track (FIX-C1: guard empty detections)
+  const trackedTrack = selectedTrackId
+    ? activeThreats.find((tr) => tr.id === selectedTrackId)
+    : null;
+  const trackedDetection = trackedTrack?.detections?.length
+    ? trackedTrack.detections[trackedTrack.detections.length - 1]
+    : null;
+
+  // Auto-clear selected track if it becomes inactive (FIX-C5)
+  useEffect(() => {
+    if (selectedTrackId && !trackedTrack) {
+      selectTrack(null);
+    }
+  }, [selectedTrackId, trackedTrack, selectTrack]);
+
   // Scan timer
   const [scanSeconds, setScanSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -82,20 +116,28 @@ export default function HomeScreen() {
   const isLoading = modelStatus === 'LOADING';
   const isError = modelStatus === 'ERROR';
 
-  // Confidence level label
-  const getConfidenceLabel = (conf: number): string => {
-    if (conf >= 0.9) return t.veryHighConfidence;
-    if (conf >= 0.8) return t.highConfidence;
-    if (conf >= 0.65) return t.moderateConfidence;
-    if (conf >= 0.5) return t.lowConfidence;
-    return t.verificationNeeded;
-  };
+  // Mic permission state for full-screen overlay
+  const [micPermissionBlocked, setMicPermissionBlocked] = useState(false);
 
-  // Mic quality color
-  const micQualityColor = micQuality === 'GOOD' ? theme.success : micQuality === 'FAIR' ? theme.warning : theme.danger;
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        );
+        setMicPermissionBlocked(!granted);
+      }
+    };
+    checkMicPermission();
 
-  // Long press handler for scan button (prevent accidental activation)
-  const handleScanPress = useCallback(() => {
+    // FIX-C3: Re-check on app resume (user may grant in system Settings)
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') checkMicPermission();
+    });
+    return () => sub.remove();
+  }, []);
+
+  const handleScanToggle = useCallback(() => {
     if (isScanning) {
       stopScanning();
     } else {
@@ -106,49 +148,61 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.background} />
+
+      {/* Full-screen mic permission blocked overlay */}
+      {micPermissionBlocked && (
+        <MicPermissionOverlay onDismiss={() => setMicPermissionBlocked(false)} />
+      )}
+
+      {/* Tracking Overlay — shown when a track is selected */}
+      {!micPermissionBlocked && !isLoading && !(isError && !isScanning) && trackedDetection && trackedTrack && (
+        <TrackingOverlay
+          trackId={trackedTrack.id}
+          droneName={trackedDetection.similarDrones?.[0]?.name || trackedDetection.threatCategory.replace('_', ' ')}
+          category={trackedDetection.threatCategory.replace('_', ' ')}
+          distance={trackedDetection.distanceMeters}
+          bearing={trackedDetection.bearingDegrees}
+          confidence={trackedDetection.confidence}
+          onClose={() => selectTrack(null)}
+        />
+      )}
+
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-        {/* Header */}
+        {/* Header — 2-tone brand + glass badges */}
         <View style={styles.header}>
           <Text style={[styles.brandText, { color: theme.text }]} accessibilityRole="header">
-            DRONE<Text style={{ color: theme.primary }}>EAR</Text>
+            Drone<Text style={{ color: theme.primary }}>Ear</Text>
           </Text>
           <View style={styles.headerRight}>
-            {/* Battery */}
-            <View style={[styles.batteryBadge, { borderColor: batteryLevel < 20 ? theme.danger : theme.border }]}>
-              <Text style={[styles.batteryText, { color: batteryLevel < 20 ? theme.danger : theme.textDim }]}>
-                {batteryLevel}%
-              </Text>
-            </View>
-            {/* Scan Timer */}
             {isScanning && (
-              <View style={[styles.timerBadge, { borderColor: theme.danger }]}>
-                <Text style={[styles.timerText, { color: theme.danger }]}>
+              <View style={[styles.glassBadge, { borderColor: `${theme.primary}40`, backgroundColor: `${theme.primary}10` }]}>
+                <Text style={[styles.badgeText, { color: theme.primary }]}>
                   {formatTime(scanSeconds)}
                 </Text>
               </View>
             )}
-            {/* Status Badge */}
-            <View style={[styles.badge, { backgroundColor: `${theme.primary}15`, borderColor: `${theme.primary}40` }]}>
+            <View style={[styles.glassBadge, {
+              backgroundColor: isScanning ? `${theme.primary}12` : isError ? `${theme.danger}12` : GLASS.cardBg,
+              borderColor: isScanning ? `${theme.primary}40` : isError ? `${theme.danger}40` : GLASS.borderSubtle,
+            }]}>
               <View style={[styles.statusDot, { backgroundColor: isScanning ? theme.primary : isError ? theme.danger : theme.textMuted }]} />
-              <Text style={[styles.badgeText, { color: isError ? theme.danger : theme.primary }]}>
+              <Text style={[styles.badgeText, { color: isError ? theme.danger : isScanning ? theme.primary : theme.textDim }]}>
                 {isLoading ? t.loading : isError ? t.error : isScanning ? t.scanning : t.standby}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Loading State */}
-        {isLoading && (
-          <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <ActivityIndicator size="small" color={theme.primary} />
-            <Text style={[styles.statusText, { color: theme.textDim }]}>
-              {t.initializingEngine}
-            </Text>
-          </View>
+        {/* Model Loading */}
+        {!micPermissionBlocked && isLoading && <ModelLoadingCard />}
+
+        {/* Engine Error */}
+        {!micPermissionBlocked && isError && !isScanning && (
+          <EngineErrorCard onRetry={() => startScanning()} />
         )}
 
-        {/* Unified Warning Banner — handles mic permission denied + indoor + accuracy degraded */}
+        {/* Unified Warning Banner */}
         <EnvironmentWarningBanner
           environmentState={environmentState}
           micPermissionDenied={isError || sensorState.microphone === 'DENIED'}
@@ -157,80 +211,18 @@ export default function HomeScreen() {
           onOpenSettings={() => Linking.openSettings()}
         />
 
-        {/* Mic Quality Monitor — Enhanced with visual SNR meter */}
+        {/* Mic Quality Monitor */}
         {isScanning && (
-          <View style={[styles.micQualityBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <View style={styles.micQualityLeft}>
-              <View style={[styles.micQualityDot, { backgroundColor: micQualityColor }]} />
-              <Text style={[styles.micQualityLabel, { color: theme.textDim }]}>
-                {t.signalQuality}:
-              </Text>
-              <Text style={[styles.micQualityValue, { color: micQualityColor }]}>
-                {micQuality === 'GOOD' ? t.micQualityGood : micQuality === 'FAIR' ? t.micQualityFair : t.micQualityPoor}
-              </Text>
-              <Text style={[styles.micSnr, { color: theme.textMuted }]}>
-                {micSnrDb}dB
-              </Text>
-            </View>
-
-            {/* SNR Visual Meter */}
-            <View style={styles.snrMeterTrack}>
-              <View style={[styles.snrMeterFill, {
-                width: `${Math.min(Math.max((micSnrDb / 40) * 100, 5), 100)}%`,
-                backgroundColor: micQualityColor,
-              }]} />
-            </View>
-
-            {micWarning && (
-              <View style={[styles.micWarningBadge, { backgroundColor: `${theme.warning}20`, borderColor: theme.warning }]}>
-                <Text style={[styles.micWarningIcon]}>
-                  {micWarning === 'WIND' ? '💨' : micWarning === 'NOISE' ? '🔊' : '⚠'}
-                </Text>
-                <Text style={[styles.micWarningText, { color: theme.warning }]} numberOfLines={1}>
-                  {micWarning === 'WIND' ? t.micWindWarning :
-                   micWarning === 'NOISE' ? t.micNoiseWarning :
-                   t.micClippingWarning}
-                </Text>
-              </View>
-            )}
-          </View>
+          <MicQualityPanel
+            micQuality={micQuality}
+            micSnrDb={micSnrDb}
+            micWarning={micWarning}
+          />
         )}
 
         {/* Sensor Enforcement Status */}
         {isScanning && sensorIssues.length > 0 && (
-          <View style={[styles.sensorPanel, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            {sensorIssues.map((issue, idx) => {
-              const issueColor = issue.severity === 'CRITICAL' ? theme.danger : issue.severity === 'HIGH' ? theme.warning : theme.textMuted;
-              return (
-                <View key={`${issue.sensor}-${idx}`} style={[styles.sensorRow, { borderBottomColor: `${theme.border}40` }]}>
-                  <View style={[styles.sensorDot, { backgroundColor: issueColor }]} />
-                  <Text style={[styles.sensorText, { color: issueColor }]} numberOfLines={1}>
-                    {issue.message}
-                  </Text>
-                  {issue.action === 'SETTINGS' && (
-                    <TouchableOpacity
-                      style={[styles.sensorActionBtn, { borderColor: issueColor }]}
-                      onPress={() => Linking.openSettings()}
-                      accessibilityLabel={t.openSettings}
-                    >
-                      <Text style={[styles.sensorActionText, { color: issueColor }]}>{t.openSettings}</Text>
-                    </TouchableOpacity>
-                  )}
-                  {issue.action === 'CHANGE_PROFILE' && (
-                    <TouchableOpacity
-                      style={[styles.sensorActionBtn, { borderColor: issueColor }]}
-                      onPress={() => {
-                        // Navigate to settings or show profile picker
-                        Alert.alert('DOA', t.bearingDisclaimer);
-                      }}
-                    >
-                      <Text style={[styles.sensorActionText, { color: issueColor }]}>STEREO</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              );
-            })}
-          </View>
+          <SensorIssuesPanel issues={sensorIssues} />
         )}
 
         {/* Tactical Radar */}
@@ -262,7 +254,7 @@ export default function HomeScreen() {
 
         {/* Debug Metrics */}
         {debugMode && isScanning && (
-          <View style={[styles.debugPanel, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={[glassStyles.card, styles.debugPanel]}>
             <DebugItem label="Model" value={modelStatus} color={theme} />
             <DebugItem label="Inference" value={`${inferenceTimeMs.toFixed(1)}ms`} color={theme} />
             <DebugItem label="RMS" value={audioLevel.toFixed(3)} color={theme} />
@@ -272,125 +264,43 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Control Button */}
-        <View style={styles.controlSection}>
-          <TouchableOpacity
-            style={[
-              styles.mainButton,
-              {
-                backgroundColor: isScanning ? theme.danger : theme.primary,
-                opacity: isLoading ? 0.5 : 1,
-              },
-            ]}
-            onPress={handleScanPress}
-            onLongPress={!isScanning ? startScanning : undefined}
-            activeOpacity={0.8}
-            disabled={isLoading}
-            accessibilityLabel={isScanning ? t.haltDetection : t.engageSensors}
-            accessibilityRole="button"
-          >
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#000" />
-            ) : (
-              <Text style={[styles.buttonText, { color: '#000' }]}>
-                {isScanning ? t.haltDetection : t.engageSensors}
-              </Text>
-            )}
-          </TouchableOpacity>
-
-          {!isScanning && !isError && (
-            <Text style={[styles.hintText, { color: theme.textMuted }]}>
-              {t.tapToBegin}
-            </Text>
-          )}
-        </View>
+        {/* Scan Control Button */}
+        <ScanButton
+          isScanning={isScanning}
+          isLoading={isLoading}
+          isError={isError}
+          disabled={micPermissionBlocked}
+          onToggle={handleScanToggle}
+        />
 
         {/* Detection Alert with Feedback */}
         {latestDetection && (
-          <View>
+          <Animated.View entering={FadeInDown.duration(400).springify()}>
             <ThreatAlert
               detection={latestDetection}
               onAcknowledge={acknowledgeDetection}
+              onTrack={(det) => {
+                acknowledgeDetection();
+                selectTrack(det.id);
+              }}
             />
-            {/* Accuracy Disclaimer */}
             <Text style={[styles.disclaimer, { color: theme.textMuted }]}>
               {t.distanceDisclaimer}
             </Text>
-          </View>
+          </Animated.View>
         )}
 
         {/* Detection Feedback Prompt */}
         {feedbackPending && !latestDetection && (
-          <View style={[styles.feedbackCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.feedbackQuestion, { color: theme.textDim }]}>
-              {t.wasDetectionAccurate}
-            </Text>
-            <View style={styles.feedbackButtons}>
-              <TouchableOpacity
-                style={[styles.feedbackBtn, { backgroundColor: `${theme.success}20`, borderColor: theme.success }]}
-                onPress={() => submitFeedback('', true)}
-                accessibilityLabel={t.yes}
-              >
-                <Text style={[styles.feedbackBtnText, { color: theme.success }]}>{t.yes}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.feedbackBtn, { backgroundColor: `${theme.danger}20`, borderColor: theme.danger }]}
-                onPress={() => submitFeedback('', false)}
-                accessibilityLabel={t.no}
-              >
-                <Text style={[styles.feedbackBtnText, { color: theme.danger }]}>{t.reportFalsePositive}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <FeedbackPrompt detectionId={feedbackDetectionId} onSubmit={submitFeedback} />
         )}
 
         {/* Active Detections Summary */}
         {activeThreats.length > 0 && (
-          <View style={[styles.threatSummary, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.sectionTitle, { color: theme.textDim }]}>
-              {t.scanning} ({activeThreats.length})
-            </Text>
-            {activeThreats.map((track) => {
-              const latest = track.detections[track.detections.length - 1];
-              const severityColor =
-                latest.severity === 'CRITICAL' ? theme.danger :
-                latest.severity === 'HIGH' ? theme.warning :
-                theme.primary;
-              return (
-                <TouchableOpacity
-                  key={track.id}
-                  style={[styles.trackRow, { borderBottomColor: theme.border }]}
-                  onPress={() => {
-                    Alert.alert(
-                      `${latest.threatCategory.replace('_', ' ')}`,
-                      `${t.distance}: ~${latest.distanceMeters}m (${t.estimatedDistance})\n${t.confidence}: ${(latest.confidence * 100).toFixed(1)}% — ${getConfidenceLabel(latest.confidence)}\n${t.bearing}: ${latest.bearingDegrees.toFixed(0)}° (${t.directionLimited})\n\n${t.accuracyNote}`,
-                    );
-                  }}
-                  accessibilityLabel={`${latest.threatCategory} ${t.distance} ${latest.distanceMeters}m`}
-                >
-                  <View style={[styles.trackDot, { backgroundColor: severityColor }]} />
-                  <View style={styles.trackInfo}>
-                    <Text style={[styles.trackType, { color: theme.text }]}>
-                      {latest.threatCategory.replace('_', ' ')}
-                    </Text>
-                    <Text style={[styles.trackConfLabel, { color: theme.textMuted }]}>
-                      {getConfidenceLabel(latest.confidence)}
-                    </Text>
-                  </View>
-                  <Text style={[styles.trackDist, { color: theme.primary }]}>
-                    ~{latest.distanceMeters}m
-                  </Text>
-                  <Text style={[styles.trackConf, { color: theme.textDim }]}>
-                    {(latest.confidence * 100).toFixed(0)}%
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-            {/* Accuracy footer */}
-            <Text style={[styles.accuracyFooter, { color: theme.textMuted }]}>
-              {t.mlDisclaimer}
-            </Text>
-          </View>
+          <ActiveThreatsList
+            activeThreats={activeThreats}
+            onSelectTrack={selectTrack}
+          />
         )}
 
         <View style={{ height: 30 }} />
@@ -399,107 +309,35 @@ export default function HomeScreen() {
   );
 }
 
-const DebugItem: React.FC<{ label: string; value: string; color: any }> = ({ label, value, color }) => (
+const DebugItem: React.FC<{ label: string; value: string; color: TacticalTheme }> = ({ label, value, color }) => (
   <View style={styles.debugItem}>
     <Text style={[styles.debugLabel, { color: color.textMuted }]}>{label}</Text>
     <Text style={[styles.debugValue, { color: color.textDim }]}>{value}</Text>
   </View>
 );
 
-/**
- * STYLES — High-readability design
- * All fonts sized for clear use:
- * - Critical info: 20-28px (distance, status, buttons)
- * - Primary info: 16-18px (labels, categories)
- * - Secondary info: 14-15px (descriptions, hints)
- * - Minimum anywhere: 13px (disclaimers only)
- * Touch targets: minimum 48px height
- */
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: 16 },
+  container: { padding: 16, paddingBottom: 100 },
 
-  // Header — brand + status clearly readable
+  // Header
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 8 },
-  brandText: { fontSize: 26, fontWeight: '900', letterSpacing: 3 },
+  brandText: { fontSize: 26, fontWeight: '900', letterSpacing: 2 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  badge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, borderWidth: 1.5, gap: 8 },
-  statusDot: { width: 10, height: 10, borderRadius: 5 },
-  badgeText: { fontSize: 15, fontWeight: '800', letterSpacing: 1 },
-  timerBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, borderWidth: 1.5 },
-  timerText: { fontSize: 16, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  batteryBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, borderWidth: 1.5 },
-  batteryText: { fontSize: 15, fontWeight: '800', fontVariant: ['tabular-nums'] },
-
-  // Status / Error cards
-  statusCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, borderWidth: 1.5, gap: 14, marginBottom: 16 },
-  statusText: { fontSize: 15, flex: 1, lineHeight: 22 },
-  errorCard: { padding: 18, borderRadius: 14, borderWidth: 1.5, marginBottom: 16 },
-  errorHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  errorIcon: { fontSize: 26 },
-  errorTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 1 },
-  errorActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  errorBtn: { flex: 1, paddingVertical: 14, borderRadius: 10, alignItems: 'center', minHeight: 52 },
-  errorBtnText: { color: '#000', fontWeight: '800', fontSize: 16, letterSpacing: 0.5 },
-  errorBtnSecondary: { flex: 1, paddingVertical: 14, borderRadius: 10, alignItems: 'center', borderWidth: 1.5, minHeight: 52 },
-  errorBtnSecondaryText: { fontWeight: '700', fontSize: 16 },
-
-  // Mic Quality — readable at a glance
-  micQualityBar: { padding: 14, borderRadius: 10, borderWidth: 1, marginBottom: 14, gap: 8 },
-  micQualityLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  micQualityDot: { width: 12, height: 12, borderRadius: 6 },
-  micQualityLabel: { fontSize: 14, fontWeight: '600' },
-  micQualityValue: { fontSize: 15, fontWeight: '800' },
-  micSnr: { fontSize: 14, marginLeft: 6, fontVariant: ['tabular-nums'] as any },
-  snrMeterTrack: { height: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' },
-  snrMeterFill: { height: '100%', borderRadius: 3 },
-  micWarningBadge: { flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 8, borderWidth: 1, gap: 8, marginTop: 4 },
-  micWarningIcon: { fontSize: 18 },
-  micWarningText: { fontSize: 14, flex: 1, lineHeight: 20 },
-
-  // Sensor enforcement panel
-  sensorPanel: { padding: 12, borderRadius: 10, borderWidth: 1, marginBottom: 14, gap: 6 },
-  sensorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, minHeight: 44 },
-  sensorDot: { width: 10, height: 10, borderRadius: 5 },
-  sensorText: { flex: 1, fontSize: 14, fontWeight: '600', lineHeight: 20 },
-  sensorActionBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 6, borderWidth: 1.5, minHeight: 36 },
-  sensorActionText: { fontSize: 13, fontWeight: '800' },
+  glassBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, gap: 8 },
+  statusDot: { width: 8, height: 8, borderRadius: 4 },
+  badgeText: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
 
   // Radar
-  radarSection: { alignItems: 'center', marginVertical: 16 },
-  scanStatus: { fontSize: 16, fontWeight: '800', letterSpacing: 2.5, marginTop: 12 },
+  radarSection: { alignItems: 'center', marginVertical: 20 },
+  scanStatus: { fontSize: 14, fontWeight: '800', letterSpacing: 2.5, marginTop: 14, textTransform: 'uppercase' },
 
   // Debug panel
-  debugPanel: { flexDirection: 'row', justifyContent: 'space-around', padding: 12, borderRadius: 10, borderWidth: 1, marginTop: 12, flexWrap: 'wrap' },
+  debugPanel: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 12, flexWrap: 'wrap' },
   debugItem: { alignItems: 'center', minWidth: 55 },
-  debugLabel: { fontSize: 11, letterSpacing: 0.5 },
-  debugValue: { fontSize: 14, fontWeight: '700', marginTop: 2 },
+  debugLabel: { fontSize: 10, letterSpacing: 0.5 },
+  debugValue: { fontSize: 13, fontWeight: '700', marginTop: 2 },
 
-  // Main action button — LARGE and unmistakable
-  controlSection: { marginTop: 16, marginBottom: 20 },
-  mainButton: { height: 72, borderRadius: 14, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8, minHeight: 72 },
-  buttonText: { fontSize: 24, fontWeight: '900', letterSpacing: 3 },
-  hintText: { fontSize: 15, textAlign: 'center', marginTop: 12, lineHeight: 22 },
-
-  // Disclaimer — still readable
-  disclaimer: { fontSize: 13, textAlign: 'center', marginTop: 8, fontStyle: 'italic', paddingHorizontal: 16, lineHeight: 20 },
-
-  // Feedback
-  feedbackCard: { padding: 18, borderRadius: 14, borderWidth: 1, marginBottom: 18 },
-  feedbackQuestion: { fontSize: 17, fontWeight: '700', textAlign: 'center', marginBottom: 14 },
-  feedbackButtons: { flexDirection: 'row', gap: 12 },
-  feedbackBtn: { flex: 1, paddingVertical: 14, borderRadius: 10, borderWidth: 1.5, alignItems: 'center', minHeight: 52 },
-  feedbackBtnText: { fontSize: 16, fontWeight: '700' },
-
-  // Detection Summary
-  threatSummary: { padding: 16, borderRadius: 14, borderWidth: 1 },
-  sectionTitle: { fontSize: 15, fontWeight: '800', letterSpacing: 1.5, marginBottom: 12 },
-  trackRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, gap: 12, minHeight: 56 },
-  trackDot: { width: 12, height: 12, borderRadius: 6 },
-  trackInfo: { flex: 1 },
-  trackType: { fontSize: 17, fontWeight: '700' },
-  trackConfLabel: { fontSize: 14, marginTop: 3 },
-  trackDist: { fontSize: 22, fontWeight: '900' },
-  trackConf: { fontSize: 15, width: 50, textAlign: 'right', fontWeight: '700' },
-  accuracyFooter: { fontSize: 13, marginTop: 12, fontStyle: 'italic', lineHeight: 20 },
+  // Disclaimer
+  disclaimer: { fontSize: 12, textAlign: 'center', marginTop: 8, fontStyle: 'italic', paddingHorizontal: 16, lineHeight: 18 },
 });

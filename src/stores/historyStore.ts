@@ -17,6 +17,9 @@ interface HistoryState {
   endSession: () => void;
   getDetectionsByCategory: (category: string) => DetectionResult[];
   getRecentDetections: (count: number) => DetectionResult[];
+  getDetectionsBySeverity: (severity: string) => DetectionResult[];
+  getAverageConfidence: () => number;
+  getWeeklyStats: () => { day: string; count: number }[];
 }
 
 export const useHistoryStore = create<HistoryState>()(
@@ -60,6 +63,35 @@ export const useHistoryStore = create<HistoryState>()(
 
       getRecentDetections: (count) => {
         return get().detections.slice(0, count);
+      },
+
+      getDetectionsBySeverity: (severity) => {
+        return get().detections.filter((d) => d.severity === severity);
+      },
+
+      getAverageConfidence: () => {
+        const dets = get().detections;
+        if (dets.length === 0) return 0;
+        return dets.reduce((sum, d) => sum + d.confidence, 0) / dets.length;
+      },
+
+      getWeeklyStats: () => {
+        const dets = get().detections;
+        const now = Date.now();
+        const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const counts: Record<string, number> = {};
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now - i * 24 * 60 * 60 * 1000);
+          counts[dayNames[d.getDay()]] = 0;
+        }
+        for (const det of dets) {
+          if (det.timestamp >= weekAgo) {
+            const day = dayNames[new Date(det.timestamp).getDay()];
+            if (day in counts) counts[day]++;
+          }
+        }
+        return Object.entries(counts).map(([day, count]) => ({ day, count }));
       },
     }),
     {

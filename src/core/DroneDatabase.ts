@@ -10,13 +10,17 @@
  * NOT positive identification of any specific aircraft.
  */
 
-import type { AcousticPattern, SimilarDrone } from '../types';
+import type { AcousticPattern, ThreatCategory, SimilarDrone } from '../types';
 
 interface DroneEntry {
   name: string;
   category: SimilarDrone['category'];
   /** Base weight within this pattern group (higher = more common) */
   weight: number;
+  /** Typical acoustic frequency range in Hz [low, high] */
+  frequencyRange?: [number, number];
+  /** Maximum detection range in meters (ideal conditions) */
+  maxDetectionRange?: number;
 }
 
 /** Core patterns that have drone mappings (excludes BACKGROUND) */
@@ -95,7 +99,7 @@ const LEGACY_MAP: Record<string, MappedPattern> = {
   AIRCRAFT: 'PROPELLER_FIXED',
 };
 
-export function getSimilarDrones(pattern: AcousticPattern): SimilarDrone[] {
+export function getSimilarDrones(pattern: AcousticPattern | ThreatCategory): SimilarDrone[] {
   if (pattern === 'BACKGROUND' || (pattern as string) === 'AMBIENT') return [];
 
   const mapped = LEGACY_MAP[pattern] || pattern;
@@ -116,7 +120,7 @@ export function getSimilarDrones(pattern: AcousticPattern): SimilarDrone[] {
 /**
  * Get the top N similar drones for display.
  */
-export function getTopSimilarDrones(pattern: AcousticPattern, topN: number = 5): SimilarDrone[] {
+export function getTopSimilarDrones(pattern: AcousticPattern | ThreatCategory, topN: number = 5): SimilarDrone[] {
   const all = getSimilarDrones(pattern);
   const top = all.slice(0, topN);
 
@@ -132,7 +136,7 @@ export function getTopSimilarDrones(pattern: AcousticPattern, topN: number = 5):
 /**
  * Get human-readable pattern label.
  */
-export function getPatternLabel(pattern: AcousticPattern): string {
+export function getPatternLabel(pattern: AcousticPattern | ThreatCategory): string {
   const labels: Record<string, string> = {
     MULTIROTOR: 'Multirotor',
     SINGLE_ENGINE: 'Single Engine Propulsion',

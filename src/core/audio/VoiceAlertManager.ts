@@ -243,7 +243,10 @@ export class VoiceAlertManager {
     if (this.processingQueue || this.isSpeaking || this.queue.length === 0) return;
     this.processingQueue = true;
 
-    while (this.queue.length > 0) {
+    let iterations = 0;
+    const maxIterations = 10;
+    while (this.queue.length > 0 && iterations < maxIterations) {
+      iterations++;
       const item = this.queue.shift()!;
       await this.speak(item.text, item.severity);
       // Small gap between announcements
@@ -282,6 +285,14 @@ export class VoiceAlertManager {
   private getCategoryName(category: ThreatCategory): string {
     const t = getTranslation(this.locale);
     const map: Record<string, string> = {
+      // New AcousticPattern names (v2.0)
+      MULTIROTOR: t.droneSmall,
+      SINGLE_ENGINE: t.droneLarge,
+      SINGLE_ROTOR: t.helicopter,
+      JET_PROPULSION: t.missile,
+      PROPELLER_FIXED: t.aircraft,
+      BACKGROUND: t.ambient,
+      // Legacy backward compat
       DRONE_SMALL: t.droneSmall,
       DRONE_LARGE: t.droneLarge,
       HELICOPTER: t.helicopter,

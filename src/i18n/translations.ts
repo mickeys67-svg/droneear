@@ -80,6 +80,9 @@ export interface Translations {
   noDetections: string;
   startScanningHint: string;
   total: string;
+  todaysDetections: string;
+  thisWeek: string;
+  avgConfidence: string;
 
   // Settings
   settings: string;
@@ -123,10 +126,14 @@ export interface Translations {
   micWindWarning: string;
   micNoiseWarning: string;
   micClippingWarning: string;
+  micWindHint?: string;
+  micNoiseHint?: string;
+  micClippingHint?: string;
   signalQuality: string;
 
   // Accuracy Disclaimers
   distanceDisclaimer: string;
+  bearingDirection?: string;
   bearingDisclaimer: string;
   accuracyNote: string;
   mlDisclaimer: string;
@@ -233,6 +240,122 @@ export interface Translations {
   southWest: string;
   west: string;
   northWest: string;
+
+  // Onboarding BLE
+  onboardingBLE: string;
+  onboardingBLEDesc: string;
+  onboardingBLESkip: string;
+
+  // Export
+  exportData: string;
+  exportCSV: string;
+  exportJSON: string;
+  exportSuccess: string;
+
+  // BLE Remote ID
+  bleScan: string;
+  bleScanDesc: string;
+  bleEnabled: string;
+  bleDisabled: string;
+  bleUnavailable: string;
+  bleRemoteID: string;
+  bleDeviceFound: string;
+  bleSerialNumber: string;
+  bleOperatorLocation: string;
+  bleNoDevices: string;
+
+  // Map Screen
+  mapTab: string;
+  mapTitle: string;
+  mapNoLocation: string;
+  mapAcousticRadius: string;
+  mapFusedDetection: string;
+  mapBLEDevice: string;
+  mapOperator: string;
+  mapAltitude: string;
+  mapSpeed: string;
+  mapHeading: string;
+  mapSerial: string;
+  mapNoDetections: string;
+
+  // Phase 0 UI additions
+  micPermissionDenied: string;
+  micPermissionGranted: string;
+  micPermissionBlockedDesc: string;
+  tryAgain: string;
+  continueWithout: string;
+  track: string;
+  dismiss: string;
+  frequency: string;
+  detectionDetails: string;
+  acousticSignature: string;
+  viewOnMap: string;
+
+  // Error Boundary
+  systemError?: string;
+  unexpectedError?: string;
+  restart?: string;
+
+  // Tab Navigation
+  tabScan?: string;
+  tabMap?: string;
+  tabLog?: string;
+  tabSet?: string;
+  tabGuide?: string;
+  tabScanDesc?: string;
+  tabMapDesc?: string;
+  tabLogDesc?: string;
+
+  // Map
+  active?: string;
+  close?: string;
+
+  // Settings sections
+  appearance?: string;
+  aboutSection?: string;
+  profileSection?: string;
+  modelLabel?: string;
+  quantizationLabel?: string;
+  classesLabel?: string;
+  patternsCount?: string;
+  resetOnboarding?: string;
+
+  // History
+  historyTab?: string;
+  noFilterResults?: string;
+  meters?: string;
+
+  // Tracking overlay
+  tracking?: string;
+  closeTracking?: string;
+
+  // Index screen extras
+  permissionBlocked?: string;
+  micAccessRequired?: string;
+  howToEnable?: string;
+  permStep1?: string;
+  permStep2?: string;
+  permStep3?: string;
+  loadingAcousticModel?: string;
+  engineError?: string;
+  engineErrorDesc?: string;
+  retry?: string;
+  stereo?: string;
+  similarModels?: string;
+  loadingDefault?: string;
+
+  // Onboarding extra
+  welcome?: string;
+  acousticDroneDetection?: string;
+  stepOf?: (step: number, total: number) => string;
+  allow?: string;
+  selectDevice?: string;
+  continueBtn?: string;
+  speakOrMakeSound?: string;
+  listeningTest?: string;
+  detectControllersDesc?: string;
+  enableBLE?: string;
+  startScanningBtn?: string;
 }
 
 const ko: Translations = {
@@ -295,6 +418,9 @@ const ko: Translations = {
   noDetections: '이 세션에 기록된 식별 없음.',
   startScanningHint: '청취를 시작하여 드론을 식별하세요.',
   total: '전체',
+  todaysDetections: '오늘',
+  thisWeek: '이번 주',
+  avgConfidence: '평균 신뢰도',
 
   // Settings
   settings: '설정',
@@ -338,10 +464,14 @@ const ko: Translations = {
   micWindWarning: '바람 소음이 감지됩니다. 마이크를 차단해 주세요.',
   micNoiseWarning: '주변 소음이 높습니다. 조용한 환경으로 이동해 주세요.',
   micClippingWarning: '오디오 클리핑 감지. 게인을 낮춰 주세요.',
+  micWindHint: '마이크를 바람으로부터 차단하세요',
+  micNoiseHint: '조용한 장소로 이동하세요',
+  micClippingHint: '소음원에서 멀리 이동하세요',
   signalQuality: '신호 품질',
 
   // Accuracy
   distanceDisclaimer: '거리는 음압 기반 추정값이며 환경에 따라 오차가 있을 수 있습니다.',
+  bearingDirection: '방향 추정',
   bearingDisclaimer: '방향 추정은 단일 마이크에서 제한적입니다. 스테레오 프로파일 사용을 권장합니다.',
   accuracyNote: '식별 결과는 참고용이며, 실제 상황과 다를 수 있습니다.',
   mlDisclaimer: '이 앱은 음향 패턴 추정 기반이며, 모든 드론을 식별하지 못할 수 있습니다. 오탐/미탐 가능성이 있습니다.',
@@ -448,6 +578,122 @@ const ko: Translations = {
   southWest: '남서',
   west: '서',
   northWest: '북서',
+
+  // Onboarding BLE
+  onboardingBLE: 'Bluetooth 드론 감지',
+  onboardingBLEDesc: 'BLE Remote ID 스캔을 통해 근처 드론의 원격 식별 신호를 수신할 수 있습니다. Bluetooth 권한이 필요합니다.',
+  onboardingBLESkip: 'Bluetooth 없이 계속',
+
+  // Export
+  exportData: '데이터 내보내기',
+  exportCSV: 'CSV로 내보내기',
+  exportJSON: 'JSON으로 내보내기',
+  exportSuccess: '내보내기 완료!',
+
+  // BLE Remote ID
+  bleScan: 'BLE 원격 ID 스캔',
+  bleScanDesc: 'Bluetooth로 드론 원격 식별 신호를 스캔합니다',
+  bleEnabled: 'BLE 스캔 활성화',
+  bleDisabled: 'BLE 스캔 비활성화',
+  bleUnavailable: 'Bluetooth를 사용할 수 없습니다',
+  bleRemoteID: '원격 ID',
+  bleDeviceFound: 'BLE 드론 발견',
+  bleSerialNumber: '시리얼 번호',
+  bleOperatorLocation: '운영자 위치',
+  bleNoDevices: '발견된 BLE 기기 없음',
+
+  // Map
+  mapTab: '지도',
+  mapTitle: '드론 지도',
+  mapNoLocation: '위치 정보를 사용할 수 없습니다',
+  mapAcousticRadius: '음향 감지 반경',
+  mapFusedDetection: '융합 감지',
+  mapBLEDevice: 'BLE 기기',
+  mapOperator: '운영자',
+  mapAltitude: '고도',
+  mapSpeed: '속도',
+  mapHeading: '방향',
+  mapSerial: '시리얼',
+  mapNoDetections: '감지된 드론 없음',
+
+  // Phase 0 UI additions
+  micPermissionDenied: '마이크 접근이 필요합니다. 마이크 없이는 앱이 작동할 수 없습니다.',
+  micPermissionGranted: '✓ 마이크 접근 허용됨',
+  micPermissionBlockedDesc: 'DroneEar는 마이크를 사용하여 드론 음향 패턴을 감지합니다. 마이크 접근 없이는 앱이 작동할 수 없습니다.',
+  tryAgain: '다시 시도',
+  continueWithout: '마이크 없이 계속',
+  track: '추적',
+  dismiss: '무시',
+  frequency: '주파수',
+  detectionDetails: '감지 상세',
+  acousticSignature: '음향 패턴',
+  viewOnMap: '지도에서 보기',
+
+  // Error Boundary
+  systemError: '시스템 오류',
+  unexpectedError: '예기치 않은 오류가 발생했습니다.',
+  restart: '재시작',
+
+  // Tab Navigation
+  tabScan: '청취',
+  tabMap: '지도',
+  tabLog: '기록',
+  tabSet: '설정',
+  tabGuide: '가이드',
+  tabScanDesc: '드론 음향 청취 화면',
+  tabMapDesc: '드론 지도 화면',
+  tabLogDesc: '식별 기록',
+
+  // Map
+  active: '활성',
+  close: '닫기',
+
+  // Settings sections
+  appearance: '외관',
+  aboutSection: '정보',
+  profileSection: '프로파일',
+  modelLabel: '모델',
+  quantizationLabel: '양자화',
+  classesLabel: '클래스',
+  patternsCount: '6개 패턴',
+  resetOnboarding: '온보딩 초기화',
+
+  // History
+  historyTab: '기록',
+  noFilterResults: '해당 심각도의 식별 기록이 없습니다',
+  meters: '미터',
+
+  // Tracking overlay
+  tracking: '추적 중',
+  closeTracking: '추적 닫기',
+
+  // Index screen extras
+  permissionBlocked: '권한 차단됨',
+  micAccessRequired: '마이크 접근\n필요',
+  howToEnable: '활성화 방법:',
+  permStep1: '1. 설정 열기',
+  permStep2: '2. DroneEar 찾기',
+  permStep3: '3. 마이크 활성화',
+  loadingAcousticModel: '음향 분석 모델 로딩 중...',
+  engineError: '엔진 오류',
+  engineErrorDesc: '오디오 분석 엔진 초기화에 실패했습니다. 마이크 권한을 확인하고 다시 시도하세요.',
+  retry: '재시도',
+  stereo: '스테레오',
+  similarModels: '유사 모델',
+  loadingDefault: '로딩 중...',
+
+  // Onboarding extra
+  welcome: '환영합니다',
+  acousticDroneDetection: '음향 드론 감지',
+  stepOf: (step, total) => `${total}단계 중 ${step}단계`,
+  allow: '허용',
+  selectDevice: '기기 선택',
+  continueBtn: '계속',
+  speakOrMakeSound: '말하거나 소리를 내세요',
+  listeningTest: '듣는 중...',
+  detectControllersDesc: '근처 드론 원격 조종기를 감지합니다',
+  enableBLE: '활성화',
+  startScanningBtn: '청취 시작',
 };
 
 const en: Translations = {
@@ -504,6 +750,9 @@ const en: Translations = {
   noDetections: 'No identifications recorded in this session.',
   startScanningHint: 'Start listening to identify drones.',
   total: 'TOTAL',
+  todaysDetections: 'Today',
+  thisWeek: 'This Week',
+  avgConfidence: 'Avg Conf.',
 
   settings: 'SETTINGS',
   displayTheme: 'DISPLAY THEME',
@@ -543,9 +792,13 @@ const en: Translations = {
   micWindWarning: 'Wind noise detected. Shield the microphone.',
   micNoiseWarning: 'High ambient noise. Move to a quieter area.',
   micClippingWarning: 'Audio clipping detected. Reduce gain.',
+  micWindHint: 'Shield microphone from wind',
+  micNoiseHint: 'Move to a quieter location',
+  micClippingHint: 'Move away from loud sound source',
   signalQuality: 'Signal Quality',
 
   distanceDisclaimer: 'Distance is estimated from sound pressure and may vary with environment.',
+  bearingDirection: 'Bearing',
   bearingDisclaimer: 'Direction estimation is limited with a single microphone. Use stereo profile for better accuracy.',
   accuracyNote: 'Identification results are for reference only and may differ from actual conditions.',
   mlDisclaimer: 'This app uses acoustic pattern estimation and may not identify all drones. False positives or negatives are possible.',
@@ -644,6 +897,122 @@ const en: Translations = {
   southWest: 'SW',
   west: 'W',
   northWest: 'NW',
+
+  // Onboarding BLE
+  onboardingBLE: 'Bluetooth Drone Detection',
+  onboardingBLEDesc: 'Enable BLE Remote ID scanning to receive drone identification signals nearby. Bluetooth permission is required.',
+  onboardingBLESkip: 'Continue without Bluetooth',
+
+  // Export
+  exportData: 'Export Data',
+  exportCSV: 'Export as CSV',
+  exportJSON: 'Export as JSON',
+  exportSuccess: 'Export complete!',
+
+  // BLE Remote ID
+  bleScan: 'BLE Remote ID Scan',
+  bleScanDesc: 'Scan for drone Remote ID signals via Bluetooth',
+  bleEnabled: 'BLE Scan Enabled',
+  bleDisabled: 'BLE Scan Disabled',
+  bleUnavailable: 'Bluetooth Unavailable',
+  bleRemoteID: 'Remote ID',
+  bleDeviceFound: 'BLE Drone Found',
+  bleSerialNumber: 'Serial Number',
+  bleOperatorLocation: 'Operator Location',
+  bleNoDevices: 'No BLE Devices Found',
+
+  // Map
+  mapTab: 'MAP',
+  mapTitle: 'Drone Map',
+  mapNoLocation: 'Location unavailable',
+  mapAcousticRadius: 'Acoustic detection radius',
+  mapFusedDetection: 'Fused Detection',
+  mapBLEDevice: 'BLE Device',
+  mapOperator: 'Operator',
+  mapAltitude: 'Altitude',
+  mapSpeed: 'Speed',
+  mapHeading: 'Heading',
+  mapSerial: 'Serial',
+  mapNoDetections: 'No drones detected',
+
+  // Phase 0 UI additions
+  micPermissionDenied: 'Microphone access is required for drone detection. Without it, the app cannot function.',
+  micPermissionGranted: '✓ Microphone access granted',
+  micPermissionBlockedDesc: 'DroneEar uses your microphone to detect drone acoustic signatures. The app cannot function without microphone access.',
+  tryAgain: 'TRY AGAIN',
+  continueWithout: 'Continue without microphone',
+  track: 'TRACK',
+  dismiss: 'DISMISS',
+  frequency: 'Frequency',
+  detectionDetails: 'Detection Details',
+  acousticSignature: 'Acoustic Signature',
+  viewOnMap: 'VIEW ON MAP',
+
+  // Error Boundary
+  systemError: 'System Error',
+  unexpectedError: 'An unexpected error occurred.',
+  restart: 'RESTART',
+
+  // Tab Navigation
+  tabScan: 'SCAN',
+  tabMap: 'MAP',
+  tabLog: 'LOG',
+  tabSet: 'SET',
+  tabGuide: 'GUIDE',
+  tabScanDesc: 'Drone scan screen',
+  tabMapDesc: 'Drone map view',
+  tabLogDesc: 'Detection history log',
+
+  // Map
+  active: 'ACTIVE',
+  close: 'Close',
+
+  // Settings sections
+  appearance: 'APPEARANCE',
+  aboutSection: 'ABOUT',
+  profileSection: 'PROFILE',
+  modelLabel: 'Model',
+  quantizationLabel: 'Quantization',
+  classesLabel: 'Classes',
+  patternsCount: '6 patterns',
+  resetOnboarding: 'Reset Onboarding',
+
+  // History
+  historyTab: 'HISTORY',
+  noFilterResults: 'No detections for this filter',
+  meters: 'meters',
+
+  // Tracking overlay
+  tracking: 'TRACKING',
+  closeTracking: 'Close tracking',
+
+  // Index screen extras
+  permissionBlocked: 'Permission Blocked',
+  micAccessRequired: 'Microphone Access\nRequired',
+  howToEnable: 'How to enable:',
+  permStep1: '1. Open Settings',
+  permStep2: '2. Find DroneEar',
+  permStep3: '3. Enable Microphone',
+  loadingAcousticModel: 'Loading acoustic analysis model...',
+  engineError: 'Engine Error',
+  engineErrorDesc: 'Audio analysis engine failed to initialize. Check microphone permissions and try again.',
+  retry: 'RETRY',
+  stereo: 'STEREO',
+  similarModels: 'SIMILAR MODELS',
+  loadingDefault: 'Loading...',
+
+  // Onboarding extra
+  welcome: 'Welcome',
+  acousticDroneDetection: 'Acoustic Drone Detection',
+  stepOf: (step, total) => `Step ${step} of ${total}`,
+  allow: 'ALLOW',
+  selectDevice: 'Select Device',
+  continueBtn: 'CONTINUE',
+  speakOrMakeSound: 'Speak or make a sound',
+  listeningTest: 'LISTENING...',
+  detectControllersDesc: 'Detect drone remote controllers nearby',
+  enableBLE: 'ENABLE',
+  startScanningBtn: 'START SCANNING',
 };
 
 const uk: Translations = {
@@ -700,6 +1069,9 @@ const uk: Translations = {
   noDetections: 'Немає записів ідентифікацій.',
   startScanningHint: 'Почніть прослухування для ідентифікації дронів.',
   total: 'ВСЬОГО',
+  todaysDetections: 'Сьогодні',
+  thisWeek: 'Цей тиждень',
+  avgConfidence: 'Сер. довіра',
 
   settings: 'НАЛАШТУВАННЯ',
   displayTheme: 'ТЕМА ДИСПЛЕЯ',
@@ -739,9 +1111,13 @@ const uk: Translations = {
   micWindWarning: 'Виявлено шум вітру. Захистіть мікрофон.',
   micNoiseWarning: 'Високий рівень шуму. Перемістіться в тихіше місце.',
   micClippingWarning: 'Виявлено кліпінг. Зменшіть підсилення.',
+  micWindHint: 'Захистіть мікрофон від вітру',
+  micNoiseHint: 'Перейдіть до тихішого місця',
+  micClippingHint: 'Відійдіть від джерела гучного звуку',
   signalQuality: 'Якість сигналу',
 
   distanceDisclaimer: 'Відстань оцінюється за звуковим тиском і може відрізнятися залежно від середовища.',
+  bearingDirection: 'Напрямок',
   bearingDisclaimer: 'Визначення напрямку обмежене одним мікрофоном. Використовуйте стерео профіль.',
   accuracyNote: 'Результати ідентифікації є орієнтовними і можуть відрізнятися від реальних умов.',
   mlDisclaimer: 'Додаток базується на оцінці акустичних патернів і може не ідентифікувати всі дрони. Можливі хибні спрацювання.',
@@ -840,6 +1216,122 @@ const uk: Translations = {
   southWest: 'ПдЗх',
   west: 'Зх',
   northWest: 'ПнЗх',
+
+  // Onboarding BLE
+  onboardingBLE: 'Bluetooth виявлення дронів',
+  onboardingBLEDesc: 'Увімкніть BLE Remote ID для отримання сигналів ідентифікації дронів поблизу. Потрібен дозвіл Bluetooth.',
+  onboardingBLESkip: 'Продовжити без Bluetooth',
+
+  // Export
+  exportData: 'Експорт даних',
+  exportCSV: 'Експорт CSV',
+  exportJSON: 'Експорт JSON',
+  exportSuccess: 'Експорт завершено!',
+
+  // BLE Remote ID
+  bleScan: 'BLE сканування Remote ID',
+  bleScanDesc: 'Сканування сигналів Remote ID дронів через Bluetooth',
+  bleEnabled: 'BLE сканування увімкнено',
+  bleDisabled: 'BLE сканування вимкнено',
+  bleUnavailable: 'Bluetooth недоступний',
+  bleRemoteID: 'Remote ID',
+  bleDeviceFound: 'BLE дрон знайдено',
+  bleSerialNumber: 'Серійний номер',
+  bleOperatorLocation: 'Місце оператора',
+  bleNoDevices: 'BLE пристрої не знайдено',
+
+  // Map
+  mapTab: 'КАРТА',
+  mapTitle: 'Карта дронів',
+  mapNoLocation: 'Місцезнаходження недоступне',
+  mapAcousticRadius: 'Радіус акустичного виявлення',
+  mapFusedDetection: 'Об\'єднане виявлення',
+  mapBLEDevice: 'BLE пристрій',
+  mapOperator: 'Оператор',
+  mapAltitude: 'Висота',
+  mapSpeed: 'Швидкість',
+  mapHeading: 'Напрямок',
+  mapSerial: 'Серійний №',
+  mapNoDetections: 'Дронів не виявлено',
+
+  // Phase 0 UI additions
+  micPermissionDenied: 'Для виявлення дронів потрібен доступ до мікрофона. Без нього додаток не може працювати.',
+  micPermissionGranted: '✓ Доступ до мікрофона надано',
+  micPermissionBlockedDesc: 'DroneEar використовує мікрофон для виявлення акустичних сигнатур дронів. Додаток не може працювати без доступу до мікрофона.',
+  tryAgain: 'СПРОБУВАТИ ЗНОВУ',
+  continueWithout: 'Продовжити без мікрофона',
+  track: 'СТЕЖИТИ',
+  dismiss: 'ВІДХИЛИТИ',
+  frequency: 'Частота',
+  detectionDetails: 'Деталі виявлення',
+  acousticSignature: 'Акустична сигнатура',
+  viewOnMap: 'ПЕРЕГЛЯНУТИ НА КАРТІ',
+
+  // Error Boundary
+  systemError: 'Системна помилка',
+  unexpectedError: 'Виникла непередбачена помилка.',
+  restart: 'ПЕРЕЗАПУСТИТИ',
+
+  // Tab Navigation
+  tabScan: 'СКАН',
+  tabMap: 'КАРТА',
+  tabLog: 'ЖУРНАЛ',
+  tabSet: 'НАЛАШТ',
+  tabGuide: 'ДОВІДКА',
+  tabScanDesc: 'Екран сканування дронів',
+  tabMapDesc: 'Перегляд карти дронів',
+  tabLogDesc: 'Журнал ідентифікацій',
+
+  // Map
+  active: 'АКТИВНИЙ',
+  close: 'Закрити',
+
+  // Settings sections
+  appearance: 'ЗОВНІШНІЙ ВИГЛЯД',
+  aboutSection: 'ПРО ДОДАТОК',
+  profileSection: 'ПРОФІЛЬ',
+  modelLabel: 'Модель',
+  quantizationLabel: 'Квантизація',
+  classesLabel: 'Класи',
+  patternsCount: '6 патернів',
+  resetOnboarding: 'Скинути вступний курс',
+
+  // History
+  historyTab: 'ІСТОРІЯ',
+  noFilterResults: 'Немає виявлень для цього фільтра',
+  meters: 'метрів',
+
+  // Tracking overlay
+  tracking: 'СТЕЖЕННЯ',
+  closeTracking: 'Закрити стеження',
+
+  // Index screen extras
+  permissionBlocked: 'Дозвіл заблоковано',
+  micAccessRequired: 'Доступ до мікрофона\nнеобхідний',
+  howToEnable: 'Як увімкнути:',
+  permStep1: '1. Відкрити Налаштування',
+  permStep2: '2. Знайти DroneEar',
+  permStep3: '3. Увімкнути мікрофон',
+  loadingAcousticModel: 'Завантаження акустичної моделі...',
+  engineError: 'Помилка двигуна',
+  engineErrorDesc: 'Не вдалося ініціалізувати двигун аналізу. Перевірте дозвіл мікрофона та спробуйте знову.',
+  retry: 'ПОВТОРИТИ',
+  stereo: 'СТЕРЕО',
+  similarModels: 'СХОЖІ МОДЕЛІ',
+  loadingDefault: 'Завантаження...',
+
+  // Onboarding extra
+  welcome: 'Вітаємо',
+  acousticDroneDetection: 'Акустичне виявлення дронів',
+  stepOf: (step, total) => `Крок ${step} з ${total}`,
+  allow: 'ДОЗВОЛИТИ',
+  selectDevice: 'Вибір пристрою',
+  continueBtn: 'ПРОДОВЖИТИ',
+  speakOrMakeSound: 'Говоріть або зробіть звук',
+  listeningTest: 'СЛУХАЮ...',
+  detectControllersDesc: 'Виявлення пультів дронів поблизу',
+  enableBLE: 'УВІМКНУТИ',
+  startScanningBtn: 'ПОЧАТИ СКАНУВАННЯ',
 };
 
 // External language imports

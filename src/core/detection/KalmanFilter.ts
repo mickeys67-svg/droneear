@@ -79,6 +79,9 @@ export class KalmanFilter2D {
    * Update step: incorporate a new measurement [mx, my].
    */
   update(state: KalmanState, mx: number, my: number): KalmanState {
+    // NaN/Infinity guard on measurement input
+    if (!isFinite(mx) || !isFinite(my)) return state;
+
     const { x, y, vx, vy, P } = state;
     const R = this.measurementNoise;
 
@@ -94,7 +97,7 @@ export class KalmanFilter2D {
 
     // Kalman gain: K = P*H'*inv(S)
     const detS = S00 * S11 - S01 * S10;
-    if (Math.abs(detS) < 1e-10) return state; // Singular, skip update
+    if (detS <= 1e-10) return state; // Singular, skip update
 
     const invS00 = S11 / detS;
     const invS01 = -S01 / detS;
@@ -109,11 +112,18 @@ export class KalmanFilter2D {
       [P[3][0] * invS00 + P[3][1] * invS10, P[3][0] * invS01 + P[3][1] * invS11],
     ];
 
+    // NaN guard on gain matrix (numerical instability)
+    if (!isFinite(K[0][0]) || !isFinite(K[1][1])) return state;
+
     // State update: x = x + K * innovation
     const newX = x + K[0][0] * dx + K[0][1] * dy;
     const newY = y + K[1][0] * dx + K[1][1] * dy;
-    const newVx = vx + K[2][0] * dx + K[2][1] * dy;
-    const newVy = vy + K[3][0] * dx + K[3][1] * dy;
+    const clampV = (v: number) => Math.max(-100, Math.min(100, v));
+    const newVx = clampV(vx + K[2][0] * dx + K[2][1] * dy);
+    const newVy = clampV(vy + K[3][0] * dx + K[3][1] * dy);
+
+    // NaN guard on output state
+    if (!isFinite(newX) || !isFinite(newY)) return state;
 
     // Covariance update: P = (I - K*H) * P
     const newP: number[][] = Array.from({ length: 4 }, () => new Array(4).fill(0));
@@ -134,7 +144,7 @@ export class KalmanFilter2D {
     const distance = Math.sqrt(state.x * state.x + state.y * state.y);
     const speed = Math.sqrt(state.vx * state.vx + state.vy * state.vy);
 
-    if (speed < 0.1) return null; // Essentially stationary
+    if (speed < 1.0) return null; // Essentially stationary
 
     // Check if approaching (dot product of position and velocity is negative)
     const dot = state.x * state.vx + state.y * state.vy;

@@ -12,6 +12,7 @@ import { FFTProcessor } from '../audio/FFTProcessor';
 import { MelSpectrogram } from '../audio/MelSpectrogram';
 import { ModelManager } from './ModelManager';
 import { DOAEstimator } from '../detection/DOAEstimator';
+import { getTopSimilarDrones } from '../DroneDatabase';
 import { SEVERITY_THRESHOLDS, DRONE_FREQUENCY_RANGES } from '../../constants/micConfig';
 import type {
   AudioFrame,
@@ -132,7 +133,10 @@ export class AudioClassifierEngine {
     };
     this.onSpectralData?.(spectralData);
 
-    // Step 4: Accumulate mel frames in sliding window
+    // Step 4: Accumulate mel frames in sliding window (cap to prevent unbounded growth)
+    if (this.melBuffer.length > this.config.windowSizeFrames * 2) {
+      this.melBuffer = this.melBuffer.slice(-this.config.windowSizeFrames);
+    }
     this.melBuffer.push(normalizedMel);
 
     // Only run inference when we have enough frames
@@ -175,7 +179,7 @@ export class AudioClassifierEngine {
       preprocessTimeMs: totalTimeMs - inferenceTimeMs,
       totalTimeMs,
       modelVersion: this.model.info?.version || 'unknown',
-      delegate: 'CPU', // TODO: detect actual delegate
+      delegate: 'CPU',
     });
 
     // Step 8: Apply confidence threshold and temporal voting
@@ -193,9 +197,9 @@ export class AudioClassifierEngine {
     // Step 9: DOA bearing estimation
     // Only possible with stereo profile (channels=2) — interleaved L/R samples
     let bearing = 0;
-    if (this.doaChannels === 2 && frame.pcmData.length >= 512) {
+    if (this.doaChannels === 2 && frame.pcmData.length >= 512 && frame.pcmData.length % 2 === 0) {
       // De-interleave stereo: [L0,R0,L1,R1,...] → separate channels
-      const halfLen = Math.floor(frame.pcmData.length / 2);
+      const halfLen = frame.pcmData.length / 2;
       const leftCh = new Float32Array(halfLen);
       const rightCh = new Float32Array(halfLen);
       for (let i = 0; i < halfLen; i++) {
@@ -233,11 +237,12 @@ export class AudioClassifierEngine {
       severity,
       confidence: bestConfidence,
       distanceMeters: this.estimateDistance(bestCategory, frame.rmsLevel),
-      bearingDegrees: Math.round(bearing),
-      approachRate: Math.round(approachRate * 10) / 10,
+      bearingDegrees: isFinite(bearing) ? Math.round(bearing) : 0,
+      approachRate: isFinite(approachRate) ? Math.round(approachRate * 10) / 10 : 0,
       timestamp: frame.timestamp,
       spectralSignature: Array.from(normalizedMel),
       frequencyPeaks: peaks.map((p) => p.freq),
+      similarDrones: getTopSimilarDrones(bestCategory, 5),
     };
 
     this.onDetection?.(result);
@@ -333,8 +338,9 @@ export class AudioClassifierEngine {
     // Inverse square law: distance = 10^((refSPL - measuredSPL) / 20)
     const estimatedDistance = Math.pow(10, (refSPL - measuredSPL) / 20);
 
-    // Clamp to reasonable range
-    return Math.max(50, Math.min(5000, Math.round(estimatedDistance)));
+    // Clamp to reasonable range; guard against NaN/Infinity
+    const clamped = Math.max(50, Math.min(5000, Math.round(estimatedDistance)));
+    return isFinite(clamped) ? clamped : 500;
   }
 
   /**

@@ -27,12 +27,13 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
-import type { ThreatTrack, ThreatSeverity } from '../../types';
+import type { ThreatTrack, ThreatSeverity, RemoteIDData } from '../../types';
 
 interface TacticalRadarProps {
   size?: number;
   isActive: boolean;
   threats: ThreatTrack[];
+  bleDevices?: Record<string, RemoteIDData>;
   maxRange?: number; // Max display range in meters
 }
 
@@ -43,6 +44,7 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
   size = 280,
   isActive,
   threats,
+  bleDevices = {},
   maxRange = 2000,
 }) => {
   const theme = useTheme();
@@ -94,9 +96,28 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
           severity: latest.severity,
           category: latest.threatCategory,
           distance: latest.distanceMeters,
+          eta: track.predictedETA,
         };
       });
   }, [threats, radius, maxRange]);
+
+  // Calculate BLE device positions on radar (square dots)
+  const bleDots = useMemo(() => {
+    return Object.entries(bleDevices)
+      .filter(([, data]) => data.uavLatitude != null && data.uavLongitude != null && data.heading != null)
+      .map(([id, data]) => {
+        // Use heading for bearing, RSSI for approximate distance
+        const bearing = data.heading ?? 0;
+        const rssi = data.rssi ?? -70;
+        // Map RSSI (-30 to -100) to distance fraction (0.1 to 0.9)
+        const dist = Math.min(Math.max((-rssi - 30) / 70, 0.1), 0.9);
+        const radians = (bearing * Math.PI) / 180;
+        const x = dist * radius * 0.85 * Math.sin(radians);
+        const y = -dist * radius * 0.85 * Math.cos(radians);
+
+        return { id, x: radius + x, y: radius + y };
+      });
+  }, [bleDevices, radius]);
 
   const getSeverityColor = (severity: ThreatSeverity): string => {
     switch (severity) {
@@ -182,15 +203,46 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
 
       {/* Signal dots */}
       {threatDots.map((dot) => (
-        <Animated.View
-          key={dot.id}
+        <React.Fragment key={dot.id}>
+          <Animated.View
+            style={[
+              styles.threatDot,
+              {
+                left: dot.x - 6,
+                top: dot.y - 6,
+                backgroundColor: getSeverityColor(dot.severity),
+                shadowColor: getSeverityColor(dot.severity),
+              },
+            ]}
+          />
+          {dot.eta != null && dot.eta > 0 && (
+            <Text
+              style={[
+                styles.etaLabel,
+                {
+                  left: dot.x + 8,
+                  top: dot.y - 6,
+                  color: getSeverityColor(dot.severity),
+                },
+              ]}
+            >
+              {dot.eta < 60 ? `${Math.round(dot.eta)}s` : `${Math.round(dot.eta / 60)}m`}
+            </Text>
+          )}
+        </React.Fragment>
+      ))}
+
+      {/* BLE Remote ID dots (square) */}
+      {bleDots.map((dot) => (
+        <View
+          key={`ble-${dot.id}`}
           style={[
-            styles.threatDot,
+            styles.bleDot,
             {
-              left: dot.x - 6,
-              top: dot.y - 6,
-              backgroundColor: getSeverityColor(dot.severity),
-              shadowColor: getSeverityColor(dot.severity),
+              left: dot.x - 5,
+              top: dot.y - 5,
+              backgroundColor: theme.secondary,
+              borderColor: theme.primary,
             },
           ]}
         />
@@ -261,6 +313,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 8,
     elevation: 5,
+  },
+  etaLabel: {
+    position: 'absolute',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  bleDot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+    borderWidth: 1,
+    elevation: 4,
   },
   centerDot: {
     position: 'absolute',

@@ -58,6 +58,9 @@ export const ar: Translations = {
   noDetections: 'لا توجد اكتشافات مسجلة في هذه الجلسة.',
   startScanningHint: 'ابدأ الاستماع لاكتشاف الأنماط الصوتية.',
   total: 'المجموع',
+  todaysDetections: 'اليوم',
+  thisWeek: 'هذا الأسبوع',
+  avgConfidence: 'متوسط الثقة',
 
   settings: 'الإعدادات',
   displayTheme: 'سمة العرض',
@@ -197,4 +200,120 @@ export const ar: Translations = {
 
   acousticDisclaimer: 'تقدير بناءً على الخصائص الصوتية. قد يختلف الطائرة الفعلية.',
   similarDrones: 'طائرات مشابهة',
+
+  // Onboarding BLE
+  onboardingBLE: 'كشف الطائرات بالبلوتوث',
+  onboardingBLEDesc: 'فعّل مسح BLE للهوية عن بعد لاستقبال إشارات تعريف الطائرات المسيّرة القريبة. يتطلب إذن البلوتوث.',
+  onboardingBLESkip: 'المتابعة بدون بلوتوث',
+
+  // Export
+  exportData: 'تصدير البيانات',
+  exportCSV: 'تصدير كـ CSV',
+  exportJSON: 'تصدير كـ JSON',
+  exportSuccess: 'تم التصدير بنجاح!',
+
+  // BLE Remote ID
+  bleScan: 'مسح BLE للهوية عن بعد',
+  bleScanDesc: 'مسح إشارات الهوية عن بعد للطائرات بدون طيار عبر البلوتوث',
+  bleEnabled: 'مسح BLE مفعّل',
+  bleDisabled: 'مسح BLE معطّل',
+  bleUnavailable: 'البلوتوث غير متاح',
+  bleRemoteID: 'الهوية عن بعد',
+  bleDeviceFound: 'تم العثور على طائرة BLE',
+  bleSerialNumber: 'الرقم التسلسلي',
+  bleOperatorLocation: 'موقع المشغّل',
+  bleNoDevices: 'لم يتم العثور على أجهزة BLE',
+
+  // Map
+  mapTab: 'خريطة',
+  mapTitle: 'خريطة الطائرات المسيرة',
+  mapNoLocation: 'الموقع غير متاح',
+  mapAcousticRadius: 'نطاق الكشف الصوتي',
+  mapFusedDetection: 'كشف مدمج',
+  mapBLEDevice: 'جهاز BLE',
+  mapOperator: 'المشغل',
+  mapAltitude: 'الارتفاع',
+  mapSpeed: 'السرعة',
+  mapHeading: 'الاتجاه',
+  mapSerial: 'الرقم التسلسلي',
+  mapNoDetections: 'لم يتم اكتشاف طائرات مسيرة',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'مطلوب الوصول إلى الميكروفون لاكتشاف الطائرات بدون طيار. بدونه، لا يمكن للتطبيق العمل.',
+  micPermissionGranted: '✓ تم منح الوصول إلى الميكروفون',
+  micPermissionBlockedDesc: 'يستخدم DroneEar الميكروفون لاكتشاف التوقيعات الصوتية للطائرات بدون طيار. لا يمكن للتطبيق العمل بدون الوصول إلى الميكروفون.',
+  tryAgain: 'حاول مرة أخرى',
+  continueWithout: 'المتابعة بدون ميكروفون',
+  track: 'تتبع',
+  dismiss: 'تجاهل',
+  frequency: 'التردد',
+  detectionDetails: 'تفاصيل الكشف',
+  acousticSignature: 'البصمة الصوتية',
+  viewOnMap: 'عرض على الخريطة',
+
+  // Error Boundary
+  systemError: 'خطأ في النظام',
+  unexpectedError: 'حدث خطأ غير متوقع.',
+  restart: 'إعادة التشغيل',
+
+  // Tab Navigation
+  tabScan: 'مسح',
+  tabMap: 'خريطة',
+  tabLog: 'سجل',
+  tabSet: 'إعدادات',
+  tabGuide: 'دليل',
+  tabScanDesc: 'شاشة مسح الطائرات',
+  tabMapDesc: 'عرض خريطة الطائرات',
+  tabLogDesc: 'سجل الكشف',
+
+  // Map
+  active: 'نشط',
+  close: 'إغلاق',
+
+  // Settings sections
+  appearance: 'المظهر',
+  aboutSection: 'حول',
+  profileSection: 'الملف الشخصي',
+  modelLabel: 'النموذج',
+  quantizationLabel: 'التكميم',
+  classesLabel: 'الفئات',
+  patternsCount: '6 أنماط',
+  resetOnboarding: 'إعادة تعيين المقدمة',
+
+  // History
+  historyTab: 'السجل',
+  noFilterResults: 'لا توجد اكتشافات لهذا المرشح',
+  meters: 'متر',
+
+  // Onboarding extra
+  welcome: 'مرحباً',
+  acousticDroneDetection: 'الكشف الصوتي عن الطائرات',
+  stepOf: (step: number, total: number) => `الخطوة ${step} من ${total}`,
+  allow: 'السماح',
+  selectDevice: 'اختر الجهاز',
+  continueBtn: 'متابعة',
+  speakOrMakeSound: 'تحدث أو أصدر صوتاً',
+  listeningTest: 'جارٍ الاستماع...',
+  detectControllersDesc: 'اكتشاف أجهزة التحكم القريبة',
+  enableBLE: 'تفعيل',
+  startScanningBtn: 'بدء المسح',
+
+  // Tracking overlay
+  tracking: 'تتبع',
+  closeTracking: 'إغلاق التتبع',
+
+  // Index screen extras
+  permissionBlocked: 'الإذن محظور',
+  micAccessRequired: 'مطلوب الوصول\nإلى الميكروفون',
+  howToEnable: 'كيفية التفعيل:',
+  permStep1: '1. افتح الإعدادات',
+  permStep2: '2. ابحث عن DroneEar',
+  permStep3: '3. فعّل الميكروفون',
+  loadingAcousticModel: 'جارٍ تحميل نموذج التحليل الصوتي...',
+  engineError: 'خطأ في المحرك',
+  engineErrorDesc: 'فشل في تهيئة محرك التحليل الصوتي. تحقق من أذونات الميكروفون وحاول مرة أخرى.',
+  retry: 'إعادة المحاولة',
+  stereo: 'ستيريو',
+  similarModels: 'نماذج مشابهة',
+  loadingDefault: 'جارٍ التحميل...',
 };

@@ -28,6 +28,7 @@ export interface SensorState {
   compass: SensorStatus;
   stereo: SensorStatus;
   recording: SensorStatus;
+  bluetooth: SensorStatus;
 }
 
 export interface SensorIssue {
@@ -56,6 +57,7 @@ export class SensorEnforcementManager {
     compass: 'UNAVAILABLE',
     stereo: 'UNAVAILABLE',
     recording: 'UNAVAILABLE',
+    bluetooth: 'UNAVAILABLE',
   };
 
   private compassData: CompassData = { heading: 0, accuracy: 0, available: false };
@@ -179,6 +181,18 @@ export class SensorEnforcementManager {
   }
 
   /**
+   * Update BLE scanner state.
+   */
+  setBLEState(available: boolean, scanning: boolean): void {
+    if (!available) {
+      this.sensorState.bluetooth = 'UNAVAILABLE';
+    } else {
+      this.sensorState.bluetooth = scanning ? 'OK' : 'DEGRADED';
+    }
+    this.emitState();
+  }
+
+  /**
    * Get current compass heading (for AudioClassifier).
    */
   getCompassHeading(): number {
@@ -218,6 +232,10 @@ export class SensorEnforcementManager {
 
     if (this.sensorState.recording === 'UNAVAILABLE') {
       issues.push({ sensor: 'recording', status: 'UNAVAILABLE', message: 'Recording stopped unexpectedly.', action: 'RETRY', severity: 'CRITICAL' });
+    }
+
+    if (this.sensorState.bluetooth === 'UNAVAILABLE') {
+      issues.push({ sensor: 'bluetooth', status: 'UNAVAILABLE', message: 'Bluetooth unavailable. BLE Remote ID scanning disabled.', action: 'SETTINGS', severity: 'MEDIUM' });
     }
 
     return issues;
@@ -297,8 +315,8 @@ export class SensorEnforcementManager {
   // ===== Escalating Alarm System =====
 
   private startEscalatingAlarm(key: string, issue: SensorIssue): void {
-    // Don't duplicate
-    if (this.alarmTimers.has(key)) return;
+    // Clear any existing alarm for this key before starting a new one
+    this.clearAlarm(key);
 
     const level = 0;
     this.alarmEscalation.set(key, level);
@@ -309,7 +327,7 @@ export class SensorEnforcementManager {
     // Set escalating timer
     const scheduleNext = () => {
       const currentLevel = this.alarmEscalation.get(key) || 0;
-      const interval = ALARM_INTERVALS[Math.min(currentLevel, ALARM_INTERVALS.length - 1)];
+      const interval = ALARM_INTERVALS[Math.min(currentLevel, ALARM_INTERVALS.length - 1)] || 60000;
 
       const timer = setTimeout(() => {
         // Check if still relevant
@@ -340,9 +358,11 @@ export class SensorEnforcementManager {
   }
 
   private clearAllAlarms(): void {
-    for (const [key] of this.alarmTimers) {
-      this.clearAlarm(key);
+    for (const [, timer] of this.alarmTimers) {
+      clearTimeout(timer);
     }
+    this.alarmTimers.clear();
+    this.alarmEscalation.clear();
   }
 
   // ===== Emit =====

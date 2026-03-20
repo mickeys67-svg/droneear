@@ -421,7 +421,8 @@ export class ModelManager {
       totalFlux += frameFlux;
     }
 
-    return totalFlux / (frames.length - 1) / numBins;
+    const flux = totalFlux / (frames.length - 1) / numBins;
+    return isFinite(flux) ? flux : 0;
   }
 
   // ===== Feature: Temporal Modulation =====
@@ -685,7 +686,7 @@ export class ModelManager {
     const expScores = new Map<ThreatCategory, number>();
 
     for (const [cat, score] of scores) {
-      const exp = Math.exp((score - maxScore) * temperature);
+      const exp = Math.exp(Math.max(-500, Math.min(500, (score - maxScore) * temperature)));
       expScores.set(cat, exp);
       expSum += exp;
     }

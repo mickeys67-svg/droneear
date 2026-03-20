@@ -57,6 +57,9 @@ export const es: Translations = {
   noDetections: 'Sin detecciones registradas en esta sesión.',
   startScanningHint: 'Inicie la escucha para detectar patrones acústicos.',
   total: 'Total',
+  todaysDetections: 'Hoy',
+  thisWeek: 'Esta Semana',
+  avgConfidence: 'Conf. Prom.',
 
   settings: 'Ajustes',
   displayTheme: 'Tema de pantalla',
@@ -194,4 +197,120 @@ export const es: Translations = {
 
   acousticDisclaimer: 'Estimación basada en características acústicas. La aeronave real puede diferir.',
   similarDrones: 'Drones similares',
+
+  // Onboarding BLE
+  onboardingBLE: 'Detección de drones por Bluetooth',
+  onboardingBLEDesc: 'Active el escaneo BLE Remote ID para recibir señales de identificación de drones cercanos. Se requiere permiso de Bluetooth.',
+  onboardingBLESkip: 'Continuar sin Bluetooth',
+
+  // Export
+  exportData: 'Exportar datos',
+  exportCSV: 'Exportar como CSV',
+  exportJSON: 'Exportar como JSON',
+  exportSuccess: '¡Exportación completada!',
+
+  // BLE Remote ID
+  bleScan: 'Escaneo BLE Remote ID',
+  bleScanDesc: 'Escanear señales Remote ID de drones por Bluetooth',
+  bleEnabled: 'Escaneo BLE activado',
+  bleDisabled: 'Escaneo BLE desactivado',
+  bleUnavailable: 'Bluetooth no disponible',
+  bleRemoteID: 'Remote ID',
+  bleDeviceFound: 'Dron BLE encontrado',
+  bleSerialNumber: 'Número de serie',
+  bleOperatorLocation: 'Ubicación del operador',
+  bleNoDevices: 'No se encontraron dispositivos BLE',
+
+  // Map
+  mapTab: 'MAPA',
+  mapTitle: 'Mapa de Drones',
+  mapNoLocation: 'Ubicación no disponible',
+  mapAcousticRadius: 'Radio de detección acústica',
+  mapFusedDetection: 'Detección Fusionada',
+  mapBLEDevice: 'Dispositivo BLE',
+  mapOperator: 'Operador',
+  mapAltitude: 'Altitud',
+  mapSpeed: 'Velocidad',
+  mapHeading: 'Rumbo',
+  mapSerial: 'Serie',
+  mapNoDetections: 'No se detectaron drones',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'Se requiere acceso al micrófono para la detección de drones. Sin él, la app no puede funcionar.',
+  micPermissionGranted: '✓ Acceso al micrófono concedido',
+  micPermissionBlockedDesc: 'DroneEar usa tu micrófono para detectar firmas acústicas de drones. La app no puede funcionar sin acceso al micrófono.',
+  tryAgain: 'REINTENTAR',
+  continueWithout: 'Continuar sin micrófono',
+  track: 'SEGUIR',
+  dismiss: 'DESCARTAR',
+  frequency: 'Frecuencia',
+  detectionDetails: 'Detalles de detección',
+  acousticSignature: 'Firma acústica',
+  viewOnMap: 'VER EN MAPA',
+
+  // Error Boundary
+  systemError: 'Error del sistema',
+  unexpectedError: 'Se produjo un error inesperado.',
+  restart: 'REINICIAR',
+
+  // Tab Navigation
+  tabScan: 'ESCAN',
+  tabMap: 'MAPA',
+  tabLog: 'REG',
+  tabSet: 'AJUST',
+  tabGuide: 'GUÍA',
+  tabScanDesc: 'Pantalla de escaneo de drones',
+  tabMapDesc: 'Vista del mapa de drones',
+  tabLogDesc: 'Registro de detecciones',
+
+  // Map
+  active: 'ACTIVO',
+  close: 'Cerrar',
+
+  // Settings sections
+  appearance: 'APARIENCIA',
+  aboutSection: 'ACERCA DE',
+  profileSection: 'PERFIL',
+  modelLabel: 'Modelo',
+  quantizationLabel: 'Cuantización',
+  classesLabel: 'Clases',
+  patternsCount: '6 patrones',
+  resetOnboarding: 'Reiniciar introducción',
+
+  // History
+  historyTab: 'HISTORIAL',
+  noFilterResults: 'Sin detecciones para este filtro',
+  meters: 'metros',
+
+  // Onboarding extra
+  welcome: 'Bienvenido',
+  acousticDroneDetection: 'Detección acústica de drones',
+  stepOf: (step: number, total: number) => `Paso ${step} de ${total}`,
+  allow: 'PERMITIR',
+  selectDevice: 'Seleccionar dispositivo',
+  continueBtn: 'CONTINUAR',
+  speakOrMakeSound: 'Hable o haga un sonido',
+  listeningTest: 'ESCUCHANDO...',
+  detectControllersDesc: 'Detectar controladores de drones cercanos',
+  enableBLE: 'ACTIVAR',
+  startScanningBtn: 'INICIAR ESCANEO',
+
+  // Tracking overlay
+  tracking: 'RASTREANDO',
+  closeTracking: 'Cerrar rastreo',
+
+  // Index screen extras
+  permissionBlocked: 'Permiso bloqueado',
+  micAccessRequired: 'Acceso al micrófono\nrequerido',
+  howToEnable: 'Cómo activar:',
+  permStep1: '1. Abrir Ajustes',
+  permStep2: '2. Buscar DroneEar',
+  permStep3: '3. Activar micrófono',
+  loadingAcousticModel: 'Cargando modelo de análisis acústico...',
+  engineError: 'Error del motor',
+  engineErrorDesc: 'No se pudo inicializar el motor de análisis de audio. Verifique los permisos del micrófono e intente nuevamente.',
+  retry: 'REINTENTAR',
+  stereo: 'ESTÉREO',
+  similarModels: 'MODELOS SIMILARES',
+  loadingDefault: 'Cargando...',
 };

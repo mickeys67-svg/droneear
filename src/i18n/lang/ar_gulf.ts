@@ -58,6 +58,9 @@ export const ar_gulf: Translations = {
   noDetections: 'ما في اكتشافات بهالجلسة.',
   startScanningHint: 'ابدأ الاستماع عشان تكتشف الأنماط الصوتية.',
   total: 'المجموع',
+  todaysDetections: 'اليوم',
+  thisWeek: 'هالأسبوع',
+  avgConfidence: 'متوسط الثقة',
 
   settings: 'الإعدادات',
   displayTheme: 'شكل الشاشة',
@@ -197,4 +200,120 @@ export const ar_gulf: Translations = {
 
   acousticDisclaimer: 'تقدير على أساس الخصائص الصوتية. الطائرة الفعلية ممكن تختلف.',
   similarDrones: 'طائرات مشابهة',
+
+  // Onboarding BLE
+  onboardingBLE: 'كشف الدرونز بالبلوتوث',
+  onboardingBLEDesc: 'شغّل مسح BLE للهوية عن بعد عشان تستقبل إشارات تعريف الدرونز القريبة. يبي إذن البلوتوث.',
+  onboardingBLESkip: 'كمّل بدون بلوتوث',
+
+  // Export
+  exportData: 'تصدير البيانات',
+  exportCSV: 'تصدير كـ CSV',
+  exportJSON: 'تصدير كـ JSON',
+  exportSuccess: 'تم التصدير بنجاح!',
+
+  // BLE Remote ID
+  bleScan: 'مسح BLE للهوية عن بعد',
+  bleScanDesc: 'مسح إشارات الهوية عن بعد للدرونز عبر البلوتوث',
+  bleEnabled: 'مسح BLE شغّال',
+  bleDisabled: 'مسح BLE مطفي',
+  bleUnavailable: 'البلوتوث مو متاح',
+  bleRemoteID: 'الهوية عن بعد',
+  bleDeviceFound: 'لقينا درون BLE',
+  bleSerialNumber: 'الرقم التسلسلي',
+  bleOperatorLocation: 'موقع المشغّل',
+  bleNoDevices: 'ما لقينا أجهزة BLE',
+
+  // Map
+  mapTab: 'خريطة',
+  mapTitle: 'خريطة الدرون',
+  mapNoLocation: 'الموقع مو متاح',
+  mapAcousticRadius: 'نطاق الكشف الصوتي',
+  mapFusedDetection: 'كشف مدمج',
+  mapBLEDevice: 'جهاز BLE',
+  mapOperator: 'المشغّل',
+  mapAltitude: 'الارتفاع',
+  mapSpeed: 'السرعة',
+  mapHeading: 'الاتجاه',
+  mapSerial: 'الرقم التسلسلي',
+  mapNoDetections: 'ما تم اكتشاف درون',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'مطلوب صلاحية المايكروفون لكشف الدرونات. بدونه ما يقدر التطبيق يشتغل.',
+  micPermissionGranted: '✓ تم السماح بالمايكروفون',
+  micPermissionBlockedDesc: 'DroneEar يستخدم المايكروفون لكشف أصوات الدرونات. ما يقدر يشتغل بدون صلاحية المايكروفون.',
+  tryAgain: 'حاول مرة ثانية',
+  continueWithout: 'كمل بدون مايكروفون',
+  track: 'تتبع',
+  dismiss: 'تجاهل',
+  frequency: 'التردد',
+  detectionDetails: 'تفاصيل الكشف',
+  acousticSignature: 'البصمة الصوتية',
+  viewOnMap: 'عرض على الخريطة',
+
+  // Error Boundary
+  systemError: 'خطأ بالنظام',
+  unexpectedError: 'صار خطأ ما كان متوقع.',
+  restart: 'إعادة التشغيل',
+
+  // Tab Navigation
+  tabScan: 'مسح',
+  tabMap: 'خريطة',
+  tabLog: 'سجل',
+  tabSet: 'إعدادات',
+  tabGuide: 'دليل',
+  tabScanDesc: 'شاشة مسح الطائرات',
+  tabMapDesc: 'عرض خريطة الطائرات',
+  tabLogDesc: 'سجل الكشف',
+
+  // Map
+  active: 'نشط',
+  close: 'إغلاق',
+
+  // Settings sections
+  appearance: 'المظهر',
+  aboutSection: 'عن التطبيق',
+  profileSection: 'البروفايل',
+  modelLabel: 'النموذج',
+  quantizationLabel: 'التكميم',
+  classesLabel: 'الفئات',
+  patternsCount: '6 أنماط',
+  resetOnboarding: 'إعادة تعيين المقدمة',
+
+  // History
+  historyTab: 'السجل',
+  noFilterResults: 'ما في اكتشافات لهالفلتر',
+  meters: 'متر',
+
+  // Onboarding extra
+  welcome: 'أهلاً وسهلاً',
+  acousticDroneDetection: 'كشف صوتي عن الطائرات',
+  stepOf: (step: number, total: number) => `الخطوة ${step} من ${total}`,
+  allow: 'السماح',
+  selectDevice: 'اختر الجهاز',
+  continueBtn: 'متابعة',
+  speakOrMakeSound: 'تكلم أو سوّ صوت',
+  listeningTest: 'نسمع...',
+  detectControllersDesc: 'كشف أجهزة التحكم القريبة',
+  enableBLE: 'تفعيل',
+  startScanningBtn: 'ابدأ المسح',
+
+  // Tracking overlay
+  tracking: 'تتبع',
+  closeTracking: 'إغلاق التتبع',
+
+  // Index screen extras
+  permissionBlocked: 'الإذن محظور',
+  micAccessRequired: 'مطلوب الوصول\nللميكروفون',
+  howToEnable: 'طريقة التفعيل:',
+  permStep1: '1. افتح الإعدادات',
+  permStep2: '2. دوّر على DroneEar',
+  permStep3: '3. فعّل الميكروفون',
+  loadingAcousticModel: 'يحمّل نموذج التحليل الصوتي...',
+  engineError: 'خطأ بالمحرك',
+  engineErrorDesc: 'ما قدر يشتغل محرك التحليل الصوتي. تأكد من أذونات الميكروفون وحاول مرة ثانية.',
+  retry: 'حاول مرة ثانية',
+  stereo: 'ستيريو',
+  similarModels: 'نماذج مشابهة',
+  loadingDefault: 'يحمّل...',
 };

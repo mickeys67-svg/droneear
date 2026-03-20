@@ -57,6 +57,9 @@ export const ja: Translations = {
   noDetections: 'このセッションで検知記録はありません。',
   startScanningHint: 'リスニングを開始して音響パターンを検知してください。',
   total: '合計',
+  todaysDetections: '今日',
+  thisWeek: '今週',
+  avgConfidence: '平均信頼度',
 
   settings: '設定',
   displayTheme: '表示テーマ',
@@ -194,4 +197,120 @@ export const ja: Translations = {
 
   acousticDisclaimer: '音響特性に基づく推定です。実際の機体とは異なる場合があります。',
   similarDrones: '類似ドローン',
+
+  // Onboarding BLE
+  onboardingBLE: 'Bluetoothドローン検出',
+  onboardingBLEDesc: 'BLEリモートIDスキャンを有効にして、近くのドローン識別信号を受信します。Bluetoothの許可が必要です。',
+  onboardingBLESkip: 'Bluetoothなしで続行',
+
+  // Export
+  exportData: 'データをエクスポート',
+  exportCSV: 'CSVでエクスポート',
+  exportJSON: 'JSONでエクスポート',
+  exportSuccess: 'エクスポート完了！',
+
+  // BLE Remote ID
+  bleScan: 'BLEリモートIDスキャン',
+  bleScanDesc: 'BluetoothでドローンのリモートID信号をスキャン',
+  bleEnabled: 'BLEスキャン有効',
+  bleDisabled: 'BLEスキャン無効',
+  bleUnavailable: 'Bluetoothが利用できません',
+  bleRemoteID: 'リモートID',
+  bleDeviceFound: 'BLEドローン発見',
+  bleSerialNumber: 'シリアル番号',
+  bleOperatorLocation: '操縦者の位置',
+  bleNoDevices: 'BLEデバイスが見つかりません',
+
+  // Map
+  mapTab: '地図',
+  mapTitle: 'ドローンマップ',
+  mapNoLocation: '位置情報が利用できません',
+  mapAcousticRadius: '音響検知半径',
+  mapFusedDetection: '統合検知',
+  mapBLEDevice: 'BLEデバイス',
+  mapOperator: 'オペレーター',
+  mapAltitude: '高度',
+  mapSpeed: '速度',
+  mapHeading: '方位',
+  mapSerial: 'シリアル',
+  mapNoDetections: 'ドローンは検出されていません',
+
+  // Mic Permission & Detection Details
+  micPermissionDenied: 'ドローン検出にはマイクへのアクセスが必要です。マイクなしではアプリは動作できません。',
+  micPermissionGranted: '✓ マイクアクセスが許可されました',
+  micPermissionBlockedDesc: 'DroneEarはマイクを使用してドローンの音響シグネチャを検出します。マイクアクセスなしではアプリは動作できません。',
+  tryAgain: '再試行',
+  continueWithout: 'マイクなしで続行',
+  track: '追跡',
+  dismiss: '無視',
+  frequency: '周波数',
+  detectionDetails: '検出詳細',
+  acousticSignature: '音響シグネチャ',
+  viewOnMap: 'マップで表示',
+
+  // Error Boundary
+  systemError: 'システムエラー',
+  unexpectedError: '予期しないエラーが発生しました。',
+  restart: '再起動',
+
+  // Tab Navigation
+  tabScan: 'スキャン',
+  tabMap: 'マップ',
+  tabLog: 'ログ',
+  tabSet: '設定',
+  tabGuide: 'ガイド',
+  tabScanDesc: 'ドローンスキャン画面',
+  tabMapDesc: 'ドローンマップ表示',
+  tabLogDesc: '検出履歴ログ',
+
+  // Map
+  active: 'アクティブ',
+  close: '閉じる',
+
+  // Settings sections
+  appearance: '外観',
+  aboutSection: 'アプリについて',
+  profileSection: 'プロファイル',
+  modelLabel: 'モデル',
+  quantizationLabel: '量子化',
+  classesLabel: 'クラス',
+  patternsCount: '6パターン',
+  resetOnboarding: 'オンボーディングをリセット',
+
+  // History
+  historyTab: '履歴',
+  noFilterResults: 'このフィルターでの検出はありません',
+  meters: 'メートル',
+
+  // Onboarding extra
+  welcome: 'ようこそ',
+  acousticDroneDetection: '音響ドローン検出',
+  stepOf: (step: number, total: number) => `ステップ${step}/${total}`,
+  allow: '許可',
+  selectDevice: 'デバイスを選択',
+  continueBtn: '続行',
+  speakOrMakeSound: '話すか音を出してください',
+  listeningTest: 'リスニング中...',
+  detectControllersDesc: '近くのドローンコントローラーを検出',
+  enableBLE: '有効化',
+  startScanningBtn: 'スキャン開始',
+
+  // Tracking overlay
+  tracking: '追跡中',
+  closeTracking: '追跡を閉じる',
+
+  // Index screen extras
+  permissionBlocked: '権限がブロックされました',
+  micAccessRequired: 'マイクへの\nアクセスが必要です',
+  howToEnable: '有効にする方法：',
+  permStep1: '1. 設定を開く',
+  permStep2: '2. DroneEarを探す',
+  permStep3: '3. マイクを有効にする',
+  loadingAcousticModel: '音響分析モデルを読み込み中...',
+  engineError: 'エンジンエラー',
+  engineErrorDesc: 'オーディオ分析エンジンの初期化に失敗しました。マイクの権限を確認して再試行してください。',
+  retry: '再試行',
+  stereo: 'ステレオ',
+  similarModels: '類似モデル',
+  loadingDefault: '読み込み中...',
 };

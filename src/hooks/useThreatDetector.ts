@@ -1,16 +1,13 @@
 /**
- * React hook for the DroneMonitor system — v4.0
+ * React hook for the DroneMonitor system — v5.0
  *
- * Major upgrades:
- * - SensorEnforcementManager integration (compass, mic monitoring, alarms)
- * - Real PCM data passed to MicQualityMonitor (fixes broken monitoring)
- * - Compass heading wired to AudioClassifier for DOA
- * - Recording error recovery with user notification
- * - Sensor status exposed to UI for enforcement indicators
+ * v5.0: BLE Remote ID scanning integration
+ * v4.0: SensorEnforcementManager, MicQualityMonitor, compass DOA, error recovery
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { ThreatDetector } from '../core/detection/ThreatDetector';
+import { DetectionFusionEngine } from '../core/detection/DetectionFusionEngine';
 import { VoiceAlertManager } from '../core/audio/VoiceAlertManager';
 import { MicQualityMonitor } from '../core/audio/MicQualityMonitor';
 import { SensorEnforcementManager, type SensorState, type SensorIssue } from '../core/sensors/SensorEnforcementManager';
@@ -19,10 +16,13 @@ import { getTranslation } from '../i18n/translations';
 import { useDetectionStore } from '../stores/detectionStore';
 import { useHistoryStore } from '../stores/historyStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { useBLEScanner } from './useBLEScanner';
 import { DEVICE_PROFILES } from '../constants/micConfig';
 import type { DeviceProfile, DetectionSession } from '../types';
+import { AppState, type AppStateStatus } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Battery from 'expo-battery';
+import * as Location from 'expo-location';
 
 export function useThreatDetector() {
   const detectorRef = useRef<ThreatDetector | null>(null);
@@ -30,6 +30,8 @@ export function useThreatDetector() {
   const micMonitorRef = useRef<MicQualityMonitor>(new MicQualityMonitor());
   const sensorMgrRef = useRef<SensorEnforcementManager>(new SensorEnforcementManager());
   const envDetectorRef = useRef<EnvironmentDetector>(new EnvironmentDetector());
+  const fusionEngineRef = useRef<DetectionFusionEngine>(new DetectionFusionEngine());
+  const locationSubRef = useRef<Location.LocationSubscription | null>(null);
   const isInitializedRef = useRef(false);
   const batteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const statusIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -37,7 +39,7 @@ export function useThreatDetector() {
 
   // Sensor status state (exposed to UI)
   const [sensorState, setSensorState] = useState<SensorState>({
-    microphone: 'UNAVAILABLE', compass: 'UNAVAILABLE', stereo: 'UNAVAILABLE', recording: 'UNAVAILABLE',
+    microphone: 'UNAVAILABLE', compass: 'UNAVAILABLE', stereo: 'UNAVAILABLE', recording: 'UNAVAILABLE', bluetooth: 'UNAVAILABLE',
   });
   const [sensorIssues, setSensorIssues] = useState<SensorIssue[]>([]);
 
@@ -52,13 +54,20 @@ export function useThreatDetector() {
     setScanning, addDetection, setAudioLevel, setSpectralData,
     setInferenceTime, acknowledgeDetection, clearThreats,
     setBatteryLevel, setMicQuality, setFeedbackPending,
+    setFusedDetections, fusedDetections,
   } = useDetectionStore();
 
   const { addDetection: addToHistory, startSession, endSession } = useHistoryStore();
 
   const {
-    profile, confidenceThreshold, alertVibration, alertSound, voiceAlert, locale,
+    profile, confidenceThreshold, alertVibration, alertSound, voiceAlert, locale, bleScanEnabled,
   } = useSettingsStore();
+
+  // BLE Remote ID Scanner
+  const {
+    bleAvailable, bleScanActive, bleDevices, bleDeviceCount,
+    startBLE, stopBLE,
+  } = useBLEScanner();
 
   // ===== Sync settings =====
   useEffect(() => { voiceRef.current.setLocale(locale); }, [locale]);
@@ -174,10 +183,73 @@ export function useThreatDetector() {
       voiceRef.current.dispose();
       sensorMgr.dispose();
       envDetector.dispose();
-      if (batteryIntervalRef.current) clearInterval(batteryIntervalRef.current);
-      if (statusIntervalRef.current) clearInterval(statusIntervalRef.current);
-      if (envVoiceIntervalRef.current) clearInterval(envVoiceIntervalRef.current);
+      if (locationSubRef.current) {
+        locationSubRef.current.remove();
+        locationSubRef.current = null;
+      }
+      if (batteryIntervalRef.current) { clearInterval(batteryIntervalRef.current); batteryIntervalRef.current = null; }
+      if (statusIntervalRef.current) { clearInterval(statusIntervalRef.current); statusIntervalRef.current = null; }
+      if (envVoiceIntervalRef.current) { clearInterval(envVoiceIntervalRef.current); envVoiceIntervalRef.current = null; }
     };
+  }, []);
+
+  // ===== AppState: pause scanning on background, resume on foreground =====
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const wasScanningRef = useRef(false);
+
+  useEffect(() => {
+    const handleAppState = (nextState: AppStateStatus) => {
+      if (appStateRef.current.match(/active/) && nextState.match(/inactive|background/)) {
+        // Going to background — pause intervals to save battery
+        if (useDetectionStore.getState().isScanning) {
+          wasScanningRef.current = true;
+          if (batteryIntervalRef.current) { clearInterval(batteryIntervalRef.current); batteryIntervalRef.current = null; }
+          if (statusIntervalRef.current) { clearInterval(statusIntervalRef.current); statusIntervalRef.current = null; }
+          if (envVoiceIntervalRef.current) { clearInterval(envVoiceIntervalRef.current); envVoiceIntervalRef.current = null; }
+        }
+      } else if (nextState === 'active' && wasScanningRef.current) {
+        // Resuming from background — restart intervals only if not already running
+        wasScanningRef.current = false;
+        if (!batteryIntervalRef.current) {
+          batteryIntervalRef.current = setInterval(async () => {
+            try {
+              const level = await Battery.getBatteryLevelAsync();
+              const pct = Math.round(level * 100);
+              useDetectionStore.getState().setBatteryLevel(pct);
+              if (pct < 20 && detectorRef.current) {
+                detectorRef.current.setFrameSkipRate(4);
+              }
+            } catch (err) {
+              console.warn('[DroneMonitor] Battery check failed:', err);
+            }
+          }, 60000);
+        }
+        if (!statusIntervalRef.current) {
+          statusIntervalRef.current = setInterval(() => {
+            const threats = useDetectionStore.getState().currentThreats;
+            const active = threats.filter((t) => t.isActive).length;
+            voiceRef.current.announceStatus(active);
+          }, 30000);
+        }
+        if (!envVoiceIntervalRef.current) {
+          envVoiceIntervalRef.current = setInterval(() => {
+            const env = envDetectorRef.current?.getState?.();
+            if (!env) return;
+            const currentLocale = useSettingsStore.getState().locale;
+            const tr = getTranslation(currentLocale);
+            if (env.environment === 'INDOOR') {
+              voiceRef.current.enqueueCustom(tr.indoorWarningVoice, 2);
+            } else if (env.detectionCapability < 40) {
+              voiceRef.current.enqueueCustom(tr.accuracyDegradedVoice, 3);
+            }
+          }, 30000);
+        }
+      }
+      appStateRef.current = nextState;
+    };
+
+    const sub = AppState.addEventListener('change', handleAppState);
+    return () => sub.remove();
   }, []);
 
   // Update profile
@@ -191,9 +263,20 @@ export function useThreatDetector() {
     detectorRef.current?.setConfidenceThreshold(confidenceThreshold);
   }, [confidenceThreshold]);
 
+  // ===== Acoustic + BLE Fusion =====
+  useEffect(() => {
+    if (!isScanning || Object.keys(bleDevices).length === 0 || currentThreats.length === 0) {
+      return;
+    }
+
+    const fused = fusionEngineRef.current.fuse(currentThreats, bleDevices);
+    setFusedDetections(fused);
+  }, [currentThreats, bleDevices, isScanning]);
+
   // ===== Scan control =====
   const startScanning = useCallback(async () => {
-    if (!detectorRef.current || !isInitializedRef.current) return;
+    if (isScanning || !isInitializedRef.current) return;
+    if (!detectorRef.current) return;
 
     const battLevel = await Battery.getBatteryLevelAsync();
     const battPercent = Math.round(battLevel * 100);
@@ -225,10 +308,41 @@ export function useThreatDetector() {
     detectorRef.current.startScanning();
     setScanning(true);
 
+    // Start BLE Remote ID scanning if enabled
+    if (bleScanEnabled && bleAvailable) {
+      const bleStarted = await startBLE();
+      sensorMgrRef.current.setBLEState(bleAvailable, bleStarted);
+    } else {
+      sensorMgrRef.current.setBLEState(bleAvailable, false);
+    }
+
     voiceRef.current.announceScanStart();
+
+    // Start location watch for fusion engine
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        locationSubRef.current = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.High, distanceInterval: 5 },
+          (loc) => {
+            fusionEngineRef.current.setUserPosition({
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+            });
+          },
+        );
+      }
+    } catch (e) {
+      console.warn('[DroneMonitor] Location watch failed:', e);
+    }
 
     // Start environment detection
     await envDetectorRef.current.start();
+
+    // Clear any existing intervals before creating new ones
+    if (batteryIntervalRef.current) clearInterval(batteryIntervalRef.current);
+    if (statusIntervalRef.current) clearInterval(statusIntervalRef.current);
+    if (envVoiceIntervalRef.current) clearInterval(envVoiceIntervalRef.current);
 
     // Periodic environment voice warnings (every 30s if indoor/degraded)
     envVoiceIntervalRef.current = setInterval(() => {
@@ -243,15 +357,19 @@ export function useThreatDetector() {
       }
     }, 30000);
 
-    // Battery monitoring
+    // Battery monitoring (60s interval — battery changes slowly)
     batteryIntervalRef.current = setInterval(async () => {
-      const level = await Battery.getBatteryLevelAsync();
-      const pct = Math.round(level * 100);
-      setBatteryLevel(pct);
-      if (pct < 20 && detectorRef.current) {
-        detectorRef.current.setFrameSkipRate(4);
+      try {
+        const level = await Battery.getBatteryLevelAsync();
+        const pct = Math.round(level * 100);
+        setBatteryLevel(pct);
+        if (pct < 20 && detectorRef.current) {
+          detectorRef.current.setFrameSkipRate(4);
+        }
+      } catch (err) {
+        console.warn('[DroneMonitor] Battery check failed:', err);
       }
-    }, 30000);
+    }, 60000);
 
     // Periodic voice status
     statusIntervalRef.current = setInterval(() => {
@@ -259,7 +377,7 @@ export function useThreatDetector() {
       const active = threats.filter((t) => t.isActive).length;
       voiceRef.current.announceStatus(active);
     }, 30000);
-  }, [profile]);
+  }, [profile, bleScanEnabled, bleAvailable, startBLE]);
 
   const stopScanning = useCallback(async () => {
     if (!detectorRef.current) return;
@@ -271,6 +389,18 @@ export function useThreatDetector() {
     sensorMgrRef.current.stopMonitoring();
     sensorMgrRef.current.setRecordingState(false);
     envDetectorRef.current.stop();
+
+    // Stop BLE scanning
+    await stopBLE();
+    sensorMgrRef.current.setBLEState(bleAvailable, false);
+
+    // Stop location watch
+    if (locationSubRef.current) {
+      locationSubRef.current.remove();
+      locationSubRef.current = null;
+    }
+    fusionEngineRef.current.setUserPosition(null);
+    setFusedDetections([]);
 
     voiceRef.current.announceScanStop();
 
@@ -286,7 +416,7 @@ export function useThreatDetector() {
       clearInterval(envVoiceIntervalRef.current);
       envVoiceIntervalRef.current = null;
     }
-  }, []);
+  }, [stopBLE, bleAvailable]);
 
   const setProfile = useCallback((newProfile: DeviceProfile) => {
     useSettingsStore.getState().setProfile(newProfile);
@@ -322,6 +452,15 @@ export function useThreatDetector() {
 
     // Environment detection state
     environmentState,
+
+    // BLE Remote ID state
+    bleAvailable,
+    bleScanActive,
+    bleDevices,
+    bleDeviceCount,
+
+    // Fused detections
+    fusedDetections,
 
     // Actions
     startScanning,

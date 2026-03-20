@@ -17,6 +17,11 @@ export class MelSpectrogram {
   private numMfccCoeffs: number;
   private dctMatrix: Float32Array[];
 
+  // Reusable buffers to avoid per-frame allocations
+  private melFrameBuffer: Float32Array;
+  private mfccBuffer: Float32Array;
+  private normalizeBuffer: Float32Array;
+
   constructor(
     numMelBins: number = 128,
     fftSize: number = 2048,
@@ -37,12 +42,22 @@ export class MelSpectrogram {
 
     // Pre-compute DCT matrix for MFCC
     this.dctMatrix = this.createDCTMatrix();
+
+    // Pre-allocate reusable buffers
+    this.melFrameBuffer = new Float32Array(numMelBins);
+    this.mfccBuffer = new Float32Array(numMfccCoeffs);
+    this.normalizeBuffer = new Float32Array(numMelBins);
   }
 
   /**
    * Convert FFT magnitude spectrum to mel spectrogram (single frame).
    */
   computeMelFrame(magnitudeSpectrum: Float32Array): Float32Array {
+    // Guard against NaN/Infinity in input magnitudes
+    for (let k = 0; k < magnitudeSpectrum.length; k++) {
+      if (!Number.isFinite(magnitudeSpectrum[k])) magnitudeSpectrum[k] = 1e-10;
+    }
+
     const melFrame = new Float32Array(this.numMelBins);
 
     for (let m = 0; m < this.numMelBins; m++) {
@@ -83,13 +98,14 @@ export class MelSpectrogram {
    * Normalize mel frame to zero mean and unit variance.
    */
   normalize(frame: Float32Array): Float32Array {
+    if (frame.length === 0) return frame;
     const mean = frame.reduce((a, b) => a + b, 0) / frame.length;
     let variance = 0;
     for (let i = 0; i < frame.length; i++) {
       variance += (frame[i] - mean) ** 2;
     }
     variance /= frame.length;
-    const std = Math.sqrt(variance + 1e-8);
+    const std = Math.max(Math.sqrt(variance + 1e-8), 1e-8);
 
     const normalized = new Float32Array(frame.length);
     for (let i = 0; i < frame.length; i++) {
