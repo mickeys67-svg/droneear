@@ -20,7 +20,7 @@ import { useBLEScanner } from './useBLEScanner';
 import { useWiFiScanner } from './useWiFiScanner';
 import { DEVICE_PROFILES } from '../constants/micConfig';
 import type { DeviceProfile, DetectionSession } from '../types';
-import { AppState, type AppStateStatus } from 'react-native';
+import { Alert, AppState, type AppStateStatus } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Battery from 'expo-battery';
 import * as Location from 'expo-location';
@@ -373,8 +373,19 @@ export function useThreatDetector() {
 
     voiceRef.current.announceScanStart();
 
-    // Start location watch for fusion engine
+    // Start location watch for fusion engine (with pre-permission rationale)
     try {
+      const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
+      if (existingStatus !== 'granted') {
+        // Show rationale before system permission dialog (Google Play requirement)
+        await new Promise<void>((resolve) => {
+          Alert.alert(
+            'Location Access',
+            'DroneEar uses your location to detect indoor/outdoor environment, display your position on the map, and calculate distance to detected drones. Location data stays on your device.',
+            [{ text: 'OK', onPress: () => resolve() }],
+          );
+        });
+      }
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === 'granted') {
         locationSubRef.current = await Location.watchPositionAsync(

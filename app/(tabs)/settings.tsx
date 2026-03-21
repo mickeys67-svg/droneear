@@ -9,7 +9,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert, Linking } from 'react-native';
 import Constants from 'expo-constants';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTheme } from '@/src/hooks/useTheme';
@@ -252,6 +252,18 @@ export default function SettingsScreen() {
         >
           <Text style={[styles.resetBtnText, { color: theme.textMuted }]}>
             ↻ {t.resetOnboarding || 'Reset Onboarding'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Privacy Policy Link */}
+        <TouchableOpacity
+          style={[styles.resetBtn, { borderColor: GLASS.borderSubtle, marginTop: 8 }]}
+          onPress={() => Linking.openURL('https://droneear.app/privacy')}
+          accessibilityRole="link"
+          accessibilityLabel={t.privacyPolicy || 'Privacy Policy'}
+        >
+          <Text style={[styles.resetBtnText, { color: theme.textMuted }]}>
+            🔒 {t.privacyPolicy || 'Privacy Policy'}
           </Text>
         </TouchableOpacity>
 

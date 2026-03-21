@@ -329,6 +329,7 @@ export interface Translations {
   resetOnboarding?: string;
   resetOnboardingMsg?: string;
   ok?: string;
+  privacyPolicy?: string;
 
   // History
   historyTab?: string;
@@ -677,6 +678,7 @@ const ko: Translations = {
   resetOnboarding: '온보딩 초기화',
   resetOnboardingMsg: '설정 과정을 다시 시작합니다. 계속하시겠습니까?',
   ok: '확인',
+  privacyPolicy: '개인정보 처리방침',
 
   // History
   historyTab: '기록',
@@ -1006,6 +1008,7 @@ const en: Translations = {
   resetOnboarding: 'Reset Onboarding',
   resetOnboardingMsg: 'This will restart the setup process. Continue?',
   ok: 'OK',
+  privacyPolicy: 'Privacy Policy',
 
   // History
   historyTab: 'HISTORY',
@@ -1335,6 +1338,7 @@ const uk: Translations = {
   resetOnboarding: 'Скинути вступний курс',
   resetOnboardingMsg: 'Це перезапустить процес налаштування. Продовжити?',
   ok: 'OK',
+  privacyPolicy: 'Політика конфіденційності',
 
   // History
   historyTab: 'ІСТОРІЯ',

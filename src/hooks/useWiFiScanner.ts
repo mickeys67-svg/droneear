@@ -12,6 +12,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { Platform } from 'react-native';
 import { WiFiRemoteIDScanner } from '../core/wifi/WiFiRemoteIDScanner';
+import { requestWiFiPermissions } from '../utils/wifiPermissions';
 import { useDetectionStore } from '../stores/detectionStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import type { RemoteIDData } from '../types';
@@ -53,6 +54,13 @@ export function useWiFiScanner() {
   const startWiFi = useCallback(async () => {
     if (Platform.OS !== 'android') return false;
     if (!wifiAvailable || !wifiScanEnabled) return false;
+
+    // Request NEARBY_WIFI_DEVICES permission on Android 13+
+    const granted = await requestWiFiPermissions();
+    if (!granted) {
+      console.warn('[WiFi] Permissions denied');
+      return false;
+    }
 
     const scanner = scannerRef.current;
     if (!scanner) return false;
