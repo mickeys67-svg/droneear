@@ -33,6 +33,9 @@ interface DetectionState {
   // Fused detections (acoustic + BLE)
   fusedDetections: FusedDetection[];
 
+  // User location (shared across components to avoid duplicate GPS watchers)
+  userLocation: { latitude: number; longitude: number } | null;
+
   // Feedback
   feedbackPending: boolean;
   feedbackDetectionId: string | null;
@@ -55,6 +58,7 @@ interface DetectionState {
   addBLEDevice: (id: string, data: RemoteIDData) => void;
   removeBLEDevice: (id: string) => void;
   clearBLEDevices: () => void;
+  setUserLocation: (loc: { latitude: number; longitude: number } | null) => void;
   selectTrack: (trackId: string | null) => void;
   hideTrackFromMap: (trackId: string) => void;
   unhideTrack: (trackId: string) => void;
@@ -77,6 +81,7 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   bleDevices: {},
   bleScanActive: false,
   fusedDetections: [],
+  userLocation: null,
   feedbackPending: false,
   feedbackDetectionId: null,
 
@@ -211,6 +216,8 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   }),
 
   clearBLEDevices: () => set({ bleDevices: {} }),
+
+  setUserLocation: (loc) => set({ userLocation: loc }),
 
   selectTrack: (trackId) => set({ selectedTrackId: trackId }),
 

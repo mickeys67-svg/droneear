@@ -8,7 +8,7 @@
  * - Operator positions: orange markers
  */
 
-import React from 'react';
+import React, { memo, useRef, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Circle, Callout, PROVIDER_DEFAULT } from 'react-native-maps';
 import { useTranslation } from '@/src/i18n/useTranslation';
@@ -21,8 +21,27 @@ interface DroneMapViewProps {
   onMarkerPress?: (marker: MapMarker) => void;
 }
 
-export default function DroneMapView({ userLocation, markers, selectedMarkerId, onMarkerPress }: DroneMapViewProps) {
+export default memo(function DroneMapView({ userLocation, markers, selectedMarkerId, onMarkerPress }: DroneMapViewProps) {
   const t = useTranslation();
+  const mapRef = useRef<MapView>(null);
+  const hasAnimatedRef = useRef(false);
+
+  // Animate to user location when it first becomes available
+  useEffect(() => {
+    if (userLocation && !hasAnimatedRef.current && mapRef.current) {
+      hasAnimatedRef.current = true;
+      mapRef.current.animateToRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 500);
+    }
+  }, [userLocation]);
+
+  const handleMarkerPress = useCallback((marker: MapMarker) => {
+    onMarkerPress?.(marker);
+  }, [onMarkerPress]);
 
   if (!userLocation) {
     return (
@@ -35,6 +54,7 @@ export default function DroneMapView({ userLocation, markers, selectedMarkerId, 
 
   return (
     <MapView
+      ref={mapRef}
       provider={PROVIDER_DEFAULT}
       style={styles.map}
       initialRegion={{
@@ -63,7 +83,7 @@ export default function DroneMapView({ userLocation, markers, selectedMarkerId, 
                 coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
                 pinColor={marker.color}
                 opacity={selectedMarkerId === marker.id ? 1.0 : 0.8}
-                onPress={() => onMarkerPress?.(marker)}
+                onPress={() => handleMarkerPress(marker)}
               >
                 <Callout>
                   <View style={styles.callout}>
@@ -89,7 +109,7 @@ export default function DroneMapView({ userLocation, markers, selectedMarkerId, 
               key={marker.id}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               pinColor={marker.color}
-              onPress={() => onMarkerPress?.(marker)}
+              onPress={() => handleMarkerPress(marker)}
             >
               <Callout>
                 <View style={styles.callout}>
@@ -123,7 +143,7 @@ export default function DroneMapView({ userLocation, markers, selectedMarkerId, 
               key={marker.id}
               coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
               pinColor={marker.color}
-              onPress={() => onMarkerPress?.(marker)}
+              onPress={() => handleMarkerPress(marker)}
             >
               <Callout>
                 <View style={styles.callout}>
@@ -169,7 +189,7 @@ export default function DroneMapView({ userLocation, markers, selectedMarkerId, 
       })}
     </MapView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   map: {

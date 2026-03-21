@@ -34,7 +34,9 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.BLUETOOTH_ADVERTISE"
+        "android.permission.BLUETOOTH_ADVERTISE",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -94,6 +96,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4f21addf-0b33-404f-a995-45d854522853"
+      }
+    },
+    "owner": "mickey67"
   }
 }

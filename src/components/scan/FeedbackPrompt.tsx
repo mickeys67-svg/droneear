@@ -17,6 +17,9 @@ export function FeedbackPrompt({ detectionId, onSubmit }: FeedbackPromptProps) {
   const theme = useTheme();
   const t = useTranslation();
 
+  // Don't render if no valid detection ID
+  if (!detectionId) return null;
+
   return (
     <View style={[glassStyles.card, styles.card]}>
       <Text style={[styles.question, { color: theme.textDim }]}>
@@ -25,7 +28,7 @@ export function FeedbackPrompt({ detectionId, onSubmit }: FeedbackPromptProps) {
       <View style={styles.buttons}>
         <TouchableOpacity
           style={[styles.btn, { backgroundColor: `${theme.success}20`, borderColor: theme.success }]}
-          onPress={() => onSubmit(detectionId || '', true)}
+          onPress={() => onSubmit(detectionId, true)}
           accessibilityRole="button"
           accessibilityLabel={t.yes}
         >
@@ -33,9 +36,9 @@ export function FeedbackPrompt({ detectionId, onSubmit }: FeedbackPromptProps) {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.btn, { backgroundColor: `${theme.danger}20`, borderColor: theme.danger }]}
-          onPress={() => onSubmit(detectionId || '', false)}
+          onPress={() => onSubmit(detectionId, false)}
           accessibilityRole="button"
-          accessibilityLabel={t.no}
+          accessibilityLabel={t.reportFalsePositive}
         >
           <Text style={[styles.btnText, { color: theme.danger }]}>{t.reportFalsePositive}</Text>
         </TouchableOpacity>

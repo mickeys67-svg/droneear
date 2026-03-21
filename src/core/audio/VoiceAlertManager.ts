@@ -243,17 +243,23 @@ export class VoiceAlertManager {
     if (this.processingQueue || this.isSpeaking || this.queue.length === 0) return;
     this.processingQueue = true;
 
-    let iterations = 0;
-    const maxIterations = 10;
-    while (this.queue.length > 0 && iterations < maxIterations) {
-      iterations++;
-      const item = this.queue.shift()!;
-      await this.speak(item.text, item.severity);
-      // Small gap between announcements
-      await new Promise((r) => setTimeout(r, 300));
+    try {
+      let iterations = 0;
+      const maxIterations = 10;
+      while (this.queue.length > 0 && iterations < maxIterations) {
+        iterations++;
+        const item = this.queue.shift()!;
+        await this.speak(item.text, item.severity);
+        // Small gap between announcements
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    } finally {
+      this.processingQueue = false;
+      // Re-check: items may have been enqueued during processing
+      if (this.queue.length > 0) {
+        this.processQueue();
+      }
     }
-
-    this.processingQueue = false;
   }
 
   private async speak(text: string, severity: ThreatSeverity): Promise<void> {

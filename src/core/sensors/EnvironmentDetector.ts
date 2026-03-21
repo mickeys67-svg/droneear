@@ -155,7 +155,7 @@ export class EnvironmentDetector {
         {
           accuracy: Location.Accuracy.High,
           timeInterval: 5000,
-          distanceInterval: 0,
+          distanceInterval: 10,
         },
         (location) => {
           this.lastGpsAccuracy = location.coords.accuracy ?? 999;

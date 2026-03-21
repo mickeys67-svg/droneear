@@ -190,7 +190,7 @@ export class ModelManager {
     try {
       const predictions = this.runAdvancedInference(melFrames);
       const inferenceTime = performance.now() - startTime;
-      console.log(`[ModelManager] Inference: ${inferenceTime.toFixed(1)}ms (v2.0 multi-feature)`);
+      if (typeof __DEV__ !== 'undefined' && __DEV__) console.log(`[ModelManager] Inference: ${inferenceTime.toFixed(1)}ms (v2.0 multi-feature)`);
       this.setStatus('READY');
       return predictions;
     } catch (error) {

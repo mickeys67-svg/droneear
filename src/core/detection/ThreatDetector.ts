@@ -47,6 +47,7 @@ export class ThreatDetector {
   private watchdogTimer: ReturnType<typeof setInterval> | null = null;
   private recoveryAttempts = 0;
   private maxRecoveryAttempts = 3;
+  private isRecovering = false;
 
   constructor(callbacks: ThreatDetectorCallbacks = {}) {
     this.callbacks = callbacks;
@@ -168,6 +169,10 @@ export class ThreatDetector {
    * Auto-recovery: stop + restart audio capture.
    */
   private async attemptRecovery(): Promise<void> {
+    // Prevent concurrent recovery attempts
+    if (this.isRecovering) return;
+    this.isRecovering = true;
+
     while (this.recoveryAttempts < this.maxRecoveryAttempts) {
       this.recoveryAttempts++;
       this.callbacks.onStatusChange?.('RECOVERING');
@@ -183,6 +188,7 @@ export class ThreatDetector {
       try {
         this.startAudioCapture();
         this.callbacks.onStatusChange?.('SCANNING');
+        this.isRecovering = false;
         return; // Recovery succeeded
       } catch (err) {
         console.error(`[DroneMonitor] Recovery attempt ${this.recoveryAttempts} failed:`, err);
@@ -190,6 +196,7 @@ export class ThreatDetector {
     }
 
     // All attempts exhausted
+    this.isRecovering = false;
     console.error('[DroneMonitor] Max recovery attempts reached');
     this.callbacks.onStatusChange?.('ERROR');
     this.callbacks.onRecordingError?.('Recording failed after multiple retries');

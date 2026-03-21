@@ -1,12 +1,12 @@
 /**
- * Map Data Hook — v1.0
+ * Map Data Hook — v2.0
  *
  * Transforms acoustic tracks, BLE devices, and fused detections
- * into map markers. Also provides user location via expo-location.
+ * into map markers. Uses shared user location from detection store
+ * to avoid duplicate GPS watchers.
  */
 
-import { useEffect, useState, useMemo } from 'react';
-import * as Location from 'expo-location';
+import { useMemo } from 'react';
 import { useDetectionStore } from '../stores/detectionStore';
 import type { FusedDetection } from '../core/detection/DetectionFusionEngine';
 import type { RemoteIDData, ThreatTrack, DetectionResult } from '../types';
@@ -64,33 +64,13 @@ function offsetPosition(
 }
 
 export function useMapData() {
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-
-  const { currentThreats, bleDevices, fusedDetections } = useDetectionStore();
-
-  // Watch user location
-  useEffect(() => {
-    let sub: Location.LocationSubscription | null = null;
-
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-
-      sub = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, distanceInterval: 10 },
-        (loc) => {
-          setUserLocation({
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          });
-        },
-      );
-    })();
-
-    return () => {
-      sub?.remove();
-    };
-  }, []);
+  // Use shared location from detection store (set by useThreatDetector)
+  // This avoids creating a duplicate GPS watcher
+  const userLocation = useDetectionStore((s) => s.userLocation);
+  const currentThreats = useDetectionStore((s) => s.currentThreats);
+  const bleDevices = useDetectionStore((s) => s.bleDevices);
+  const fusedDetections = useDetectionStore((s) => s.fusedDetections);
+  const hiddenTrackIds = useDetectionStore((s) => s.hiddenTrackIds);
 
   const markers = useMemo(() => {
     const result: MapMarker[] = [];
@@ -108,11 +88,12 @@ export function useMapData() {
         .filter(Boolean),
     );
 
-    // 1. Acoustic tracks → radius circles (only unfused)
+    // 1. Acoustic tracks → radius circles (only unfused, not hidden)
     if (userLocation) {
       for (const track of currentThreats) {
         if (!track.isActive || track.detections.length === 0) continue;
         if (fusedTrackIds.has(track.id)) continue;
+        if (hiddenTrackIds.includes(track.id)) continue;
 
         const last = track.detections[track.detections.length - 1];
         const pos = offsetPosition(
@@ -183,7 +164,7 @@ export function useMapData() {
     }
 
     return result;
-  }, [currentThreats, bleDevices, fusedDetections, userLocation]);
+  }, [currentThreats, bleDevices, fusedDetections, userLocation, hiddenTrackIds]);
 
   return { userLocation, markers };
 }

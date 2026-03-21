@@ -90,7 +90,12 @@ export class RemoteIDParser {
   static mergeMessages(parts: Partial<RemoteIDData>[]): RemoteIDData {
     const merged: RemoteIDData = {};
     for (const part of parts) {
-      Object.assign(merged, part);
+      // Only assign defined values to avoid overwriting valid data with undefined
+      for (const [key, value] of Object.entries(part)) {
+        if (value !== undefined) {
+          (merged as any)[key] = value;
+        }
+      }
     }
     merged.lastSeen = Date.now();
     return merged;

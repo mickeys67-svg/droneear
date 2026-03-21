@@ -106,7 +106,7 @@ export class FFTProcessor {
 
     // Bit-reversal permutation
     for (let i = 0; i < n; i++) {
-      real[this.reverseBits(i, Math.log2(n))] = input[i];
+      real[this.reverseBits(i, Math.round(Math.log2(n)))] = input[i];
     }
 
     // Butterfly operations

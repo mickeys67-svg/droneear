@@ -53,26 +53,22 @@ export class MelSpectrogram {
    * Convert FFT magnitude spectrum to mel spectrogram (single frame).
    */
   computeMelFrame(magnitudeSpectrum: Float32Array): Float32Array {
-    // Guard against NaN/Infinity in input magnitudes
-    for (let k = 0; k < magnitudeSpectrum.length; k++) {
-      if (!Number.isFinite(magnitudeSpectrum[k])) magnitudeSpectrum[k] = 1e-10;
-    }
-
-    const melFrame = new Float32Array(this.numMelBins);
+    const melFrame = this.melFrameBuffer;
 
     for (let m = 0; m < this.numMelBins; m++) {
       let sum = 0;
       const filter = this.melFilterbank[m];
-      for (let k = 0; k < filter.length; k++) {
-        if (k < magnitudeSpectrum.length) {
-          sum += magnitudeSpectrum[k] * filter[k];
-        }
+      const len = Math.min(filter.length, magnitudeSpectrum.length);
+      for (let k = 0; k < len; k++) {
+        const mag = magnitudeSpectrum[k];
+        sum += (Number.isFinite(mag) ? mag : 1e-10) * filter[k];
       }
       // Log mel energy (add small epsilon to avoid log(0))
       melFrame[m] = Math.log(Math.max(sum, 1e-10));
     }
 
-    return melFrame;
+    // Return a copy since buffer is reused
+    return new Float32Array(melFrame);
   }
 
   /**
@@ -80,7 +76,7 @@ export class MelSpectrogram {
    * Returns 30 cepstral coefficients (optimal for drone classification per research).
    */
   computeMFCC(melFrame: Float32Array): Float32Array {
-    const mfcc = new Float32Array(this.numMfccCoeffs);
+    const mfcc = this.mfccBuffer;
 
     for (let i = 0; i < this.numMfccCoeffs; i++) {
       let sum = 0;
@@ -91,7 +87,7 @@ export class MelSpectrogram {
       mfcc[i] = sum;
     }
 
-    return mfcc;
+    return new Float32Array(mfcc);
   }
 
   /**

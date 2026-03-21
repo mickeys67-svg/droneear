@@ -22,9 +22,8 @@ import Animated, {
   useAnimatedStyle,
   withRepeat,
   withTiming,
+  cancelAnimation,
   Easing,
-  withSequence,
-  interpolate,
 } from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
 import type { ThreatTrack, ThreatSeverity, RemoteIDData } from '../../types';
@@ -49,7 +48,6 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
 }) => {
   const theme = useTheme();
   const rotation = useSharedValue(0);
-  const pulse = useSharedValue(0);
 
   useEffect(() => {
     if (isActive) {
@@ -58,22 +56,20 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
         -1,
         false
       );
-      pulse.value = withRepeat(
-        withSequence(
-          withTiming(1, { duration: 1000 }),
-          withTiming(0.3, { duration: 1000 })
-        ),
-        -1,
-        true
-      );
     } else {
+      cancelAnimation(rotation);
       rotation.value = 0;
-      pulse.value = 0;
     }
-  }, [isActive]);
+  }, [isActive, rotation]);
 
   const sweepStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
+    transform: [
+      { translateX: radius / 2 },
+      { translateY: radius / 2 },
+      { rotate: `${rotation.value}deg` },
+      { translateX: -radius / 2 },
+      { translateY: -radius / 2 },
+    ],
   }));
 
   const radius = size / 2;
@@ -295,7 +291,6 @@ const styles = StyleSheet.create({
   },
   sweep: {
     position: 'absolute',
-    transformOrigin: 'bottom right',
     bottom: '50%',
     right: '50%',
   },

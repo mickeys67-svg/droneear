@@ -19,6 +19,7 @@ export class AudioCapture {
   private config: MicConfig;
   private frameCallback: AudioFrameCallback | null = null;
   private frameCount = 0;
+  private dataHandler: ((base64Data: string) => void) | null = null;
 
   constructor(profileName: keyof typeof DEVICE_PROFILES = 'BALANCED') {
     this.config = DEVICE_PROFILES[profileName];
@@ -75,7 +76,12 @@ export class AudioCapture {
       wavFile: 'drone_capture.wav',
     });
 
-    AudioRecord.on('data', (base64Data: string) => {
+    // Remove any previous listener to prevent duplicates on start/stop cycles
+    if (this.dataHandler) {
+      try { (AudioRecord as any).removeListener?.('data', this.dataHandler); } catch {}
+    }
+
+    this.dataHandler = (base64Data: string) => {
       this.frameCount++;
 
       // Decode base64 to PCM samples
@@ -95,7 +101,9 @@ export class AudioCapture {
       };
 
       this.frameCallback?.(frame);
-    });
+    };
+
+    AudioRecord.on('data', this.dataHandler);
 
     AudioRecord.start();
     this.isRecording = true;
@@ -108,6 +116,11 @@ export class AudioCapture {
   async stop(): Promise<void> {
     if (!this.isRecording) return;
 
+    // Remove listener before stopping to prevent stale callbacks
+    if (this.dataHandler) {
+      try { (AudioRecord as any).removeListener?.('data', this.dataHandler); } catch {}
+      this.dataHandler = null;
+    }
     await AudioRecord.stop();
     this.isRecording = false;
     this.frameCallback = null;

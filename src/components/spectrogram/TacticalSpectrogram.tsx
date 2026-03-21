@@ -7,15 +7,14 @@
  * Future upgrade: Replace with Skia Canvas for true waterfall display.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, memo } from 'react';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
-
 interface TacticalSpectrogramProps {
   spectralData: number[]; // 128 mel bins
   audioLevel: number;     // 0.0 - 1.0
@@ -24,23 +23,25 @@ interface TacticalSpectrogramProps {
   height?: number;
 }
 
-const AnimatedBar: React.FC<{
+const SPRING_CONFIG = {
+  damping: 15,
+  stiffness: 150,
+  mass: 0.5,
+};
+
+const AnimatedBar = memo<{
   value: number;
   maxHeight: number;
   colorLow: string;
   colorMid: string;
   colorHigh: string;
   width: number;
-}> = ({ value, maxHeight, colorLow, colorMid, colorHigh, width }) => {
+}>(({ value, maxHeight, colorLow, colorMid, colorHigh, width }) => {
   const animHeight = useSharedValue(2);
 
   useEffect(() => {
-    animHeight.value = withSpring(Math.max(2, value * maxHeight), {
-      damping: 15,
-      stiffness: 150,
-      mass: 0.5,
-    });
-  }, [value]);
+    animHeight.value = withSpring(Math.max(2, value * maxHeight), SPRING_CONFIG);
+  }, [value, maxHeight, animHeight]);
 
   const barStyle = useAnimatedStyle(() => {
     const h = animHeight.value;
@@ -53,9 +54,17 @@ const AnimatedBar: React.FC<{
   });
 
   return <Animated.View style={[styles.bar, { width, borderRadius: width / 2 }, barStyle]} />;
-};
+}, (prev, next) => {
+  // Only re-render if value actually changed (avoid re-render on same value)
+  return prev.value === next.value
+    && prev.maxHeight === next.maxHeight
+    && prev.width === next.width
+    && prev.colorLow === next.colorLow;
+});
 
-export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = ({
+const ZERO_BARS: number[] = [];
+
+export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
   spectralData,
   audioLevel,
   isActive,
@@ -63,11 +72,21 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = ({
   height = 60,
 }) => {
   const theme = useTheme();
+  const { width: screenWidth } = useWindowDimensions();
+
+  // Stable zero-filled array for inactive state
+  const zeroBars = useMemo(() => {
+    if (ZERO_BARS.length !== numBars) {
+      ZERO_BARS.length = 0;
+      for (let i = 0; i < numBars; i++) ZERO_BARS.push(0);
+    }
+    return ZERO_BARS;
+  }, [numBars]);
 
   // Downsample 128 mel bins to numBars
   const barValues = useMemo(() => {
     if (!isActive || spectralData.length === 0) {
-      return new Array(numBars).fill(0);
+      return zeroBars;
     }
 
     const binSize = Math.floor(spectralData.length / numBars);
@@ -79,15 +98,16 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = ({
       for (let j = start; j < start + binSize && j < spectralData.length; j++) {
         sum += Math.abs(spectralData[j]);
       }
-      // Normalize and apply audio level scaling
       const avg = sum / binSize;
       values.push(Math.min(1, avg * (audioLevel + 0.3)));
     }
 
     return values;
-  }, [spectralData, audioLevel, isActive, numBars]);
+  }, [spectralData, audioLevel, isActive, numBars, zeroBars]);
 
-  const barWidth = Math.max(2, Math.floor((280 - numBars * 2) / numBars));
+  // Responsive bar width
+  const containerWidth = Math.min(screenWidth - 40, 300);
+  const barWidth = Math.max(2, Math.floor((containerWidth - numBars * 2) / numBars));
 
   return (
     <View style={[styles.container, { height, backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -109,7 +129,7 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = ({
       </Text>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

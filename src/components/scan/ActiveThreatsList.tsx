@@ -2,7 +2,7 @@
  * Active threats summary — glass card with animated track rows.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, type TextStyle } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '@/src/hooks/useTheme';
@@ -30,7 +30,7 @@ function getConfidenceLabel(conf: number, t: ReturnType<typeof useTranslation>):
   return t.verificationNeeded;
 }
 
-export function ActiveThreatsList({ activeThreats, onSelectTrack }: ActiveThreatsListProps) {
+export const ActiveThreatsList = memo(function ActiveThreatsList({ activeThreats, onSelectTrack }: ActiveThreatsListProps) {
   const theme = useTheme();
   const t = useTranslation();
 
@@ -57,7 +57,7 @@ export function ActiveThreatsList({ activeThreats, onSelectTrack }: ActiveThreat
             <View style={[styles.dot, { backgroundColor: severityColor }]} />
             <View style={styles.info}>
               <Text style={[styles.type, { color: theme.text }]}>
-                {latest.threatCategory.replace('_', ' ')}
+                {latest.threatCategory.replace(/_/g, ' ')}
               </Text>
               <Text style={[styles.confLabel, { color: theme.textMuted }]}>
                 {getConfidenceLabel(latest.confidence, t)}
@@ -77,7 +77,7 @@ export function ActiveThreatsList({ activeThreats, onSelectTrack }: ActiveThreat
       </Text>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: { marginBottom: 16 },

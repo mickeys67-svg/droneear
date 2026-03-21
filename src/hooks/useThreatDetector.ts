@@ -46,22 +46,48 @@ export function useThreatDetector() {
   // Environment detection state (exposed to UI)
   const [environmentState, setEnvironmentState] = useState<EnvironmentState | null>(null);
 
-  // Zustand stores
-  const {
-    isScanning, latestDetection, currentThreats, audioLevel,
-    spectralData, inferenceTimeMs, micQuality, micSnrDb, micWarning,
-    batteryLevel, feedbackPending,
-    setScanning, addDetection, setAudioLevel, setSpectralData,
-    setInferenceTime, acknowledgeDetection, clearThreats,
-    setBatteryLevel, setMicQuality, setFeedbackPending,
-    setFusedDetections, fusedDetections,
-  } = useDetectionStore();
+  // Zustand stores — use selectors to minimize re-renders
+  const isScanning = useDetectionStore((s) => s.isScanning);
+  const latestDetection = useDetectionStore((s) => s.latestDetection);
+  const currentThreats = useDetectionStore((s) => s.currentThreats);
+  const audioLevel = useDetectionStore((s) => s.audioLevel);
+  const spectralData = useDetectionStore((s) => s.spectralData);
+  const inferenceTimeMs = useDetectionStore((s) => s.inferenceTimeMs);
+  const micQuality = useDetectionStore((s) => s.micQuality);
+  const micSnrDb = useDetectionStore((s) => s.micSnrDb);
+  const micWarning = useDetectionStore((s) => s.micWarning);
+  const batteryLevel = useDetectionStore((s) => s.batteryLevel);
+  const feedbackPending = useDetectionStore((s) => s.feedbackPending);
+  const fusedDetections = useDetectionStore((s) => s.fusedDetections);
 
-  const { addDetection: addToHistory, startSession, endSession } = useHistoryStore();
+  // Actions (stable refs from Zustand)
+  const setScanning = useDetectionStore((s) => s.setScanning);
+  const addDetection = useDetectionStore((s) => s.addDetection);
+  const setAudioLevel = useDetectionStore((s) => s.setAudioLevel);
+  const setSpectralData = useDetectionStore((s) => s.setSpectralData);
+  const setInferenceTime = useDetectionStore((s) => s.setInferenceTime);
+  const acknowledgeDetection = useDetectionStore((s) => s.acknowledgeDetection);
+  const clearThreats = useDetectionStore((s) => s.clearThreats);
+  const setBatteryLevel = useDetectionStore((s) => s.setBatteryLevel);
+  const setMicQuality = useDetectionStore((s) => s.setMicQuality);
+  const setFeedbackPending = useDetectionStore((s) => s.setFeedbackPending);
+  const setFusedDetections = useDetectionStore((s) => s.setFusedDetections);
 
-  const {
-    profile, confidenceThreshold, alertVibration, alertSound, voiceAlert, locale, bleScanEnabled,
-  } = useSettingsStore();
+  const addToHistory = useHistoryStore((s) => s.addDetection);
+  const startSession = useHistoryStore((s) => s.startSession);
+  const endSession = useHistoryStore((s) => s.endSession);
+
+  const profile = useSettingsStore((s) => s.profile);
+  const confidenceThreshold = useSettingsStore((s) => s.confidenceThreshold);
+  const alertVibration = useSettingsStore((s) => s.alertVibration);
+  const alertSound = useSettingsStore((s) => s.alertSound);
+  const voiceAlert = useSettingsStore((s) => s.voiceAlert);
+  const locale = useSettingsStore((s) => s.locale);
+  const bleScanEnabled = useSettingsStore((s) => s.bleScanEnabled);
+
+  // Ref to avoid stale closure for alertVibration in long-lived callbacks
+  const alertVibrationRef = useRef(alertVibration);
+  useEffect(() => { alertVibrationRef.current = alertVibration; }, [alertVibration]);
 
   // BLE Remote ID Scanner
   const {
@@ -99,8 +125,8 @@ export function useThreatDetector() {
         if (issue.severity === 'CRITICAL') {
           voiceRef.current.announceMicWarning('POOR', 'NOISE');
         }
-        // Haptic feedback for any alarm
-        if (alertVibration) {
+        // Haptic feedback for any alarm (use ref to avoid stale closure)
+        if (alertVibrationRef.current) {
           Haptics.notificationAsync(
             issue.severity === 'CRITICAL'
               ? Haptics.NotificationFeedbackType.Error
@@ -115,7 +141,7 @@ export function useThreatDetector() {
         addDetection(result);
         addToHistory(result);
 
-        if (alertVibration) {
+        if (alertVibrationRef.current) {
           Haptics.notificationAsync(
             result.severity === 'CRITICAL'
               ? Haptics.NotificationFeedbackType.Error
@@ -274,8 +300,11 @@ export function useThreatDetector() {
   }, [currentThreats, bleDevices, isScanning]);
 
   // ===== Scan control =====
+  const isScanningRef = useRef(isScanning);
+  useEffect(() => { isScanningRef.current = isScanning; }, [isScanning]);
+
   const startScanning = useCallback(async () => {
-    if (isScanning || !isInitializedRef.current) return;
+    if (isScanningRef.current || !isInitializedRef.current) return;
     if (!detectorRef.current) return;
 
     const battLevel = await Battery.getBatteryLevelAsync();
@@ -325,10 +354,13 @@ export function useThreatDetector() {
         locationSubRef.current = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.High, distanceInterval: 5 },
           (loc) => {
-            fusionEngineRef.current.setUserPosition({
+            const pos = {
               latitude: loc.coords.latitude,
               longitude: loc.coords.longitude,
-            });
+            };
+            fusionEngineRef.current.setUserPosition(pos);
+            // Share location with detection store (so useMapData doesn't need its own GPS watcher)
+            useDetectionStore.getState().setUserLocation(pos);
           },
         );
       }
@@ -400,6 +432,7 @@ export function useThreatDetector() {
       locationSubRef.current = null;
     }
     fusionEngineRef.current.setUserPosition(null);
+    useDetectionStore.getState().setUserLocation(null);
     setFusedDetections([]);
 
     voiceRef.current.announceScanStop();

@@ -15,6 +15,7 @@ import type { DetectionResult } from '../types';
 export async function exportAsCSV(detections: DetectionResult[]): Promise<void> {
   if (detections.length === 0) return;
 
+  try {
   const headers = [
     'id', 'timestamp', 'datetime', 'threatCategory', 'severity',
     'confidence', 'distanceMeters', 'bearingDegrees', 'approachRate',
@@ -47,6 +48,10 @@ export async function exportAsCSV(detections: DetectionResult[]): Promise<void> 
       dialogTitle: 'Export Detection Log',
     });
   }
+  } catch (err) {
+    console.error('[ExportData] CSV export failed:', err);
+    throw new Error(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -55,6 +60,7 @@ export async function exportAsCSV(detections: DetectionResult[]): Promise<void> 
 export async function exportAsJSON(detections: DetectionResult[]): Promise<void> {
   if (detections.length === 0) return;
 
+  try {
   const data = {
     exportedAt: new Date().toISOString(),
     count: detections.length,
@@ -83,5 +89,9 @@ export async function exportAsJSON(detections: DetectionResult[]): Promise<void>
       mimeType: 'application/json',
       dialogTitle: 'Export Detection Log',
     });
+  }
+  } catch (err) {
+    console.error('[ExportData] JSON export failed:', err);
+    throw new Error(`Export failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
 }
