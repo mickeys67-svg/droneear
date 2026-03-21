@@ -8,7 +8,7 @@
  *   import { isAndroid, isIOS, requestMicPermission } from '@/src/utils/platform';
  */
 
-import { Platform, PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid, Alert } from 'react-native';
 import { Audio } from 'expo-av';
 
 // ===== Platform Constants =====
@@ -30,14 +30,23 @@ export type MicPermissionResult = 'granted' | 'denied' | 'never_ask_again';
 export async function requestMicPermission(): Promise<MicPermissionResult> {
   if (isAndroid) {
     try {
+      // Check if already granted (skip rationale if so)
+      const alreadyGranted = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+      );
+      if (alreadyGranted) return 'granted';
+
+      // Google Play requirement: show pre-rationale BEFORE system dialog
+      await new Promise<void>((resolve) => {
+        Alert.alert(
+          'Microphone Access',
+          'DroneEar analyzes sound patterns from your microphone to detect nearby drones. Audio is processed in real-time on your device and is never recorded or stored.',
+          [{ text: 'Continue', onPress: () => resolve() }],
+        );
+      });
+
       const result = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        {
-          title: 'Microphone Access',
-          message: 'DroneEar needs microphone access to analyze acoustic patterns.',
-          buttonPositive: 'Allow',
-          buttonNegative: 'Deny',
-        }
       );
       if (result === PermissionsAndroid.RESULTS.GRANTED) return 'granted';
       if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) return 'never_ask_again';
@@ -47,12 +56,12 @@ export async function requestMicPermission(): Promise<MicPermissionResult> {
     }
   }
 
-  // iOS
+  // iOS — system handles rationale via NSMicrophoneUsageDescription
   try {
     const { status } = await Audio.requestPermissionsAsync();
     return status === 'granted' ? 'granted' : 'denied';
   } catch {
-    return 'granted'; // iOS fallback — assume granted if API fails
+    return 'granted';
   }
 }
 

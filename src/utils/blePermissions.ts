@@ -5,7 +5,7 @@
  * iOS permissions are handled via Info.plist.
  */
 
-import { Platform, PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid, Alert } from 'react-native';
 
 /**
  * Request BLE scanning permissions on Android 12+ (API 31+).
@@ -19,6 +19,20 @@ export async function requestBLEPermissions(): Promise<boolean> {
   // Android 12+ (API 31) requires BLUETOOTH_SCAN and BLUETOOTH_CONNECT
   if (Platform.Version >= 31) {
     try {
+      // Check if already granted (skip rationale if so)
+      const scanOk = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN);
+      const connectOk = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT);
+      if (scanOk && connectOk) return true;
+
+      // Google Play requirement: show pre-rationale BEFORE system dialog
+      await new Promise<void>((resolve) => {
+        Alert.alert(
+          'Bluetooth Access',
+          'DroneEar uses Bluetooth to detect drones broadcasting Remote ID signals (ASTM F3411). This helps identify drone type, location, and operator information. Bluetooth data stays on your device.',
+          [{ text: 'Continue', onPress: () => resolve() }],
+        );
+      });
+
       const results = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
         PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,

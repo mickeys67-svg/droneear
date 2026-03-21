@@ -8,7 +8,7 @@
  * On Android < 13: returns true (no runtime permission needed).
  */
 
-import { Platform, PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid, Alert } from 'react-native';
 
 /**
  * Request WiFi scanning permissions on Android 13+ (API 33).
@@ -20,14 +20,23 @@ export async function requestWiFiPermissions(): Promise<boolean> {
   // Android 13+ (API 33) requires NEARBY_WIFI_DEVICES
   if (Platform.Version >= 33) {
     try {
+      // Check if already granted
+      const alreadyGranted = await PermissionsAndroid.check(
+        'android.permission.NEARBY_WIFI_DEVICES' as any
+      );
+      if (alreadyGranted) return true;
+
+      // Google Play requirement: show pre-rationale BEFORE system dialog
+      await new Promise<void>((resolve) => {
+        Alert.alert(
+          'WiFi Scanning',
+          'DroneEar uses WiFi to detect drones broadcasting Remote ID via WiFi Beacon and WiFi NAN. This extends detection range beyond Bluetooth. WiFi data stays on your device.',
+          [{ text: 'Continue', onPress: () => resolve() }],
+        );
+      });
+
       const result = await PermissionsAndroid.request(
         'android.permission.NEARBY_WIFI_DEVICES' as any,
-        {
-          title: 'WiFi Scanning',
-          message: 'DroneEar needs WiFi access to detect drones broadcasting Remote ID via WiFi. This improves detection range beyond Bluetooth.',
-          buttonPositive: 'Allow',
-          buttonNegative: 'Deny',
-        }
       );
       const granted = result === PermissionsAndroid.RESULTS.GRANTED;
       if (!granted) {
