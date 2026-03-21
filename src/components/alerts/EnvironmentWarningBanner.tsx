@@ -20,11 +20,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, Animated,
-  Linking, LayoutAnimation, Platform, UIManager,
+  LayoutAnimation, Platform, UIManager,
 } from 'react-native';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
-import type { EnvironmentState, EnvironmentType } from '@/src/core/sensors/EnvironmentDetector';
+import type { EnvironmentState } from '@/src/core/sensors/EnvironmentDetector';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && Platform.Version >= 23 && UIManager.setLayoutAnimationEnabledExperimental) {

@@ -26,6 +26,8 @@ export interface MapMarker {
   remoteIdData?: RemoteIDData;
   /** Detection result (for acoustic/fused) */
   detection?: DetectionResult;
+  /** Track ID for acoustic markers (used by selectTrack) */
+  trackId?: string;
   /** Color hint for the marker */
   color: string;
 }
@@ -109,6 +111,7 @@ export function useMapData() {
           title: last.threatCategory,
           radius: Math.max(50, last.distanceMeters * 0.2),
           detection: last,
+          trackId: track.id,
           color: last.severity === 'CRITICAL' ? '#FF4444' :
                  last.severity === 'HIGH' ? '#FF8800' : '#00FF88',
         });

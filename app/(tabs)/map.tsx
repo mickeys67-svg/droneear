@@ -251,9 +251,8 @@ export default function MapScreen() {
             <TouchableOpacity
               style={[styles.trackBtn, { backgroundColor: theme.primary }, primaryGlow(theme.primary, 10)]}
               onPress={() => {
-                if (selectedMarker?.detection?.id) {
-                  selectTrack(selectedMarker.detection.id);
-                }
+                const tid = selectedMarker?.trackId || selectedMarker?.detection?.id;
+                if (tid) selectTrack(tid);
                 handleDismissMarker();
               }}
               accessibilityRole="button"

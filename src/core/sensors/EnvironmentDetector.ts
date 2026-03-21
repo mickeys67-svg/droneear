@@ -315,7 +315,8 @@ export class EnvironmentDetector {
   }
 
   private emit(): void {
-    this.callback?.(this.state);
+    // Shallow copy to ensure React detects state changes
+    this.callback?.({ ...this.state, signals: { ...this.state.signals } });
   }
 
   dispose(): void {

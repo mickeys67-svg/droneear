@@ -56,6 +56,9 @@ export class AudioClassifierEngine {
 
   // DOA tracking
   private doaChannels = 1; // 1=mono, 2=stereo (set by DroneMonitor based on profile)
+  // Pre-allocated stereo de-interleave buffers (avoid GC in hot path)
+  private _leftCh: Float32Array | null = null;
+  private _rightCh: Float32Array | null = null;
   private lastDominantFreq = 0;
   private lastBearing = 0;
   private compassHeading = 0; // Updated via setCompassHeading()
@@ -198,13 +201,16 @@ export class AudioClassifierEngine {
     if (this.doaChannels === 2 && frame.pcmData.length >= 512 && frame.pcmData.length % 2 === 0) {
       // De-interleave stereo: [L0,R0,L1,R1,...] → separate channels
       const halfLen = frame.pcmData.length / 2;
-      const leftCh = new Float32Array(halfLen);
-      const rightCh = new Float32Array(halfLen);
-      for (let i = 0; i < halfLen; i++) {
-        leftCh[i] = frame.pcmData[i * 2];
-        rightCh[i] = frame.pcmData[i * 2 + 1];
+      // Reuse pre-allocated buffers (avoid GC in hot path)
+      if (!this._leftCh || this._leftCh.length !== halfLen) {
+        this._leftCh = new Float32Array(halfLen);
+        this._rightCh = new Float32Array(halfLen);
       }
-      const relativeBearing = this.doaEstimator.estimateBearing(leftCh, rightCh);
+      for (let i = 0; i < halfLen; i++) {
+        this._leftCh[i] = frame.pcmData[i * 2];
+        this._rightCh![i] = frame.pcmData[i * 2 + 1];
+      }
+      const relativeBearing = this.doaEstimator.estimateBearing(this._leftCh, this._rightCh!);
       bearing = this.doaEstimator.toAbsoluteBearing(relativeBearing, this.compassHeading);
       this.lastBearing = bearing;
     } else {
