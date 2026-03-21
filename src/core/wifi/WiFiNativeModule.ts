@@ -124,6 +124,9 @@ export class AndroidWiFiAdapter implements WiFiAdapter {
     try {
       await this.nativeModule.startScanning();
     } catch (e) {
+      // Clean up listener on failure
+      this.subscription?.remove();
+      this.subscription = null;
       console.warn('[WiFiAdapter] Failed to start native scan:', e);
     }
   }

@@ -26,7 +26,7 @@ export function useWiFiScanner() {
   const [wifiAvailable, setWifiAvailable] = useState(false);
   const [wifiScanActive, setWifiScanActive] = useState(false);
 
-  const wifiScanEnabled = useSettingsStore((s) => s.bleScanEnabled); // Share BLE toggle for now
+  const wifiScanEnabled = useSettingsStore((s) => s.wifiScanEnabled);
 
   // Check availability on mount (Android only)
   useEffect(() => {

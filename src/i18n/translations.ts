@@ -257,6 +257,8 @@ export interface Translations {
   // BLE Remote ID
   bleScan: string;
   bleScanDesc: string;
+  wifiScan?: string;
+  wifiScanDesc?: string;
   bleEnabled: string;
   bleDisabled: string;
   bleUnavailable: string;
@@ -606,6 +608,8 @@ const ko: Translations = {
   // BLE Remote ID
   bleScan: 'BLE 원격 ID 스캔',
   bleScanDesc: 'Bluetooth로 드론 원격 식별 신호를 스캔합니다',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'WiFi로 드론 Remote ID를 스캔합니다 (Android 전용)',
   bleEnabled: 'BLE 스캔 활성화',
   bleDisabled: 'BLE 스캔 비활성화',
   bleUnavailable: 'Bluetooth를 사용할 수 없습니다',
@@ -936,6 +940,8 @@ const en: Translations = {
   // BLE Remote ID
   bleScan: 'BLE Remote ID Scan',
   bleScanDesc: 'Scan for drone Remote ID signals via Bluetooth',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'Scan for drone Remote ID via WiFi (Android only)',
   bleEnabled: 'BLE Scan Enabled',
   bleDisabled: 'BLE Scan Disabled',
   bleUnavailable: 'Bluetooth Unavailable',
@@ -1266,6 +1272,8 @@ const uk: Translations = {
   // BLE Remote ID
   bleScan: 'BLE сканування Remote ID',
   bleScanDesc: 'Сканування сигналів Remote ID дронів через Bluetooth',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'Сканування Remote ID дронів через WiFi (лише Android)',
   bleEnabled: 'BLE сканування увімкнено',
   bleDisabled: 'BLE сканування вимкнено',
   bleUnavailable: 'Bluetooth недоступний',

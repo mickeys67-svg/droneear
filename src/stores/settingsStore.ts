@@ -24,6 +24,8 @@ interface SettingsState extends AppSettings {
   setMaxHistoryItems: (count: number) => void;
   setDebugMode: (enabled: boolean) => void;
   setBLEScanEnabled: (enabled: boolean) => void;
+  wifiScanEnabled?: boolean;
+  setWiFiScanEnabled: (enabled: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -39,6 +41,7 @@ const DEFAULT_SETTINGS: AppSettings & { locale: SupportedLocale; voiceAlert: boo
   modelAutoUpdate: true,
   debugMode: false,
   bleScanEnabled: true,
+  wifiScanEnabled: true,
   locale: 'ko',
   onboardingComplete: false,
 };
@@ -68,6 +71,7 @@ export const useSettingsStore = create<SettingsState>()(
       setMaxHistoryItems: (count) => set({ maxHistoryItems: Math.max(10, Math.min(1000, count)) }),
       setDebugMode: (enabled) => set({ debugMode: enabled }),
       setBLEScanEnabled: (enabled) => set({ bleScanEnabled: enabled }),
+      setWiFiScanEnabled: (enabled) => set({ wifiScanEnabled: enabled }),
       resetToDefaults: () => set(DEFAULT_SETTINGS),
     }),
     {
@@ -86,6 +90,7 @@ export const useSettingsStore = create<SettingsState>()(
         debugMode: state.debugMode,
         locale: state.locale,
         bleScanEnabled: state.bleScanEnabled,
+        wifiScanEnabled: state.wifiScanEnabled,
         onboardingComplete: state.onboardingComplete,
       }),
     }

@@ -9,7 +9,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert, Linking } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert, Linking, Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTheme } from '@/src/hooks/useTheme';
@@ -56,6 +56,8 @@ export default function SettingsScreen() {
   const setVoiceAlert = useSettingsStore((s) => s.setVoiceAlert);
   const bleScanEnabled = useSettingsStore((s) => s.bleScanEnabled);
   const setBLEScanEnabled = useSettingsStore((s) => s.setBLEScanEnabled);
+  const wifiScanEnabled = useSettingsStore((s) => s.wifiScanEnabled);
+  const setWiFiScanEnabled = useSettingsStore((s) => s.setWiFiScanEnabled);
   const debugMode = useSettingsStore((s) => s.debugMode);
   const setDebugMode = useSettingsStore((s) => s.setDebugMode);
   const setOnboardingComplete = useSettingsStore((s) => s.setOnboardingComplete);
@@ -175,6 +177,9 @@ export default function SettingsScreen() {
           <ToggleRow label={t.audioAlert} desc={t.playWarningSound} value={alertSound} onToggle={setAlertSound} theme={theme} />
           <ToggleRow label={t.voiceAlert} desc={t.voiceAnnouncement} value={voiceAlert} onToggle={setVoiceAlert} theme={theme} />
           <ToggleRow label={t.bleScan} desc={t.bleScanDesc} value={bleScanEnabled ?? false} onToggle={setBLEScanEnabled} theme={theme} />
+          {Platform.OS === 'android' && (
+            <ToggleRow label={t.wifiScan || 'WiFi Remote ID'} desc={t.wifiScanDesc || 'Scan for drone Remote ID via WiFi (Android only)'} value={wifiScanEnabled ?? false} onToggle={setWiFiScanEnabled} theme={theme} />
+          )}
         </View>
 
         {/* ===== PROFILE ===== */}

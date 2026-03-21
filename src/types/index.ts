@@ -248,6 +248,8 @@ export interface AppSettings {
   debugMode: boolean;
   /** Enable BLE Remote ID scanning alongside acoustic detection */
   bleScanEnabled?: boolean;
+  /** Enable WiFi Remote ID scanning (Android only) */
+  wifiScanEnabled?: boolean;
 }
 
 // ===== Inference Metrics =====

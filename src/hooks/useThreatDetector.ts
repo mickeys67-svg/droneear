@@ -243,16 +243,26 @@ export function useThreatDetector() {
   useEffect(() => {
     const handleAppState = (nextState: AppStateStatus) => {
       if (appStateRef.current.match(/active/) && nextState.match(/inactive|background/)) {
-        // Going to background — pause intervals to save battery
+        // Going to background — pause intervals + BLE/WiFi scans to save battery
         if (useDetectionStore.getState().isScanning) {
           wasScanningRef.current = true;
           if (batteryIntervalRef.current) { clearInterval(batteryIntervalRef.current); batteryIntervalRef.current = null; }
           if (statusIntervalRef.current) { clearInterval(statusIntervalRef.current); statusIntervalRef.current = null; }
           if (envVoiceIntervalRef.current) { clearInterval(envVoiceIntervalRef.current); envVoiceIntervalRef.current = null; }
+          // Pause BLE + WiFi scans to prevent background battery drain
+          stopBLE().catch(() => {});
+          stopWiFi().catch(() => {});
         }
       } else if (nextState === 'active' && wasScanningRef.current) {
-        // Resuming from background — restart intervals only if not already running
+        // Resuming from background — restart intervals + BLE/WiFi scans
         wasScanningRef.current = false;
+        // Resume BLE + WiFi scans
+        if (useSettingsStore.getState().bleScanEnabled) {
+          startBLE().catch(() => {});
+        }
+        if (wifiAvailable) {
+          startWiFi().catch(() => {});
+        }
         if (!batteryIntervalRef.current) {
           batteryIntervalRef.current = setInterval(async () => {
             try {
