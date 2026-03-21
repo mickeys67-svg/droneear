@@ -366,7 +366,7 @@ export function useThreatDetector() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === 'granted') {
         locationSubRef.current = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, distanceInterval: 5 },
+          { accuracy: Location.Accuracy.Balanced, distanceInterval: 15 },
           (loc) => {
             const pos = {
               latitude: loc.coords.latitude,

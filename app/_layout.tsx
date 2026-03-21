@@ -139,8 +139,8 @@ const errorStyles = StyleSheet.create({
     marginBottom: 12,
   },
   message: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
     fontFamily: 'monospace',
     textAlign: 'center',
     lineHeight: 20,
@@ -168,8 +168,8 @@ const errorStyles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   version: {
-    color: 'rgba(255,255,255,0.2)',
-    fontSize: 11,
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
     fontFamily: 'monospace',
     marginTop: 24,
   },
@@ -199,9 +199,9 @@ export default function RootLayout() {
   // Apply RTL for Arabic, Hebrew, Urdu, Gulf Arabic
   useRTLSupport(locale);
 
-  // Splash timer — show LoadingScreen for initial hydration
+  // Splash timer — minimum visible time + store hydration check
   useEffect(() => {
-    const timer = setTimeout(() => setAppReady(true), 1800);
+    const timer = setTimeout(() => setAppReady(true), 900);
     return () => clearTimeout(timer);
   }, []);
 

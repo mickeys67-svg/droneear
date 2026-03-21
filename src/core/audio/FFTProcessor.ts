@@ -12,6 +12,11 @@ export class FFTProcessor {
   private cosTable: Float32Array;
   private sinTable: Float32Array;
   private windowFunction: Float32Array;
+  // Pre-allocated buffers to avoid GC pressure in hot path
+  private _windowed: Float32Array;
+  private _real: Float32Array;
+  private _imag: Float32Array;
+  private _magnitudes: Float32Array;
 
   constructor(fftSize: number = 2048) {
     if ((fftSize & (fftSize - 1)) !== 0) {
@@ -33,18 +38,27 @@ export class FFTProcessor {
     for (let i = 0; i < fftSize; i++) {
       this.windowFunction[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (fftSize - 1)));
     }
+
+    // Pre-allocate reusable buffers (avoids ~5 allocations per frame)
+    this._windowed = new Float32Array(fftSize);
+    this._real = new Float32Array(fftSize);
+    this._imag = new Float32Array(fftSize);
+    this._magnitudes = new Float32Array(this.halfSize + 1);
   }
 
   /**
    * Apply window function to input signal.
    */
   applyWindow(signal: Float32Array): Float32Array {
-    const windowed = new Float32Array(signal.length);
     const len = Math.min(signal.length, this.fftSize);
     for (let i = 0; i < len; i++) {
-      windowed[i] = signal[i] * this.windowFunction[i];
+      this._windowed[i] = signal[i] * this.windowFunction[i];
     }
-    return windowed;
+    // Zero-fill remainder if signal is shorter than fftSize
+    for (let i = len; i < this.fftSize; i++) {
+      this._windowed[i] = 0;
+    }
+    return this._windowed;
   }
 
   /**
@@ -52,24 +66,24 @@ export class FFTProcessor {
    * Returns array of length fftSize/2 + 1 (DC to Nyquist).
    */
   computeMagnitudeSpectrum(signal: Float32Array): Float32Array {
-    const windowed = this.applyWindow(signal);
-    const { real, imag } = this.fft(windowed);
+    this.applyWindow(signal);
+    this.fftInPlace(this._windowed);
 
-    const magnitudes = new Float32Array(this.halfSize + 1);
     for (let i = 0; i <= this.halfSize; i++) {
-      magnitudes[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
+      this._magnitudes[i] = Math.sqrt(this._real[i] * this._real[i] + this._imag[i] * this._imag[i]);
     }
-    return magnitudes;
+    return this._magnitudes;
   }
 
   /**
    * Compute power spectrum in dB.
    */
   computePowerSpectrum(signal: Float32Array): Float32Array {
-    const magnitudes = this.computeMagnitudeSpectrum(signal);
-    const power = new Float32Array(magnitudes.length);
-    for (let i = 0; i < magnitudes.length; i++) {
-      power[i] = 20 * Math.log10(Math.max(magnitudes[i], 1e-10));
+    this.computeMagnitudeSpectrum(signal);
+    // Reuse _magnitudes buffer — convert to dB in-place
+    const power = new Float32Array(this._magnitudes.length);
+    for (let i = 0; i < this._magnitudes.length; i++) {
+      power[i] = 20 * Math.log10(Math.max(this._magnitudes[i], 1e-10));
     }
     return power;
   }
@@ -99,10 +113,17 @@ export class FFTProcessor {
   /**
    * Cooley-Tukey FFT (in-place, radix-2).
    */
-  private fft(input: Float32Array): { real: Float32Array; imag: Float32Array } {
+  /**
+   * In-place FFT using pre-allocated _real/_imag buffers.
+   * Results are written to this._real and this._imag.
+   */
+  private fftInPlace(input: Float32Array): void {
     const n = this.fftSize;
-    const real = new Float32Array(n);
-    const imag = new Float32Array(n);
+    const real = this._real;
+    const imag = this._imag;
+
+    // Clear imag buffer
+    imag.fill(0);
 
     // Bit-reversal permutation
     const bits = Math.round(Math.log2(n));
@@ -128,8 +149,6 @@ export class FFTProcessor {
         }
       }
     }
-
-    return { real, imag };
   }
 
   private reverseBits(x: number, bits: number): number {
