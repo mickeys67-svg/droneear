@@ -2,15 +2,13 @@
  * BLE Remote ID Scanner — v1.0
  *
  * Scans for ASTM F3411 Open Drone ID BLE advertisements.
- * Uses an adapter pattern: currently ships with a mock adapter for
- * development/Expo Go. Replace with a real BLE adapter (react-native-ble-plx)
- * when building a production native binary.
+ * Uses an adapter pattern with react-native-ble-plx (RealBLEAdapter).
  *
  * Architecture:
  *   BLERemoteIDScanner (public API)
  *     └─ BLEAdapter (interface)
- *          ├─ MockBLEAdapter (dev/testing — simulates Remote ID beacons)
- *          └─ (future) RealBLEAdapter (react-native-ble-plx wrapper)
+ *          ├─ RealBLEAdapter (react-native-ble-plx — production)
+ *          └─ NullBLEAdapter (Expo Go fallback — no-op)
  */
 
 import { RemoteIDParser, ODID_SERVICE_UUID } from './RemoteIDParser';
@@ -31,101 +29,6 @@ export interface BLEAdapter {
   startScan(onDevice: (device: BLEAdapterDevice) => void): Promise<void>;
   stopScan(): Promise<void>;
   dispose(): void;
-}
-
-// ===== Mock BLE Adapter (for dev/Expo Go) =====
-
-export class MockBLEAdapter implements BLEAdapter {
-  private timer: ReturnType<typeof setInterval> | null = null;
-  private counter = 0;
-
-  async isAvailable(): Promise<boolean> {
-    return true; // Always available in mock
-  }
-
-  async startScan(onDevice: (device: BLEAdapterDevice) => void): Promise<void> {
-    this.counter = 0;
-
-    // Simulate periodic Remote ID beacon discovery
-    this.timer = setInterval(() => {
-      this.counter++;
-
-      // Simulate 1-3 drones appearing over time
-      if (this.counter % 8 === 0) {
-        onDevice(this.generateMockDevice('MOCK-DJI-001', 'DJI-Mavic3-RID', -65));
-      }
-      if (this.counter % 12 === 0) {
-        onDevice(this.generateMockDevice('MOCK-AUTEL-002', 'Autel-EVO2-RID', -78));
-      }
-      if (this.counter % 20 === 0) {
-        onDevice(this.generateMockDevice('MOCK-SKYDIO-003', 'Skydio-X10-RID', -85));
-      }
-    }, 2000);
-  }
-
-  async stopScan(): Promise<void> {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
-  }
-
-  dispose(): void {
-    this.stopScan();
-  }
-
-  private generateMockDevice(id: string, name: string, baseRssi: number): BLEAdapterDevice {
-    // Build a mock ODID Basic ID message
-    const basicId = new Uint8Array(25);
-    basicId[0] = 0x01; // msg type 0x0, id type 0x1 (serial)
-    basicId[1] = 2;    // UA type: Helicopter/Multirotor
-
-    // Write serial number
-    const serial = id;
-    for (let i = 0; i < serial.length && i < 20; i++) {
-      basicId[2 + i] = serial.charCodeAt(i);
-    }
-
-    // Build a mock ODID Location message
-    const location = new Uint8Array(25);
-    location[0] = 0x10; // msg type 0x1
-    location[2] = 90;   // heading = 180°
-
-    // Speed: ~15 m/s
-    location[3] = 60;   // 60 * 0.25 = 15 m/s
-
-    // Lat/Lon: Seoul area (37.5665°N, 126.9780°E) with random offset
-    const baseLat = 37.5665 + (Math.random() - 0.5) * 0.01;
-    const baseLon = 126.978 + (Math.random() - 0.5) * 0.01;
-    this.writeInt32LE(location, 5, Math.round(baseLat * 1e7));
-    this.writeInt32LE(location, 9, Math.round(baseLon * 1e7));
-
-    // Altitude: ~120m
-    const altRaw = Math.round((120 + 1000) / 0.5);
-    location[13] = altRaw & 0xFF;
-    location[14] = (altRaw >> 8) & 0xFF;
-
-    // Combine into message pack
-    const pack = new Uint8Array(2 + 50);
-    pack[0] = 0xF0; // Message pack header
-    pack[1] = 2;     // 2 messages
-    pack.set(basicId, 2);
-    pack.set(location, 27);
-
-    return {
-      id,
-      name,
-      rssi: baseRssi + Math.round((Math.random() - 0.5) * 6),
-      serviceData: pack,
-    };
-  }
-
-  private writeInt32LE(arr: Uint8Array, offset: number, value: number): void {
-    arr[offset] = value & 0xFF;
-    arr[offset + 1] = (value >> 8) & 0xFF;
-    arr[offset + 2] = (value >> 16) & 0xFF;
-    arr[offset + 3] = (value >> 24) & 0xFF;
-  }
 }
 
 // ===== Public Scanner =====

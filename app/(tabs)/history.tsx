@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   categoryBadgeText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   footerText: {
-    fontSize: 10,
+    fontSize: 11,
     textAlign: 'center',
     fontStyle: 'italic',
   },

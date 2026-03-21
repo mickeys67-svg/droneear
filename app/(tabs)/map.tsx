@@ -215,25 +215,36 @@ export default function MapScreen() {
             </View>
           </View>
 
-          {/* Acoustic Signature Placeholder */}
+          {/* Acoustic Signature — real spectral data from detection */}
+          {selectedMarker.detection?.spectralSignature && selectedMarker.detection.spectralSignature.length > 0 && (
           <View style={styles.waveformSection}>
             <Text style={[styles.waveformLabel, { color: theme.textMuted }]}>{t.acousticSignature || 'Acoustic Signature'}</Text>
             <View style={styles.waveformContainer}>
-              {Array.from({ length: 24 }).map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.waveformBar,
-                    {
-                      height: 4 + Math.sin(i * 0.7) * 12 + Math.sin(i * 1.3 + 2) * 3,
-                      opacity: 0.3 + Math.sin(i * 0.5) * 0.4,
-                      backgroundColor: theme.primary,
-                    },
-                  ]}
-                />
-              ))}
+              {(() => {
+                const sig = selectedMarker.detection!.spectralSignature;
+                const step = Math.max(1, Math.floor(sig.length / 24));
+                const bars: number[] = [];
+                for (let i = 0; i < sig.length && bars.length < 24; i += step) {
+                  bars.push(Math.abs(sig[i]) || 0);
+                }
+                const maxVal = Math.max(...bars, 0.01);
+                return bars.map((val, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.waveformBar,
+                      {
+                        height: 4 + (val / maxVal) * 20,
+                        opacity: 0.4 + (val / maxVal) * 0.5,
+                        backgroundColor: theme.primary,
+                      },
+                    ]}
+                  />
+                ));
+              })()}
             </View>
           </View>
+          )}
 
           {/* Action Buttons */}
           <View style={styles.sheetActions}>
@@ -404,7 +415,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   sheetCategoryText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -440,7 +451,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   sheetStatLabel: {
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
     marginBottom: 6,
@@ -518,7 +529,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   waveformLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
     letterSpacing: 0.8,
     textTransform: 'uppercase',

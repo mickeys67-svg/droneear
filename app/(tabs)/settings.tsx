@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
 
   // Disclaimer
   disclaimerBox: { borderTopWidth: 0.5, paddingTop: 16, marginTop: 8, marginBottom: 8 },
-  disclaimerText: { fontSize: 10, lineHeight: 14, fontStyle: 'italic', textAlign: 'center' },
+  disclaimerText: { fontSize: 11, lineHeight: 14, fontStyle: 'italic', textAlign: 'center' },
 
   // Reset button
   resetBtn: { marginTop: 12, padding: 14, borderRadius: 10, borderWidth: 1, alignItems: 'center' },

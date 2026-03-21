@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     minHeight: 2,
   },
   label: {
-    fontSize: 8,
+    fontSize: 11,
     textAlign: 'center',
     marginTop: 4,
     letterSpacing: 1,

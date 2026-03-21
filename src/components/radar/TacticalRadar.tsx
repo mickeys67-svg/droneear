@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   rangeLabel: {
     position: 'absolute',
-    fontSize: 8,
+    fontSize: 11,
     opacity: 0.5,
   },
   sweep: {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   etaLabel: {
     position: 'absolute',
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: 'bold',
   },
   bleDot: {

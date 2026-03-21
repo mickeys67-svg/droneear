@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   rangeLabel: { fontSize: 13, fontWeight: '600' },
   rangeValue: { fontSize: 14, fontWeight: '800', fontVariant: ['tabular-nums'] },
-  rangeNote: { fontSize: 10, fontStyle: 'italic', marginTop: 10, textAlign: 'center' },
+  rangeNote: { fontSize: 11, fontStyle: 'italic', marginTop: 10, textAlign: 'center' },
 
   // Limits
   limitDesc: { fontSize: 13, lineHeight: 20 },
@@ -235,5 +235,5 @@ const styles = StyleSheet.create({
 
   // Disclaimer
   disclaimerBox: { borderTopWidth: 0.5, paddingTop: 16, marginTop: 8, marginBottom: 8 },
-  disclaimerText: { fontSize: 10, lineHeight: 14, fontStyle: 'italic', textAlign: 'center' },
+  disclaimerText: { fontSize: 11, lineHeight: 14, fontStyle: 'italic', textAlign: 'center' },
 });

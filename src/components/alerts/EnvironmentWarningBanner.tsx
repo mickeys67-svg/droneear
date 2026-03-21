@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   capabilityLabel: {
     fontFamily: 'monospace',
-    fontSize: 10,
+    fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   envBadge: {
     fontFamily: 'monospace',
-    fontSize: 9,
+    fontSize: 11,
     marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   },
   stepLabel: {
     fontFamily: 'monospace',
-    fontSize: 8,
+    fontSize: 11,
     marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   },
   stepDesc: {
     fontFamily: 'monospace',
-    fontSize: 10,
+    fontSize: 11,
     lineHeight: 16,
   },
   stepActions: {

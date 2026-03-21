@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   // Debug panel
   debugPanel: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 12, flexWrap: 'wrap' },
   debugItem: { alignItems: 'center', minWidth: 55 },
-  debugLabel: { fontSize: 10, letterSpacing: 0.5 },
+  debugLabel: { fontSize: 11, letterSpacing: 0.5 },
   debugValue: { fontSize: 13, fontWeight: '700', marginTop: 2 },
 
   // Disclaimer

@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   disclaimer: {
-    fontSize: 8,
+    fontSize: 11,
     fontStyle: 'italic',
     marginTop: 4,
     textAlign: 'center',
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   confidenceLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
     marginTop: 6,
     textAlign: 'center',
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   dataSublabel: {
-    fontSize: 8,
+    fontSize: 11,
     marginTop: 2,
     fontStyle: 'italic',
     textAlign: 'right',
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   accuracyNote: {
-    fontSize: 8,
+    fontSize: 11,
     marginTop: 6,
     fontStyle: 'italic',
   },

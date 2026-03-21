@@ -253,7 +253,7 @@ export const glassStyles = StyleSheet.create({
 
   // Data label
   dataLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600' as const,
     letterSpacing: 0.8,
     textTransform: 'uppercase' as const,

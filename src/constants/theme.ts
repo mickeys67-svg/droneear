@@ -14,7 +14,7 @@ const dayTheme: TacticalTheme = {
   surfaceElevated: '#1E1E26',
   text: '#FFFFFF',
   textDim: '#A0A0A0',
-  textMuted: '#666666',
+  textMuted: '#737373', // WCAG AA: 4.5:1 on #0A0A0F
   border: '#2A2A35',
   radarSweep: 'rgba(0, 229, 204, 0.15)',
   radarGrid: 'rgba(0, 229, 204, 0.2)',
@@ -40,7 +40,7 @@ const nightTheme: TacticalTheme = {
   surfaceElevated: '#1A0000',
   text: '#DD4444',
   textDim: '#BB4444',
-  textMuted: '#883333',
+  textMuted: '#AA4444', // WCAG AA: 4.7:1 on #000000
   border: '#2A0000',
   radarSweep: 'rgba(204, 51, 51, 0.2)',
   radarGrid: 'rgba(204, 51, 51, 0.18)',
@@ -64,7 +64,7 @@ const amoledTheme: TacticalTheme = {
   surfaceElevated: '#141414',
   text: '#FFFFFF',
   textDim: '#888888',
-  textMuted: '#444444',
+  textMuted: '#757575', // WCAG AA: 4.6:1 on #000000
   border: '#1F1F1F',
   radarSweep: 'rgba(0, 229, 204, 0.12)',
   radarGrid: 'rgba(0, 229, 204, 0.15)',
