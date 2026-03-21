@@ -148,15 +148,15 @@ export default function HomeScreen() {
 
   const handleScanToggle = useCallback(() => {
     if (isScanning) {
-      stopScanning();
+      stopScanning().catch((e) => console.warn('[Scan] Stop error:', e));
     } else {
-      startScanning();
+      startScanning().catch((e) => console.warn('[Scan] Start error:', e));
     }
   }, [isScanning, startScanning, stopScanning]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <StatusBar barStyle={theme.mode === 'DAY' ? 'dark-content' : 'light-content'} backgroundColor={theme.background} />
+      <StatusBar barStyle="light-content" backgroundColor={theme.background} />
 
       {/* Full-screen mic permission blocked overlay */}
       {micPermissionBlocked && (

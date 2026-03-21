@@ -83,7 +83,7 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
       return zeroBars;
     }
 
-    const binSize = Math.floor(spectralData.length / numBars);
+    const binSize = Math.max(1, Math.floor(spectralData.length / numBars));
     const values: number[] = [];
 
     for (let i = 0; i < numBars; i++) {
