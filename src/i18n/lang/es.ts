@@ -284,6 +284,13 @@ export const es: Translations = {
   resetOnboarding: 'Reiniciar introducción',
   resetOnboardingMsg: 'Esto reiniciará el proceso de configuración. ¿Continuar?',
   ok: 'OK',
+  privacyPolicy: 'Política de privacidad',
+  batteryWarning: 'Batería baja',
+  batteryHalf: 'Batería por debajo del 50%. Considere conectar una batería externa.',
+  batteryLow: 'Batería por debajo del 30%. Conecte una batería externa o cargador.',
+  batteryCritical: 'Batería críticamente baja. Conecte alimentación inmediatamente.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'Escanear Remote ID de drones por WiFi (solo Android)',
 
   // History
   historyTab: 'HISTORIAL',

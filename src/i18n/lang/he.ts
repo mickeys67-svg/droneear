@@ -286,6 +286,13 @@ export const he: Translations = {
   resetOnboarding: 'איפוס הדרכה',
   resetOnboardingMsg: 'פעולה זו תפעיל מחדש את תהליך ההגדרה. להמשיך?',
   ok: 'אישור',
+  privacyPolicy: 'מדיניות פרטיות',
+  batteryWarning: 'סוללה חלשה',
+  batteryHalf: 'הסוללה מתחת ל-50%. מומלץ לחבר מטען נייד לסריקה ממושכת.',
+  batteryLow: 'הסוללה מתחת ל-30%. חבר מטען נייד או מקור חשמל.',
+  batteryCritical: 'הסוללה קריטית. חבר חשמל מיד.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'סריקת Remote ID דרך WiFi (Android בלבד)',
 
   // History
   historyTab: 'היסטוריה',

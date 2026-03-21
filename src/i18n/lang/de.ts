@@ -284,6 +284,13 @@ export const de: Translations = {
   resetOnboarding: 'Einführung zurücksetzen',
   resetOnboardingMsg: 'Der Einrichtungsprozess wird neu gestartet. Fortfahren?',
   ok: 'OK',
+  privacyPolicy: 'Datenschutzrichtlinie',
+  batteryWarning: 'Niedriger Akkustand',
+  batteryHalf: 'Akku unter 50%. Erwägen Sie eine Powerbank für längeres Scannen.',
+  batteryLow: 'Akku unter 30%. Verbinden Sie eine Powerbank oder ein Ladegerät.',
+  batteryCritical: 'Akku kritisch niedrig. Sofort Stromversorgung anschließen.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'Drohnen-Remote-ID per WiFi scannen (nur Android)',
 
   // History
   historyTab: 'VERLAUF',

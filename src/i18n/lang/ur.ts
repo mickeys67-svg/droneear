@@ -284,6 +284,13 @@ export const ur: Translations = {
   resetOnboarding: 'آن بورڈنگ ری سیٹ',
   resetOnboardingMsg: 'یہ سیٹ اپ عمل دوبارہ شروع کرے گا۔ جاری رکھیں؟',
   ok: 'ٹھیک ہے',
+  privacyPolicy: 'رازداری کی پالیسی',
+  batteryWarning: 'کم بیٹری',
+  batteryHalf: 'بیٹری 50% سے کم۔ طویل اسکیننگ کے لیے پاور بینک لگائیں۔',
+  batteryLow: 'بیٹری 30% سے کم۔ پاور بینک یا چارجر لگائیں۔',
+  batteryCritical: 'بیٹری انتہائی کم۔ فوری طور پر پاور لگائیں۔',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'WiFi سے ڈرون Remote ID اسکین کریں (صرف Android)',
 
   // History
   historyTab: 'تاریخ',

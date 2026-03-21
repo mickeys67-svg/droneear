@@ -284,6 +284,13 @@ export const fr: Translations = {
   resetOnboarding: 'Réinitialiser l\'introduction',
   resetOnboardingMsg: 'Cela redémarrera le processus de configuration. Continuer ?',
   ok: 'OK',
+  privacyPolicy: 'Politique de confidentialité',
+  batteryWarning: 'Batterie faible',
+  batteryHalf: 'Batterie en dessous de 50%. Envisagez de connecter une batterie externe.',
+  batteryLow: 'Batterie en dessous de 30%. Connectez une batterie externe ou un chargeur.',
+  batteryCritical: 'Batterie critique. Connectez l\'alimentation immédiatement.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'Scanner le Remote ID par WiFi (Android uniquement)',
 
   // History
   historyTab: 'HISTORIQUE',

@@ -287,6 +287,13 @@ export const ar_gulf: Translations = {
   resetOnboarding: 'إعادة تعيين المقدمة',
   resetOnboardingMsg: 'بيرجع عملية الإعداد من أول. تبي تكمل؟',
   ok: 'أوكي',
+  privacyPolicy: 'سياسة الخصوصية',
+  batteryWarning: 'البطارية ضعيفة',
+  batteryHalf: 'البطارية أقل من 50%. وصّل باور بانك عشان تكمل المسح.',
+  batteryLow: 'البطارية أقل من 30%. وصّل باور بانك أو شاحن.',
+  batteryCritical: 'البطارية خلصت تقريباً. وصّل الشاحن الحين.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'مسح Remote ID عن طريق WiFi (بس Android)',
 
   // History
   historyTab: 'السجل',

@@ -284,6 +284,13 @@ export const zh: Translations = {
   resetOnboarding: '重置引导',
   resetOnboardingMsg: '这将重新启动设置过程。是否继续？',
   ok: '确定',
+  privacyPolicy: '隐私政策',
+  batteryWarning: '电量不足',
+  batteryHalf: '电量低于50%。建议连接充电宝以延长扫描时间。',
+  batteryLow: '电量低于30%。请连接充电宝或充电器。',
+  batteryCritical: '电量严重不足。请立即连接电源。',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: '通过WiFi扫描无人机Remote ID（仅限Android）',
 
   // History
   historyTab: '历史',

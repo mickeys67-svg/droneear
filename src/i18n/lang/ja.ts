@@ -284,6 +284,13 @@ export const ja: Translations = {
   resetOnboarding: 'オンボーディングをリセット',
   resetOnboardingMsg: 'セットアッププロセスを再開します。続行しますか？',
   ok: 'OK',
+  privacyPolicy: 'プライバシーポリシー',
+  batteryWarning: 'バッテリー残量低下',
+  batteryHalf: 'バッテリーが50%以下です。長時間スキャンにはモバイルバッテリーの接続をお勧めします。',
+  batteryLow: 'バッテリーが30%以下です。モバイルバッテリーまたは充電器を接続してください。',
+  batteryCritical: 'バッテリー残量が非常に少ないです。直ちに電源を接続してください。',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'WiFiでドローンRemote IDをスキャン（Androidのみ）',
 
   // History
   historyTab: '履歴',

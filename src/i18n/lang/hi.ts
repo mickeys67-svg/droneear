@@ -284,6 +284,13 @@ export const hi: Translations = {
   resetOnboarding: 'ऑनबोर्डिंग रीसेट करें',
   resetOnboardingMsg: 'यह सेटअप प्रक्रिया पुनः आरंभ करेगा। जारी रखें?',
   ok: 'ठीक है',
+  privacyPolicy: 'गोपनीयता नीति',
+  batteryWarning: 'कम बैटरी',
+  batteryHalf: 'बैटरी 50% से कम। लंबे स्कैन के लिए पावर बैंक कनेक्ट करें।',
+  batteryLow: 'बैटरी 30% से कम। पावर बैंक या चार्जर कनेक्ट करें।',
+  batteryCritical: 'बैटरी गंभीर रूप से कम। तुरंत पावर कनेक्ट करें।',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'WiFi से ड्रोन Remote ID स्कैन करें (केवल Android)',
 
   // History
   historyTab: 'इतिहास',

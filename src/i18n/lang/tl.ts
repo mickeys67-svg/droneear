@@ -284,6 +284,13 @@ export const tl: Translations = {
   resetOnboarding: 'I-reset ang Onboarding',
   resetOnboardingMsg: 'I-re-restart nito ang setup process. Magpatuloy?',
   ok: 'OK',
+  privacyPolicy: 'Patakaran sa Privacy',
+  batteryWarning: 'Mababang Baterya',
+  batteryHalf: 'Baterya nasa ibaba ng 50%. Ikonekta ang power bank para sa matagal na pag-scan.',
+  batteryLow: 'Baterya nasa ibaba ng 30%. Ikonekta ang power bank o charger.',
+  batteryCritical: 'Kritikal na mababa ang baterya. Ikonekta agad ang power.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'I-scan ang drone Remote ID sa pamamagitan ng WiFi (Android lang)',
 
   // History
   historyTab: 'KASAYSAYAN',

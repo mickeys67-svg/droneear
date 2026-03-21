@@ -287,6 +287,13 @@ export const ar: Translations = {
   resetOnboarding: 'إعادة تعيين المقدمة',
   resetOnboardingMsg: 'سيتم إعادة تشغيل عملية الإعداد. هل تريد المتابعة؟',
   ok: 'موافق',
+  privacyPolicy: 'سياسة الخصوصية',
+  batteryWarning: 'البطارية منخفضة',
+  batteryHalf: 'البطارية أقل من 50%. يُنصح بتوصيل شاحن محمول للمسح المطول.',
+  batteryLow: 'البطارية أقل من 30%. قم بتوصيل شاحن محمول أو مصدر طاقة.',
+  batteryCritical: 'البطارية منخفضة جداً. قم بتوصيل الطاقة فوراً.',
+  wifiScan: 'WiFi Remote ID',
+  wifiScanDesc: 'مسح Remote ID عبر WiFi (Android فقط)',
 
   // History
   historyTab: 'السجل',
