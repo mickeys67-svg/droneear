@@ -222,6 +222,12 @@ export const he: Translations = {
   bleSerialNumber: 'מספר סידורי',
   bleOperatorLocation: 'מיקום מפעיל',
   bleNoDevices: 'לא נמצאו מכשירי BLE',
+  bleWifiNotice: 'רחפנים מובילים (DJI, Skydio וכו\') משדרים Remote ID דרך WiFi. קליטת WiFi Remote ID זמינה רק ב-Android.',
+  bleWifiNoticeDesc: 'ב-iOS, סריקת WiFi חסומה על ידי מדיניות Apple. ניתן לקלוט רק Bluetooth (BLE) Remote ID.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: Android בלבד',
+  audioDetectionNote: 'זיהוי כפול: אודיו + BLE',
+  audioDetectionDesc: 'DroneEar מזהה רחפנים באמצעות ניתוח אקוסטי וסריקת BLE Remote ID לדיוק מרבי.',
+  androidWifiSupported: 'WiFi Remote ID נתמך במכשיר זה',
 
   // Map
   mapTab: 'מפה',

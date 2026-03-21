@@ -220,6 +220,12 @@ export const ja: Translations = {
   bleSerialNumber: 'シリアル番号',
   bleOperatorLocation: '操縦者の位置',
   bleNoDevices: 'BLEデバイスが見つかりません',
+  bleWifiNotice: '主要なドローン（DJI、Skydioなど）はWiFi経由でRemote IDを送信します。WiFi Remote IDの受信はAndroidのみ対応しています。',
+  bleWifiNoticeDesc: 'iOSではAppleのポリシーによりWiFiスキャンがブロックされています。Bluetooth（BLE）Remote IDのみ受信可能です。',
+  bleWifiAndroidOnly: 'WiFi Remote ID：Androidのみ',
+  audioDetectionNote: '音響 + BLE デュアル検出',
+  audioDetectionDesc: 'DroneEarは音響分析とBLE Remote IDスキャンを同時に使用して最大の検出精度を提供します。',
+  androidWifiSupported: 'このデバイスでWiFi Remote ID対応',
 
   // Map
   mapTab: '地図',

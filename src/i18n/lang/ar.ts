@@ -223,6 +223,12 @@ export const ar: Translations = {
   bleSerialNumber: 'الرقم التسلسلي',
   bleOperatorLocation: 'موقع المشغّل',
   bleNoDevices: 'لم يتم العثور على أجهزة BLE',
+  bleWifiNotice: 'الطائرات الرئيسية (DJI، Skydio، إلخ) تبث Remote ID عبر WiFi. استقبال WiFi Remote ID متاح فقط على Android.',
+  bleWifiNoticeDesc: 'على iOS، يتم حظر فحص WiFi بموجب سياسة Apple. يمكن استقبال Bluetooth (BLE) Remote ID فقط.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: Android فقط',
+  audioDetectionNote: 'كشف مزدوج: صوتي + BLE',
+  audioDetectionDesc: 'DroneEar يكتشف الطائرات باستخدام التحليل الصوتي ومسح BLE Remote ID لأقصى دقة.',
+  androidWifiSupported: 'WiFi Remote ID مدعوم على هذا الجهاز',
 
   // Map
   mapTab: 'خريطة',

@@ -220,6 +220,12 @@ export const zh: Translations = {
   bleSerialNumber: '序列号',
   bleOperatorLocation: '操作员位置',
   bleNoDevices: '未发现BLE设备',
+  bleWifiNotice: '主流无人机（DJI、Skydio等）通过WiFi广播Remote ID。WiFi Remote ID接收仅在Android上可用。',
+  bleWifiNoticeDesc: '在iOS上，WiFi扫描被Apple政策阻止。只能接收蓝牙（BLE）Remote ID。',
+  bleWifiAndroidOnly: 'WiFi Remote ID：仅限Android',
+  audioDetectionNote: '声学 + BLE 双重检测',
+  audioDetectionDesc: 'DroneEar使用声学分析和BLE Remote ID扫描同时进行，提供最大检测精度。',
+  androidWifiSupported: '此设备支持WiFi Remote ID',
 
   // Map
   mapTab: '地图',

@@ -223,6 +223,12 @@ export const ar_gulf: Translations = {
   bleSerialNumber: 'الرقم التسلسلي',
   bleOperatorLocation: 'موقع المشغّل',
   bleNoDevices: 'ما لقينا أجهزة BLE',
+  bleWifiNotice: 'الدرونات الرئيسية (DJI، Skydio، إلخ) تبث Remote ID عن طريق WiFi. استقبال WiFi Remote ID بس على Android.',
+  bleWifiNoticeDesc: 'على iOS، فحص WiFi ممنوع حسب سياسة Apple. بس Bluetooth (BLE) Remote ID يشتغل.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: بس Android',
+  audioDetectionNote: 'كشف مزدوج: صوتي + BLE',
+  audioDetectionDesc: 'DroneEar يكشف الدرونات بالتحليل الصوتي ومسح BLE Remote ID لأعلى دقة.',
+  androidWifiSupported: 'WiFi Remote ID يشتغل على هالجهاز',
 
   // Map
   mapTab: 'خريطة',

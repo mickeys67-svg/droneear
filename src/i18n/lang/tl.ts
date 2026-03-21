@@ -220,6 +220,12 @@ export const tl: Translations = {
   bleSerialNumber: 'Serial Number',
   bleOperatorLocation: 'Lokasyon ng operator',
   bleNoDevices: 'Walang nakitang BLE device',
+  bleWifiNotice: 'Ang mga pangunahing drone (DJI, Skydio, atbp.) ay nagbo-broadcast ng Remote ID sa pamamagitan ng WiFi. Ang WiFi Remote ID reception ay available lang sa Android.',
+  bleWifiNoticeDesc: 'Sa iOS, ang WiFi scanning ay naka-block dahil sa patakaran ng Apple. Bluetooth (BLE) Remote ID lang ang maaaring matanggap.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: Android lang',
+  audioDetectionNote: 'Audio + BLE Dual Detection',
+  audioDetectionDesc: 'Ang DroneEar ay nakaka-detect ng mga drone gamit ang acoustic sound analysis kasabay ng BLE Remote ID scanning para sa pinakamataas na katumpakan.',
+  androidWifiSupported: 'Sinusuportahan ang WiFi Remote ID sa device na ito',
 
   // Map
   mapTab: 'MAPA',

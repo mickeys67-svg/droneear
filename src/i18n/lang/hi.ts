@@ -220,6 +220,12 @@ export const hi: Translations = {
   bleSerialNumber: 'सीरियल नंबर',
   bleOperatorLocation: 'ऑपरेटर स्थान',
   bleNoDevices: 'कोई BLE डिवाइस नहीं मिला',
+  bleWifiNotice: 'प्रमुख ड्रोन (DJI, Skydio आदि) WiFi के माध्यम से Remote ID प्रसारित करते हैं। WiFi Remote ID रिसेप्शन केवल Android पर उपलब्ध है।',
+  bleWifiNoticeDesc: 'iOS पर, Apple की नीति द्वारा WiFi स्कैनिंग अवरुद्ध है। केवल Bluetooth (BLE) Remote ID प्राप्त किया जा सकता है।',
+  bleWifiAndroidOnly: 'WiFi Remote ID: केवल Android',
+  audioDetectionNote: 'ऑडियो + BLE दोहरा पता लगाना',
+  audioDetectionDesc: 'DroneEar ध्वनि विश्लेषण और BLE Remote ID स्कैन का उपयोग करके अधिकतम सटीकता के लिए ड्रोन का पता लगाता है।',
+  androidWifiSupported: 'इस डिवाइस पर WiFi Remote ID समर्थित',
 
   // Map
   mapTab: 'मानचित्र',

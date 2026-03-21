@@ -220,6 +220,12 @@ export const ur: Translations = {
   bleSerialNumber: 'سیریل نمبر',
   bleOperatorLocation: 'آپریٹر مقام',
   bleNoDevices: 'کوئی BLE ڈیوائس نہیں ملی',
+  bleWifiNotice: 'اہم ڈرونز (DJI، Skydio وغیرہ) WiFi کے ذریعے Remote ID نشر کرتے ہیں۔ WiFi Remote ID صرف Android پر دستیاب ہے۔',
+  bleWifiNoticeDesc: 'iOS پر، Apple کی پالیسی کی وجہ سے WiFi اسکیننگ بلاک ہے۔ صرف Bluetooth (BLE) Remote ID وصول ہو سکتا ہے۔',
+  bleWifiAndroidOnly: 'WiFi Remote ID: صرف Android',
+  audioDetectionNote: 'آڈیو + BLE دوہری تلاش',
+  audioDetectionDesc: 'DroneEar صوتی تجزیے اور BLE Remote ID اسکین کا استعمال کرتے ہوئے زیادہ سے زیادہ درستگی کے لیے ڈرونز کا پتہ لگاتا ہے۔',
+  androidWifiSupported: 'اس ڈیوائس پر WiFi Remote ID معاون ہے',
 
   // Map
   mapTab: 'نقشہ',
