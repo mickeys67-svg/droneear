@@ -114,7 +114,7 @@ export class DetectionFusionEngine {
 
     const activeTracks = tracks.filter((t) => t.isActive && t.detections.length > 0);
     const bleEntries = Object.entries(bleDevices).filter(
-      ([, data]) => data.uavLatitude != null && data.uavLongitude != null,
+      ([, data]) => data.uavLatitude != null && data.uavLongitude != null && isFinite(data.uavLatitude!) && isFinite(data.uavLongitude!),
     );
 
     if (activeTracks.length === 0 || bleEntries.length === 0) return [];

@@ -18,6 +18,7 @@ import {
   SafeAreaView, StatusBar, Linking,
   PermissionsAndroid, Platform, AppState,
 } from 'react-native';
+import { Audio } from 'expo-av';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useThreatDetector } from '@/src/hooks/useThreatDetector';
@@ -70,7 +71,7 @@ export default function HomeScreen() {
     submitFeedback,
   } = useThreatDetector();
 
-  const activeThreats = currentThreats.filter((t) => t.isActive);
+  const activeThreats = currentThreats.filter((tr) => tr.isActive);
 
   // Track selection from store
   const selectedTrackId = useDetectionStore((s) => s.selectedTrackId);
@@ -127,6 +128,14 @@ export default function HomeScreen() {
         );
         setMicPermissionBlocked(!granted);
       }
+      if (Platform.OS === 'ios') {
+        try {
+          const { status } = await Audio.getPermissionsAsync();
+          setMicPermissionBlocked(status !== 'granted');
+        } catch {
+          setMicPermissionBlocked(false);
+        }
+      }
     };
     checkMicPermission();
 
@@ -147,7 +156,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.background} />
+      <StatusBar barStyle={theme.mode === 'DAY' ? 'dark-content' : 'light-content'} backgroundColor={theme.background} />
 
       {/* Full-screen mic permission blocked overlay */}
       {micPermissionBlocked && (

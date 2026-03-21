@@ -52,6 +52,7 @@ export type CompassCallback = (data: CompassData) => void;
 const ALARM_INTERVALS = [5000, 15000, 30000, 60000]; // Escalating intervals
 
 export class SensorEnforcementManager {
+  private disposed = false;
   private sensorState: SensorState = {
     microphone: 'UNAVAILABLE',
     compass: 'UNAVAILABLE',
@@ -326,6 +327,7 @@ export class SensorEnforcementManager {
 
     // Set escalating timer
     const scheduleNext = () => {
+      if (this.disposed) return;
       const currentLevel = this.alarmEscalation.get(key) || 0;
       const interval = ALARM_INTERVALS[Math.min(currentLevel, ALARM_INTERVALS.length - 1)] || 60000;
 
@@ -373,6 +375,7 @@ export class SensorEnforcementManager {
   }
 
   dispose(): void {
+    this.disposed = true;
     this.stopMonitoring();
   }
 }

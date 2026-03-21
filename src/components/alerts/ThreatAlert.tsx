@@ -255,7 +255,7 @@ const DataRow: React.FC<{
 
 function getBearingLabel(degrees: number, t: ReturnType<typeof useTranslation>): string {
   const dirs = [t.north, t.northEast, t.east, t.southEast, t.south, t.southWest, t.west, t.northWest];
-  const idx = Math.round(degrees / 45) % 8;
+  const idx = ((Math.round(degrees / 45) % 8) + 8) % 8;
   return dirs[idx];
 }
 

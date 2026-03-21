@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
   // List
   list: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 100,
   },
 
   // Empty State

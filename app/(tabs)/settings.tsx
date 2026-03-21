@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch } from 'react-native';
+import Constants from 'expo-constants';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
@@ -225,7 +226,7 @@ export default function SettingsScreen() {
 
           {/* Version */}
           <View style={[styles.versionRow, { borderTopColor: GLASS.borderSubtle }]}>
-            <Text style={[styles.versionText, { color: theme.textMuted }]}>v2.1.0</Text>
+            <Text style={[styles.versionText, { color: theme.textMuted }]}>{Constants.expoConfig?.version ? `v${Constants.expoConfig.version}` : 'v2.1.0'}</Text>
           </View>
         </View>
 

@@ -236,7 +236,8 @@ export class BLERemoteIDScanner {
   }
 
   dispose(): void {
-    this.stopScanning();
+    this.scanning = false;
+    if (this.staleTimer) { clearInterval(this.staleTimer); this.staleTimer = null; }
     this.adapter.dispose();
     this.callback = null;
     this.devices.clear();

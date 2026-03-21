@@ -72,6 +72,15 @@ export class KalmanFilter2D {
       [FP[3][0] + dt * FP[3][2],     FP[3][1] + dt * FP[3][3],     FP[3][2], FP[3][3] + q],
     ];
 
+    // Enforce covariance symmetry (prevents numerical drift)
+    for (let i = 0; i < 4; i++) {
+      for (let j = i + 1; j < 4; j++) {
+        const avg = (newP[i][j] + newP[j][i]) / 2;
+        newP[i][j] = avg;
+        newP[j][i] = avg;
+      }
+    }
+
     return { x: newX, y: newY, vx, vy, P: newP };
   }
 
@@ -97,7 +106,7 @@ export class KalmanFilter2D {
 
     // Kalman gain: K = P*H'*inv(S)
     const detS = S00 * S11 - S01 * S10;
-    if (detS <= 1e-10) return state; // Singular, skip update
+    if (Math.abs(detS) < 1e-10) return state; // Singular, skip update
 
     const invS00 = S11 / detS;
     const invS01 = -S01 / detS;

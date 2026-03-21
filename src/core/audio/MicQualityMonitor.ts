@@ -46,7 +46,6 @@ export class MicQualityMonitor {
     }
 
     const rms = this.calculateRMS(pcmData);
-    const peak = this.calculatePeak(pcmData);
 
     // Update noise floor (track minimum RMS over time)
     this.noiseFloorHistory.push(rms);

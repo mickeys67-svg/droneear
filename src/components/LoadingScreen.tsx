@@ -82,7 +82,7 @@ function LoadingScreen({
   }));
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Center icon area */}
       <View style={styles.centerArea}>
         {/* Neumorphic circle */}

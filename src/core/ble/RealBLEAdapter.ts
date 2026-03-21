@@ -109,7 +109,8 @@ export class RealBLEAdapter implements BLEAdapter {
   }
 
   dispose(): void {
-    this.stopScan();
+    this.scanning = false;
+    this.manager.stopDeviceScan();
     this.manager.destroy();
   }
 

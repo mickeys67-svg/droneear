@@ -3,6 +3,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { I18nManager, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Constants from 'expo-constants';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -10,6 +11,7 @@ import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useDetectionStore } from '@/src/stores/detectionStore';
 import { RTL_LOCALES, type SupportedLocale, TRANSLATIONS } from '@/src/i18n/translations';
 import LoadingScreen from '@/src/components/LoadingScreen';
+import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -65,7 +67,7 @@ class AppErrorBoundary extends React.Component<{ children: React.ReactNode }, Er
           </View>
 
           {/* Version */}
-          <Text style={errorStyles.version}>v2.1.0</Text>
+          <Text style={errorStyles.version}>{Constants.expoConfig?.version ? `v${Constants.expoConfig.version}` : 'v2.1.0'}</Text>
         </View>
       );
     }
@@ -208,7 +210,7 @@ export default function RootLayout() {
     if (appReady && !onboardingComplete && (segments[0] as string) !== 'onboarding') {
       router.replace('/onboarding');
     }
-  }, [onboardingComplete, appReady]);
+  }, [segments, onboardingComplete, appReady]);
 
   if (!appReady) {
     return <LoadingScreen message={TRANSLATIONS[locale]?.initializingEngine || 'Initializing audio engine...'} />;
@@ -216,19 +218,21 @@ export default function RootLayout() {
 
   return (
     <AppErrorBoundary>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack
-          screenOptions={{
-            animation: 'fade',
-            animationDuration: 250,
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal', animation: 'slide_from_bottom' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack
+            screenOptions={{
+              animation: 'fade',
+              animationDuration: 250,
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal', animation: 'slide_from_bottom' }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </ErrorBoundary>
     </AppErrorBoundary>
   );
 }

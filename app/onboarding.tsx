@@ -16,7 +16,8 @@
 import React, { useState, useRef } from 'react';
 import {
   StyleSheet, Text, View, TouchableOpacity, SafeAreaView,
-  Dimensions, FlatList, Alert, PermissionsAndroid, Platform, Linking,
+  FlatList, Alert, PermissionsAndroid, Platform, Linking,
+  useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/hooks/useTheme';
@@ -25,8 +26,6 @@ import { useTranslation } from '@/src/i18n/useTranslation';
 import { DEVICE_PROFILES } from '@/src/constants/micConfig';
 import { GLASS, glassStyles, cyanGlow, primaryGlow } from '@/src/constants/glass';
 import type { DeviceProfile } from '@/src/types';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface OnboardingStep {
   key: string;
@@ -42,10 +41,14 @@ const STEPS: OnboardingStep[] = [
 ];
 
 export default function OnboardingScreen() {
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const theme = useTheme();
   const t = useTranslation();
   const router = useRouter();
-  const settings = useSettingsStore();
+  const profile = useSettingsStore((s) => s.profile);
+  const setProfile = useSettingsStore((s) => s.setProfile);
+  const setOnboardingComplete = useSettingsStore((s) => s.setOnboardingComplete);
+  const setBLEScanEnabled = useSettingsStore((s) => s.setBLEScanEnabled);
   const flatListRef = useRef<FlatList>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [micGranted, setMicGranted] = useState(false);
@@ -61,7 +64,7 @@ export default function OnboardingScreen() {
   };
 
   const finish = () => {
-    settings.setOnboardingComplete(true);
+    setOnboardingComplete(true);
     router.replace('/(tabs)');
   };
 
@@ -191,22 +194,22 @@ export default function OnboardingScreen() {
                   style={[
                     styles.profileCard,
                     {
-                      backgroundColor: settings.profile === key ? `${theme.primary}12` : GLASS.cardBg,
-                      borderColor: settings.profile === key ? `${theme.primary}50` : GLASS.borderSubtle,
+                      backgroundColor: profile === key ? `${theme.primary}12` : GLASS.cardBg,
+                      borderColor: profile === key ? `${theme.primary}50` : GLASS.borderSubtle,
                     },
-                    settings.profile === key && primaryGlow(theme.primary,6),
+                    profile === key && primaryGlow(theme.primary,6),
                   ]}
-                  onPress={() => settings.setProfile(key as DeviceProfile)}
+                  onPress={() => setProfile(key as DeviceProfile)}
                   accessibilityRole="button"
                   accessibilityLabel={`Select device profile: ${config.label}`}
-                  accessibilityState={{ selected: settings.profile === key }}
+                  accessibilityState={{ selected: profile === key }}
                 >
-                  {settings.profile === key && (
+                  {profile === key && (
                     <View style={[styles.checkMark, { backgroundColor: theme.primary }]}>
                       <Text style={[styles.checkMarkText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>✓</Text>
                     </View>
                   )}
-                  <Text style={[styles.profileLabel, { color: settings.profile === key ? theme.primary : theme.text }]}>
+                  <Text style={[styles.profileLabel, { color: profile === key ? theme.primary : theme.text }]}>
                     {config.label}
                   </Text>
                 </TouchableOpacity>
@@ -277,13 +280,13 @@ export default function OnboardingScreen() {
               <Text style={styles.iconEmoji}>📶</Text>
             </View>
             <TouchableOpacity style={[styles.ctaBtn, { backgroundColor: theme.primary }, primaryGlow(theme.primary,10)]} onPress={() => {
-              settings.setBLEScanEnabled(true);
+              setBLEScanEnabled(true);
               goNext();
             }} accessibilityRole="button" accessibilityLabel="Enable BLE detection">
               <Text style={[styles.ctaBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.enableBLE || 'ENABLE'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ marginTop: 16, padding: 8, minHeight: 48, justifyContent: 'center' }} onPress={() => {
-              settings.setBLEScanEnabled(false);
+              setBLEScanEnabled(false);
               goNext();
             }} accessibilityRole="button" accessibilityLabel="Skip BLE detection">
               <Text style={[{ color: theme.textMuted, fontSize: 13 }]}>{t.onboardingBLESkip}</Text>
@@ -333,6 +336,11 @@ export default function OnboardingScreen() {
         pagingEnabled
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
+        getItemLayout={(_, index) => ({
+          length: SCREEN_WIDTH,
+          offset: SCREEN_WIDTH * index,
+          index,
+        })}
       />
 
       {/* Step indicator dots */}

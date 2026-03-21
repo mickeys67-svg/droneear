@@ -180,7 +180,7 @@ export class ModelManager {
   }
 
   async predict(melFrames: Float32Array[]): Promise<Map<ThreatCategory, number>> {
-    if (this.status !== 'READY') {
+    if (this.status !== 'READY' && this.status !== 'INFERENCE') {
       throw new Error(`Model not ready. Current status: ${this.status}`);
     }
 
@@ -497,7 +497,7 @@ export class ModelManager {
     let count = 0;
 
     for (let i = 0; i < spectrum.length; i++) {
-      const val = Math.max(spectrum[i], 1e-10);
+      const val = Math.max(Math.abs(spectrum[i]), 1e-10);
       logSum += Math.log(val);
       linearSum += val;
       count++;

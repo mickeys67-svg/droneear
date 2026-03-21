@@ -79,10 +79,7 @@ export class DOAEstimator {
    * @returns Absolute bearing (0-360)
    */
   toAbsoluteBearing(relativeBearing: number, compassHeading: number): number {
-    let absolute = compassHeading + relativeBearing;
-    if (absolute < 0) absolute += 360;
-    if (absolute >= 360) absolute -= 360;
-    return absolute;
+    return ((compassHeading + relativeBearing) % 360 + 360) % 360;
   }
 
   /**
