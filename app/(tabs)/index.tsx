@@ -16,9 +16,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   StyleSheet, Text, View, ScrollView,
   SafeAreaView, StatusBar, Linking,
-  PermissionsAndroid, Platform, AppState,
+  AppState,
 } from 'react-native';
-import { Audio } from 'expo-av';
+import { checkMicPermission } from '@/src/utils/platform';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useThreatDetector } from '@/src/hooks/useThreatDetector';
@@ -121,27 +121,15 @@ export default function HomeScreen() {
   const [micPermissionBlocked, setMicPermissionBlocked] = useState(false);
 
   useEffect(() => {
-    const checkMicPermission = async () => {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        );
-        setMicPermissionBlocked(!granted);
-      }
-      if (Platform.OS === 'ios') {
-        try {
-          const { status } = await Audio.getPermissionsAsync();
-          setMicPermissionBlocked(status !== 'granted');
-        } catch {
-          setMicPermissionBlocked(false);
-        }
-      }
+    const checkMic = async () => {
+      const granted = await checkMicPermission();
+      setMicPermissionBlocked(!granted);
     };
-    checkMicPermission();
+    checkMic();
 
     // FIX-C3: Re-check on app resume (user may grant in system Settings)
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') checkMicPermission();
+      if (state === 'active') checkMic();
     });
     return () => sub.remove();
   }, []);

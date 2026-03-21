@@ -1,0 +1,37 @@
+DroneEar — Acoustic Drone Detection & Remote ID Scanner
+
+DroneEar identifies nearby drones using your smartphone's microphone and Bluetooth/WiFi sensors. All processing happens entirely on your device — no internet connection required, no data leaves your phone.
+
+KEY FEATURES
+
+Acoustic Detection
+- Real-time audio analysis using hybrid AI (rule-based + Gaussian ML)
+- Identifies 5 aircraft sound patterns: multirotor, single-engine, single-rotor, jet propulsion, fixed-wing
+- Direction of Arrival (DOA) estimation with stereo microphones
+- Distance and approach rate estimation
+
+Remote ID Scanning
+- BLE Remote ID (ASTM F3411) on both Android and iOS
+- WiFi Remote ID (WiFi Beacon + WiFi NAN) — Android exclusive
+- Reads drone serial number, GPS position, altitude, speed, heading
+- Operator location when broadcast by the drone
+
+Smart Features
+- Audio + Remote ID fusion for maximum detection accuracy
+- Real-time tactical map with drone positions
+- Detection history with detailed analysis
+- Environment detection (indoor/outdoor) with adaptive sensitivity
+- 3 display themes: Day, Night (NVG-compatible), AMOLED
+
+15 Languages Supported
+Korean, English, Ukrainian, Arabic, Gulf Arabic, Hebrew, Hindi, Urdu, Filipino, German, Spanish, French, Italian, Chinese, Japanese
+
+PRIVACY
+- 100% on-device processing
+- Zero data collection
+- No analytics or tracking
+- No internet required
+- No account needed
+
+DISCLAIMER
+DroneEar is an acoustic pattern identification tool. Detection results are probabilistic estimates based on sound analysis and should not be relied upon for security or safety decisions. Environmental conditions significantly affect detection accuracy.

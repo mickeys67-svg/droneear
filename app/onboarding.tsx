@@ -16,7 +16,7 @@
 import React, { useState, useRef } from 'react';
 import {
   StyleSheet, Text, View, TouchableOpacity, SafeAreaView,
-  FlatList, Alert, PermissionsAndroid, Platform, Linking,
+  FlatList, Alert, Platform, Linking,
   useWindowDimensions,
 } from 'react-native';
 import { Audio } from 'expo-av';
@@ -26,6 +26,7 @@ import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTranslation } from '@/src/i18n/useTranslation';
 import { DEVICE_PROFILES } from '@/src/constants/micConfig';
 import { GLASS, glassStyles, cyanGlow, primaryGlow } from '@/src/constants/glass';
+import { requestMicPermission } from '@/src/utils/platform';
 import type { DeviceProfile } from '@/src/types';
 
 interface OnboardingStep {
@@ -83,39 +84,15 @@ export default function OnboardingScreen() {
   const [micPermanentlyDenied, setMicPermanentlyDenied] = useState(false);
 
   const requestMic = async () => {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        {
-          title: 'DroneEar',
-          message: t.onboardingMicDesc,
-          buttonPositive: t.grantAccess,
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        setMicGranted(true);
-        setMicDenied(false);
-        goNext();
-        return;
-      }
-      // FIX-H5: Detect permanently denied (NEVER_ASK_AGAIN)
-      if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-        setMicPermanentlyDenied(true);
-      }
-      setMicDenied(true);
+    const result = await requestMicPermission();
+    if (result === 'granted') {
+      setMicGranted(true);
+      setMicDenied(false);
+      goNext();
     } else {
-      // iOS: request mic permission via expo-av
-      try {
-        const { status } = await Audio.requestPermissionsAsync();
-        if (status === 'granted') {
-          setMicGranted(true);
-          goNext();
-        } else {
-          setMicDenied(true);
-        }
-      } catch {
-        setMicGranted(true); // Fallback: assume granted, will be checked at recording time
-        goNext();
+      setMicDenied(true);
+      if (result === 'never_ask_again') {
+        setMicPermanentlyDenied(true);
       }
     }
   };
