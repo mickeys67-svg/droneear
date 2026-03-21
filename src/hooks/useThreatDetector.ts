@@ -17,6 +17,7 @@ import { useDetectionStore } from '../stores/detectionStore';
 import { useHistoryStore } from '../stores/historyStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useBLEScanner } from './useBLEScanner';
+import { useWiFiScanner } from './useWiFiScanner';
 import { DEVICE_PROFILES } from '../constants/micConfig';
 import type { DeviceProfile, DetectionSession } from '../types';
 import { AppState, type AppStateStatus } from 'react-native';
@@ -102,6 +103,12 @@ export function useThreatDetector() {
     bleAvailable, bleScanActive, bleDevices, bleDeviceCount,
     startBLE, stopBLE,
   } = useBLEScanner();
+
+  // WiFi Remote ID Scanner (Android only)
+  const {
+    wifiAvailable, wifiScanActive,
+    startWiFi, stopWiFi,
+  } = useWiFiScanner();
 
   // ===== Sync settings =====
   useEffect(() => { voiceRef.current.setLocale(locale); }, [locale]);
@@ -359,6 +366,11 @@ export function useThreatDetector() {
       sensorMgrRef.current.setBLEState(bleAvailable, false);
     }
 
+    // Start WiFi Remote ID scanning (Android only, parallel to BLE)
+    if (wifiAvailable) {
+      await startWiFi().catch((e) => console.warn('[WiFi] Start error:', e));
+    }
+
     voiceRef.current.announceScanStart();
 
     // Start location watch for fusion engine
@@ -423,7 +435,7 @@ export function useThreatDetector() {
       const active = threats.filter((t) => t.isActive).length;
       voiceRef.current.announceStatus(active);
     }, 30000);
-  }, [profile, bleScanEnabled, bleAvailable, startBLE]);
+  }, [profile, bleScanEnabled, bleAvailable, startBLE, wifiAvailable, startWiFi]);
 
   const stopScanning = useCallback(async () => {
     if (!detectorRef.current) return;
@@ -436,8 +448,9 @@ export function useThreatDetector() {
     sensorMgrRef.current.setRecordingState(false);
     envDetectorRef.current.stop();
 
-    // Stop BLE scanning
+    // Stop BLE + WiFi scanning
     await stopBLE();
+    await stopWiFi().catch(() => {});
     sensorMgrRef.current.setBLEState(bleAvailable, false);
 
     // Stop location watch
@@ -463,7 +476,7 @@ export function useThreatDetector() {
       clearInterval(envVoiceIntervalRef.current);
       envVoiceIntervalRef.current = null;
     }
-  }, [stopBLE, bleAvailable]);
+  }, [stopBLE, stopWiFi, bleAvailable]);
 
   const setProfile = useCallback((newProfile: DeviceProfile) => {
     useSettingsStore.getState().setProfile(newProfile);
@@ -504,6 +517,10 @@ export function useThreatDetector() {
     bleScanActive,
     bleDevices,
     bleDeviceCount,
+
+    // WiFi Remote ID state (Android only)
+    wifiAvailable,
+    wifiScanActive,
 
     // Fused detections
     fusedDetections,
