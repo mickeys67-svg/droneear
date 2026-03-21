@@ -11,7 +11,7 @@ import { useDetectionStore } from '../stores/detectionStore';
 import type { FusedDetection } from '../core/detection/DetectionFusionEngine';
 import type { RemoteIDData, ThreatTrack, DetectionResult } from '../types';
 
-export type MarkerType = 'acoustic' | 'ble' | 'fused' | 'operator';
+export type MarkerType = 'acoustic' | 'ble' | 'wifi' | 'fused' | 'operator';
 
 export interface MapMarker {
   id: string;
@@ -123,15 +123,16 @@ export function useMapData() {
       if (fusedBleIds.has(id)) continue;
       if (data.uavLatitude == null || data.uavLongitude == null) continue;
 
+      const isWiFi = id.startsWith('wifi_');
       result.push({
-        id: `ble_${id}`,
-        type: 'ble',
+        id: `${isWiFi ? 'wifi' : 'ble'}_${id}`,
+        type: isWiFi ? 'wifi' : 'ble',
         latitude: data.uavLatitude,
         longitude: data.uavLongitude,
         title: data.serialNumber || id,
         description: data.manufacturer,
         remoteIdData: data,
-        color: '#4488FF',
+        color: isWiFi ? '#00E5CC' : '#4488FF', // Cyan for WiFi, Blue for BLE
       });
 
       // Operator position

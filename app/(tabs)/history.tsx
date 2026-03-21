@@ -133,6 +133,13 @@ export default function HistoryScreen() {
                   {getCategoryShort(item.threatCategory).toUpperCase().slice(0, 8)}
                 </Text>
               </View>
+              {item.source && item.source !== 'ACOUSTIC' && (
+                <View style={[styles.categoryBadge, { backgroundColor: item.source === 'FUSED' ? '#00E5CC22' : '#4488FF22', borderColor: item.source === 'FUSED' ? '#00E5CC44' : '#4488FF44', marginLeft: 4 }]}>
+                  <Text style={[styles.categoryBadgeText, { color: item.source === 'FUSED' ? '#00E5CC' : '#4488FF' }]}>
+                    {item.source === 'FUSED' ? 'FUSED' : item.source === 'BLE_REMOTE_ID' ? 'BLE' : 'WiFi'}
+                  </Text>
+                </View>
+              )}
             </View>
             <View style={styles.cardSecondary}>
               <Text style={[styles.cardDistance, { color: theme.primary }]}>~{Math.round(item.distanceMeters)}m</Text>

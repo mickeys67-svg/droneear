@@ -65,6 +65,11 @@ export default function HomeScreen() {
     sensorState,
     sensorIssues,
     environmentState,
+    bleAvailable,
+    bleScanActive,
+    bleDeviceCount,
+    wifiAvailable,
+    wifiScanActive,
     startScanning,
     stopScanning,
     acknowledgeDetection,
@@ -238,6 +243,28 @@ export default function HomeScreen() {
               ? t.scanningTracks(activeThreats.length)
               : t.sensorOffline}
           </Text>
+
+          {/* BLE / WiFi scan status badges */}
+          {isScanning && (
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+              {bleAvailable && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: bleScanActive ? '#4488FF' : theme.textMuted }} />
+                  <Text style={{ fontSize: 11, color: bleScanActive ? '#4488FF' : theme.textMuted, fontWeight: '600' }}>
+                    BLE{bleDeviceCount > 0 ? ` (${bleDeviceCount})` : ''}
+                  </Text>
+                </View>
+              )}
+              {wifiAvailable && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: wifiScanActive ? '#00E5CC' : theme.textMuted }} />
+                  <Text style={{ fontSize: 11, color: wifiScanActive ? '#00E5CC' : theme.textMuted, fontWeight: '600' }}>
+                    WiFi
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Spectrogram */}
