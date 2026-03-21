@@ -4,7 +4,7 @@ import { createMMKVStorage } from './mmkvStorage';
 import type { AppSettings, DeviceProfile, ThemeMode } from '../types';
 import type { SupportedLocale } from '../i18n/translations';
 
-const mmkvStorage = createMMKVStorage('dronefinder-settings', 'df-tactical-2026');
+const mmkvStorage = createMMKVStorage('dronefinder-settings', 'df-settings-2026');
 
 interface SettingsState extends AppSettings {
   // Locale & voice

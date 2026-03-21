@@ -19,6 +19,7 @@ import {
   FlatList, Alert, PermissionsAndroid, Platform, Linking,
   useWindowDimensions,
 } from 'react-native';
+import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useSettingsStore } from '@/src/stores/settingsStore';
@@ -97,11 +98,28 @@ export default function OnboardingScreen() {
     }
   };
 
-  const testMicrophone = () => {
+  const testMicrophone = async () => {
     setMicTestResult('testing');
-    setTimeout(() => {
-      setMicTestResult('good');
-    }, 2000);
+    try {
+      // Record a short clip and check audio levels
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.LOW_QUALITY
+      );
+      // Record for 1.5 seconds
+      await new Promise((r) => setTimeout(r, 1500));
+      const status = await recording.getStatusAsync();
+      await recording.stopAndUnloadAsync();
+
+      // Check if we got audio data (metering level)
+      if (status.isRecording || status.durationMillis > 500) {
+        setMicTestResult('good');
+      } else {
+        setMicTestResult('bad');
+      }
+    } catch (err) {
+      console.warn('[Onboarding] Mic test failed:', err);
+      setMicTestResult('bad');
+    }
   };
 
   const renderStep = ({ item }: { item: OnboardingStep }) => {

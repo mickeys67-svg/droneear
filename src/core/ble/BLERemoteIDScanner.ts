@@ -141,16 +141,14 @@ export class BLERemoteIDScanner {
 
   // Known manufacturer OUI → name mapping
   private static readonly MANUFACTURER_OUI: Record<string, string> = {
-    'MOCK-DJI': 'DJI',
-    'MOCK-AUTEL': 'Autel Robotics',
-    'MOCK-SKYDIO': 'Skydio',
     '60:60:1F': 'DJI',
     '90:3A:E6': 'Parrot',
     'A0:14:3D': 'Parrot',
   };
 
   constructor(adapter?: BLEAdapter) {
-    this.adapter = adapter || new MockBLEAdapter();
+    if (!adapter) throw new Error('BLEAdapter is required');
+    this.adapter = adapter;
   }
 
   /**
@@ -186,8 +184,6 @@ export class BLERemoteIDScanner {
     this.devices.clear();
     this.scanning = true;
 
-    console.log('[BLEScanner] Starting Remote ID scan...');
-
     await this.adapter.startScan((device) => {
       this.handleDevice(device);
     });
@@ -214,7 +210,6 @@ export class BLERemoteIDScanner {
       this.staleTimer = null;
     }
 
-    console.log('[BLEScanner] Scan stopped');
   }
 
   /**

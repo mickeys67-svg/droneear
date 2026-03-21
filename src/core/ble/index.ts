@@ -1,4 +1,4 @@
-export { BLERemoteIDScanner, MockBLEAdapter } from './BLERemoteIDScanner';
+export { BLERemoteIDScanner } from './BLERemoteIDScanner';
 export type { BLEAdapter, BLEAdapterDevice, RemoteIDCallback } from './BLERemoteIDScanner';
 export { RealBLEAdapter } from './RealBLEAdapter';
 export { createBLEAdapter } from './createBLEAdapter';

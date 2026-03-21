@@ -187,7 +187,6 @@ export function useThreatDetector() {
         setInferenceTime(metrics.totalTimeMs);
       },
       onStatusChange: (status) => {
-        console.log(`[DroneMonitor] Status: ${status}`);
         setModelStatus(status);
         if (status === 'ERROR') {
           sensorMgr.setRecordingState(false, 'Detection engine error');
@@ -467,7 +466,6 @@ export function useThreatDetector() {
   }, []);
 
   const submitFeedback = useCallback((detectionId: string, accurate: boolean) => {
-    console.log(`[Feedback] Detection ${detectionId}: ${accurate ? 'accurate' : 'false positive'}`);
     setFeedbackPending(false, null);
     // Voice confirmation so user knows feedback was recorded
     const tr = getTranslation(useSettingsStore.getState().locale);

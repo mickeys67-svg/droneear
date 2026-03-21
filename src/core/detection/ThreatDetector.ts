@@ -176,7 +176,7 @@ export class ThreatDetector {
     while (this.recoveryAttempts < this.maxRecoveryAttempts) {
       this.recoveryAttempts++;
       this.callbacks.onStatusChange?.('RECOVERING');
-      console.log(`[DroneMonitor] Recovery attempt ${this.recoveryAttempts}/${this.maxRecoveryAttempts}`);
+      if (typeof __DEV__ !== 'undefined' && __DEV__) console.log(`[DroneMonitor] Recovery attempt ${this.recoveryAttempts}/${this.maxRecoveryAttempts}`);
 
       try {
         await this.audioCapture.stop();

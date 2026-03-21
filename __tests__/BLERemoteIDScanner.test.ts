@@ -1,10 +1,10 @@
-import { BLERemoteIDScanner } from '../src/core/ble/BLERemoteIDScanner';
+import { BLERemoteIDScanner, MockBLEAdapter } from '../src/core/ble/BLERemoteIDScanner';
 
 describe('BLERemoteIDScanner', () => {
   let scanner: BLERemoteIDScanner;
 
   beforeEach(() => {
-    scanner = new BLERemoteIDScanner();
+    scanner = new BLERemoteIDScanner(new MockBLEAdapter());
   });
 
   afterEach(() => {

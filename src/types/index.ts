@@ -189,7 +189,7 @@ export interface ModelInfo {
   name: string;
   version: string;
   sizeBytes: number;
-  quantization: 'FLOAT32' | 'FLOAT16' | 'INT8';
+  quantization: 'FLOAT32' | 'FLOAT16' | 'INT8' | 'NONE';
   inputShape: number[];
   outputClasses: AcousticPattern[];
   lastUpdated: number;

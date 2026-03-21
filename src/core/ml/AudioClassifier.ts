@@ -101,9 +101,7 @@ export class AudioClassifierEngine {
    * Initialize the classifier (loads ML model).
    */
   async initialize(): Promise<void> {
-    console.log('[AudioClassifier] Initializing pipeline...');
     await this.model.loadModel();
-    console.log('[AudioClassifier] Pipeline ready');
   }
 
   /**

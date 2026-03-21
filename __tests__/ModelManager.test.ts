@@ -40,8 +40,8 @@ describe('ModelManager', () => {
       const mm = new ModelManager();
       const info = mm.info;
       expect(info).not.toBeNull();
-      expect(info!.name).toBe('DroneEar-YAMNet-v2');
-      expect(info!.quantization).toBe('INT8');
+      expect(info!.name).toBe('DroneEar-SpectralEngine');
+      expect(info!.quantization).toBe('NONE');
       expect(info!.outputClasses.length).toBe(6);
       expect(info!.inputShape).toEqual([1, 96, 128]);
     });

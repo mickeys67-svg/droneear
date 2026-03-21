@@ -148,10 +148,10 @@ export class ModelManager {
 
   constructor() {
     this.modelInfo = {
-      name: 'DroneEar-YAMNet-v2',
+      name: 'DroneEar-SpectralEngine',
       version: '2.0.0',
-      sizeBytes: 3_700_000,
-      quantization: 'INT8',
+      sizeBytes: 0,
+      quantization: 'NONE',
       inputShape: ModelManager.INPUT_SHAPE,
       outputClasses: ModelManager.OUTPUT_CLASSES,
       lastUpdated: Date.now(),
@@ -164,14 +164,12 @@ export class ModelManager {
     if (this.status === 'READY' || this.status === 'LOADING') return;
 
     this.setStatus('LOADING');
-    console.log('[ModelManager] Loading advanced spectral analysis engine v2.0...');
 
     try {
       // Validate signatures and warm up analysis pipeline
       await this.initializeEngine();
       this.initialized = true;
       this.setStatus('READY');
-      console.log('[ModelManager] Engine loaded — 6 acoustic signatures active');
     } catch (error) {
       this.setStatus('ERROR');
       console.error('[ModelManager] Engine initialization failed:', error);
@@ -219,8 +217,6 @@ export class ModelManager {
   }
 
   private async initializeEngine(): Promise<void> {
-    // Simulate model load time (real TFLite: ~200-500ms)
-    await new Promise((resolve) => setTimeout(resolve, 300));
     // Validate all signatures have required fields
     for (const cat of ModelManager.OUTPUT_CLASSES) {
       if (!SIGNATURES[cat]) throw new Error(`Missing signature for ${cat}`);
