@@ -53,6 +53,12 @@ export default function HistoryScreen() {
       MISSILE: t.missile,
       AIRCRAFT: t.aircraft,
       AMBIENT: t.ambient,
+      MULTIROTOR: t.droneSmall.split('(')[0].trim(),
+      SINGLE_ENGINE: t.droneLarge.split('(')[0].trim(),
+      SINGLE_ROTOR: t.helicopter,
+      JET_PROPULSION: t.missile,
+      PROPELLER_FIXED: t.aircraft,
+      BACKGROUND: t.ambient,
     };
     return map[cat] || cat;
   };
@@ -129,7 +135,7 @@ export default function HistoryScreen() {
               </View>
             </View>
             <View style={styles.cardSecondary}>
-              <Text style={[styles.cardDistance, { color: theme.primary }]}>~{item.distanceMeters}m</Text>
+              <Text style={[styles.cardDistance, { color: theme.primary }]}>~{Math.round(item.distanceMeters)}m</Text>
               <Text style={[styles.cardDot, { color: theme.textMuted }]}> · </Text>
               <Text style={[styles.cardTime, { color: theme.textDim }]}>{time}</Text>
             </View>
@@ -167,8 +173,8 @@ export default function HistoryScreen() {
                   t.exportData,
                   '',
                   [
-                    { text: t.exportCSV, onPress: () => exportAsCSV(detections) },
-                    { text: t.exportJSON, onPress: () => exportAsJSON(detections) },
+                    { text: t.exportCSV, onPress: () => exportAsCSV(detections).catch((e) => Alert.alert('Export Error', e.message)) },
+                    { text: t.exportJSON, onPress: () => exportAsJSON(detections).catch((e) => Alert.alert('Export Error', e.message)) },
                     { text: t.cancel, style: 'cancel' },
                   ],
                 );
@@ -332,7 +338,7 @@ export default function HistoryScreen() {
                       {t.distance || 'Distance'}
                     </Text>
                     <Text style={[glassStyles.statValueLarge, { color: theme.text }]}>
-                      ~{selectedDetection.distanceMeters}
+                      ~{Math.round(selectedDetection.distanceMeters)}
                     </Text>
                     <Text style={[glassStyles.statUnit, { color: theme.textDim }]}>{t.meters || 'meters'}</Text>
                   </View>

@@ -59,10 +59,10 @@ const AnimatedBar = memo<{
   return prev.value === next.value
     && prev.maxHeight === next.maxHeight
     && prev.width === next.width
-    && prev.colorLow === next.colorLow;
+    && prev.colorLow === next.colorLow
+    && prev.colorMid === next.colorMid
+    && prev.colorHigh === next.colorHigh;
 });
-
-const ZERO_BARS: number[] = [];
 
 export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
   spectralData,
@@ -75,13 +75,7 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
   const { width: screenWidth } = useWindowDimensions();
 
   // Stable zero-filled array for inactive state
-  const zeroBars = useMemo(() => {
-    if (ZERO_BARS.length !== numBars) {
-      ZERO_BARS.length = 0;
-      for (let i = 0; i < numBars; i++) ZERO_BARS.push(0);
-    }
-    return ZERO_BARS;
-  }, [numBars]);
+  const zeroBars = useMemo(() => new Array(numBars).fill(0), [numBars]);
 
   // Downsample 128 mel bins to numBars
   const barValues = useMemo(() => {

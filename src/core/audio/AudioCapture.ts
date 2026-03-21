@@ -103,10 +103,9 @@ export class AudioCapture {
       this.frameCallback?.(frame);
     };
 
+    this.isRecording = true; // Set BEFORE start to prevent double-call race
     AudioRecord.on('data', this.dataHandler);
-
     AudioRecord.start();
-    this.isRecording = true;
     console.log(`[AudioCapture] Started: ${this.config.sampleRate}Hz, ${this.config.channels}ch`);
   }
 

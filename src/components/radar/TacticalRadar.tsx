@@ -48,6 +48,7 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
 }) => {
   const theme = useTheme();
   const rotation = useSharedValue(0);
+  const radius = size / 2;
 
   useEffect(() => {
     if (isActive) {
@@ -71,8 +72,6 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
       { translateY: -radius / 2 },
     ],
   }));
-
-  const radius = size / 2;
 
   // Calculate signal positions on radar
   const threatDots = useMemo(() => {

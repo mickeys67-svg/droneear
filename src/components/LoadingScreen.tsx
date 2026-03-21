@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,9 +16,7 @@ import Animated, {
 import { GLASS, primaryGlow } from '@/src/constants/glass';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const PROGRESS_BAR_WIDTH = SCREEN_WIDTH * 0.6;
+import Constants from 'expo-constants';
 
 interface LoadingScreenProps {
   message?: string;
@@ -29,11 +27,13 @@ interface LoadingScreenProps {
 function LoadingScreen({
   message,
   progress,
-  version = 'v2.1.0',
+  version = Constants.expoConfig?.version ? `v${Constants.expoConfig.version}` : 'v2.1.0',
 }: LoadingScreenProps) {
   const theme = useTheme();
   const t = useTranslation();
   const displayMessage = message || t.loadingDefault || 'Loading...';
+  const { width: screenWidth } = useWindowDimensions();
+  const progressBarWidth = screenWidth * 0.6;
   // Pulse animation
   const pulse = useSharedValue(0);
 
@@ -78,7 +78,7 @@ function LoadingScreen({
   }, [progress]);
 
   const progressBarStyle = useAnimatedStyle(() => ({
-    width: progressAnim.value * PROGRESS_BAR_WIDTH,
+    width: progressAnim.value * progressBarWidth,
   }));
 
   return (
@@ -103,7 +103,7 @@ function LoadingScreen({
         <Text style={styles.message}>{displayMessage}</Text>
 
         {/* Progress bar */}
-        <View style={styles.progressTrack}>
+        <View style={[styles.progressTrack, { width: progressBarWidth }]}>
           <Animated.View style={[styles.progressFill, { backgroundColor: theme.primary }, progressBarStyle]} />
         </View>
       </View>
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   progressTrack: {
-    width: PROGRESS_BAR_WIDTH,
     height: 3,
     borderRadius: 1.5,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',

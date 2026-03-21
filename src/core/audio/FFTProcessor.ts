@@ -105,8 +105,9 @@ export class FFTProcessor {
     const imag = new Float32Array(n);
 
     // Bit-reversal permutation
+    const bits = Math.round(Math.log2(n));
     for (let i = 0; i < n; i++) {
-      real[this.reverseBits(i, Math.round(Math.log2(n)))] = input[i];
+      real[this.reverseBits(i, bits)] = input[i];
     }
 
     // Butterfly operations

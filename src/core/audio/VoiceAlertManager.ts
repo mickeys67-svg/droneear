@@ -84,6 +84,7 @@ export class VoiceAlertManager {
   private isSpeaking = false;
   private queue: QueuedAnnouncement[] = [];
   private processingQueue = false;
+  private disposed = false;
   setLocale(locale: SupportedLocale): void {
     this.locale = locale;
   }
@@ -241,6 +242,7 @@ export class VoiceAlertManager {
 
   private async processQueue(): Promise<void> {
     if (this.processingQueue || this.isSpeaking || this.queue.length === 0) return;
+    if (this.disposed) return;
     this.processingQueue = true;
 
     try {
@@ -272,15 +274,22 @@ export class VoiceAlertManager {
     const lang = TTS_LANG[this.locale] || 'en-US';
 
     return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        this.isSpeaking = false;
+        resolve();
+      }, 10000); // 10s safety timeout
+
       Speech.speak(text, {
         language: lang,
         rate: SPEECH_RATE[severity] || 1.0,
         pitch: SPEECH_PITCH[severity] || 1.0,
         onDone: () => {
+          clearTimeout(timeout);
           this.isSpeaking = false;
           resolve();
         },
         onError: () => {
+          clearTimeout(timeout);
           this.isSpeaking = false;
           resolve();
         },
@@ -317,6 +326,7 @@ export class VoiceAlertManager {
   }
 
   dispose(): void {
+    this.disposed = true;
     Speech.stop();
     this.isSpeaking = false;
     this.queue = [];

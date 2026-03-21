@@ -26,11 +26,16 @@ import * as Location from 'expo-location';
 
 export function useThreatDetector() {
   const detectorRef = useRef<ThreatDetector | null>(null);
-  const voiceRef = useRef<VoiceAlertManager>(new VoiceAlertManager());
-  const micMonitorRef = useRef<MicQualityMonitor>(new MicQualityMonitor());
-  const sensorMgrRef = useRef<SensorEnforcementManager>(new SensorEnforcementManager());
-  const envDetectorRef = useRef<EnvironmentDetector>(new EnvironmentDetector());
-  const fusionEngineRef = useRef<DetectionFusionEngine>(new DetectionFusionEngine());
+  const voiceRef = useRef<VoiceAlertManager>(null as unknown as VoiceAlertManager);
+  const micMonitorRef = useRef<MicQualityMonitor>(null as unknown as MicQualityMonitor);
+  const sensorMgrRef = useRef<SensorEnforcementManager>(null as unknown as SensorEnforcementManager);
+  const envDetectorRef = useRef<EnvironmentDetector>(null as unknown as EnvironmentDetector);
+  const fusionEngineRef = useRef<DetectionFusionEngine>(null as unknown as DetectionFusionEngine);
+  if (!voiceRef.current) voiceRef.current = new VoiceAlertManager();
+  if (!micMonitorRef.current) micMonitorRef.current = new MicQualityMonitor();
+  if (!sensorMgrRef.current) sensorMgrRef.current = new SensorEnforcementManager();
+  if (!envDetectorRef.current) envDetectorRef.current = new EnvironmentDetector();
+  if (!fusionEngineRef.current) fusionEngineRef.current = new DetectionFusionEngine();
   const locationSubRef = useRef<Location.LocationSubscription | null>(null);
   const isInitializedRef = useRef(false);
   const batteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -45,6 +50,9 @@ export function useThreatDetector() {
 
   // Environment detection state (exposed to UI)
   const [environmentState, setEnvironmentState] = useState<EnvironmentState | null>(null);
+
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [modelStatus, setModelStatus] = useState<string>('UNLOADED');
 
   // Zustand stores — use selectors to minimize re-renders
   const isScanning = useDetectionStore((s) => s.isScanning);
@@ -180,6 +188,7 @@ export function useThreatDetector() {
       },
       onStatusChange: (status) => {
         console.log(`[DroneMonitor] Status: ${status}`);
+        setModelStatus(status);
         if (status === 'ERROR') {
           sensorMgr.setRecordingState(false, 'Detection engine error');
         }
@@ -196,11 +205,13 @@ export function useThreatDetector() {
     detector.initialize().then((success) => {
       if (disposed) return; // Prevent state updates after cleanup
       isInitializedRef.current = success;
+      setIsInitialized(success);
       sensorMgr.setMicPermission(success);
     }).catch((err) => {
       if (disposed) return;
       console.error('[DroneMonitor] Init failed:', err);
       sensorMgr.setMicPermission(false);
+      setIsInitialized(false);
     });
 
     return () => {
@@ -466,13 +477,13 @@ export function useThreatDetector() {
   return {
     // State
     isScanning,
-    isInitialized: isInitializedRef.current,
+    isInitialized,
     latestDetection,
     currentThreats,
     audioLevel,
     spectralData,
     inferenceTimeMs,
-    modelStatus: detectorRef.current?.modelStatus || 'UNLOADED',
+    modelStatus,
     batteryLevel,
     micQuality,
     micSnrDb,

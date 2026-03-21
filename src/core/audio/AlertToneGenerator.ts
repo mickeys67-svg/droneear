@@ -193,9 +193,18 @@ export async function playAlertTone(severity: string): Promise<void> {
       { shouldPlay: true, volume: SEVERITY_TONES[severity]?.volume ?? 0.7 }
     );
 
+    // Safety timeout: unload sound after 5s max (prevents leak if callback never fires)
+    const safetyTimer = setTimeout(() => {
+      sound.unloadAsync().catch(() => {});
+    }, 5000);
+
     sound.setOnPlaybackStatusUpdate((status) => {
       if ('didJustFinish' in status && status.didJustFinish) {
-        sound.unloadAsync();
+        clearTimeout(safetyTimer);
+        sound.unloadAsync().catch(() => {});
+      } else if ('error' in status) {
+        clearTimeout(safetyTimer);
+        sound.unloadAsync().catch(() => {});
       }
     });
   } catch (e) {

@@ -14,21 +14,24 @@ import { useSettingsStore } from '../stores/settingsStore';
 import type { RemoteIDData } from '../types';
 
 export function useBLEScanner() {
-  const scannerRef = useRef<BLERemoteIDScanner>(
-    new BLERemoteIDScanner(createBLEAdapter())
-  );
+  const scannerRef = useRef<BLERemoteIDScanner | null>(null);
+  if (!scannerRef.current) {
+    scannerRef.current = new BLERemoteIDScanner(createBLEAdapter());
+  }
   const [bleAvailable, setBleAvailable] = useState(false);
 
-  const {
-    bleDevices, bleScanActive,
-    setBLEScanActive, addBLEDevice, clearBLEDevices,
-  } = useDetectionStore();
+  const bleDevices = useDetectionStore((s) => s.bleDevices);
+  const bleScanActive = useDetectionStore((s) => s.bleScanActive);
+  const setBLEScanActive = useDetectionStore((s) => s.setBLEScanActive);
+  const addBLEDevice = useDetectionStore((s) => s.addBLEDevice);
+  const clearBLEDevices = useDetectionStore((s) => s.clearBLEDevices);
 
   const bleScanEnabled = useSettingsStore((s) => s.bleScanEnabled);
 
   // Check availability on mount
   useEffect(() => {
     const scanner = scannerRef.current;
+    if (!scanner) return;
 
     scanner.isAvailable().then((available) => {
       setBleAvailable(available);
@@ -42,7 +45,7 @@ export function useBLEScanner() {
     return () => {
       scanner.dispose();
     };
-  }, []);
+  }, [addBLEDevice]);
 
   const startBLE = useCallback(async () => {
     if (!bleAvailable || !bleScanEnabled) return false;
@@ -55,17 +58,19 @@ export function useBLEScanner() {
     }
 
     const scanner = scannerRef.current;
+    if (!scanner) return false;
     clearBLEDevices();
     const started = await scanner.startScanning();
     setBLEScanActive(started);
     return started;
-  }, [bleAvailable, bleScanEnabled]);
+  }, [bleAvailable, bleScanEnabled, clearBLEDevices, setBLEScanActive]);
 
   const stopBLE = useCallback(async () => {
     const scanner = scannerRef.current;
+    if (!scanner) return;
     await scanner.stopScanning();
     setBLEScanActive(false);
-  }, []);
+  }, [setBLEScanActive]);
 
   return {
     bleAvailable,

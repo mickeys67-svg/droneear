@@ -103,11 +103,13 @@ export class MelSpectrogram {
     variance /= frame.length;
     const std = Math.max(Math.sqrt(variance + 1e-8), 1e-8);
 
-    const normalized = new Float32Array(frame.length);
+    const normalized = this.normalizeBuffer.length === frame.length
+      ? this.normalizeBuffer
+      : new Float32Array(frame.length);
     for (let i = 0; i < frame.length; i++) {
       normalized[i] = (frame[i] - mean) / std;
     }
-    return normalized;
+    return new Float32Array(normalized);
   }
 
   /**

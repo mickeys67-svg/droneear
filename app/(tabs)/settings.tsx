@@ -22,12 +22,42 @@ const LANGUAGE_OPTIONS: { locale: SupportedLocale; label: string; nativeLabel: s
   { locale: 'ko', label: 'Korean', nativeLabel: '한국어' },
   { locale: 'en', label: 'English', nativeLabel: 'English' },
   { locale: 'uk', label: 'Ukrainian', nativeLabel: 'Українська' },
+  { locale: 'ar', label: 'Arabic', nativeLabel: 'العربية' },
+  { locale: 'he', label: 'Hebrew', nativeLabel: 'עברית' },
+  { locale: 'hi', label: 'Hindi', nativeLabel: 'हिन्दी' },
+  { locale: 'de', label: 'German', nativeLabel: 'Deutsch' },
+  { locale: 'es', label: 'Spanish', nativeLabel: 'Español' },
+  { locale: 'fr', label: 'French', nativeLabel: 'Français' },
+  { locale: 'it', label: 'Italian', nativeLabel: 'Italiano' },
+  { locale: 'ja', label: 'Japanese', nativeLabel: '日本語' },
+  { locale: 'zh', label: 'Chinese', nativeLabel: '中文' },
+  { locale: 'ur', label: 'Urdu', nativeLabel: 'اردو' },
+  { locale: 'tl', label: 'Filipino', nativeLabel: 'Filipino' },
+  { locale: 'ar_gulf', label: 'Gulf Arabic', nativeLabel: 'عربي خليجي' },
 ];
 
 export default function SettingsScreen() {
   const theme = useTheme();
   const t = useTranslation();
-  const settings = useSettingsStore();
+  const profile = useSettingsStore((s) => s.profile);
+  const setProfile = useSettingsStore((s) => s.setProfile);
+  const themeMode = useSettingsStore((s) => s.themeMode);
+  const setThemeMode = useSettingsStore((s) => s.setThemeMode);
+  const locale = useSettingsStore((s) => s.locale);
+  const setLocale = useSettingsStore((s) => s.setLocale);
+  const confidenceThreshold = useSettingsStore((s) => s.confidenceThreshold);
+  const setConfidenceThreshold = useSettingsStore((s) => s.setConfidenceThreshold);
+  const alertVibration = useSettingsStore((s) => s.alertVibration);
+  const setAlertVibration = useSettingsStore((s) => s.setAlertVibration);
+  const alertSound = useSettingsStore((s) => s.alertSound);
+  const setAlertSound = useSettingsStore((s) => s.setAlertSound);
+  const voiceAlert = useSettingsStore((s) => s.voiceAlert);
+  const setVoiceAlert = useSettingsStore((s) => s.setVoiceAlert);
+  const bleScanEnabled = useSettingsStore((s) => s.bleScanEnabled);
+  const setBLEScanEnabled = useSettingsStore((s) => s.setBLEScanEnabled);
+  const debugMode = useSettingsStore((s) => s.debugMode);
+  const setDebugMode = useSettingsStore((s) => s.setDebugMode);
+  const setOnboardingComplete = useSettingsStore((s) => s.setOnboardingComplete);
 
   const THEME_OPTIONS: { mode: ThemeMode; label: string; description: string }[] = [
     { mode: 'DAY', label: t.dayMode, description: t.dayModeDesc },
@@ -61,15 +91,15 @@ export default function SettingsScreen() {
                   key={opt.mode}
                   style={[
                     styles.themeChip,
-                    settings.themeMode === opt.mode && { backgroundColor: theme.primary },
-                    settings.themeMode !== opt.mode && { backgroundColor: GLASS.cardBg, borderColor: GLASS.borderSubtle, borderWidth: 1 },
+                    themeMode === opt.mode && { backgroundColor: theme.primary },
+                    themeMode !== opt.mode && { backgroundColor: GLASS.cardBg, borderColor: GLASS.borderSubtle, borderWidth: 1 },
                   ]}
-                  onPress={() => settings.setThemeMode(opt.mode)}
+                  onPress={() => setThemeMode(opt.mode)}
                   accessibilityRole="button"
                   accessibilityLabel={opt.label}
-                  accessibilityState={{ selected: settings.themeMode === opt.mode }}
+                  accessibilityState={{ selected: themeMode === opt.mode }}
                 >
-                  <Text style={[styles.themeChipText, { color: settings.themeMode === opt.mode ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim }]}>
+                  <Text style={[styles.themeChipText, { color: themeMode === opt.mode ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim }]}>
                     {opt.mode}
                   </Text>
                 </TouchableOpacity>
@@ -86,16 +116,16 @@ export default function SettingsScreen() {
                   key={opt.locale}
                   style={[
                     styles.langChip,
-                    settings.locale === opt.locale
+                    locale === opt.locale
                       ? { backgroundColor: `${theme.primary}20`, borderColor: `${theme.primary}60` }
                       : { backgroundColor: 'transparent', borderColor: GLASS.borderSubtle },
                   ]}
-                  onPress={() => settings.setLocale(opt.locale)}
+                  onPress={() => setLocale(opt.locale)}
                   accessibilityRole="button"
                   accessibilityLabel={opt.label}
-                  accessibilityState={{ selected: settings.locale === opt.locale }}
+                  accessibilityState={{ selected: locale === opt.locale }}
                 >
-                  <Text style={[styles.langText, { color: settings.locale === opt.locale ? theme.primary : theme.textDim }]}>
+                  <Text style={[styles.langText, { color: locale === opt.locale ? theme.primary : theme.textDim }]}>
                     {opt.nativeLabel}
                   </Text>
                 </TouchableOpacity>
@@ -114,7 +144,7 @@ export default function SettingsScreen() {
               {t.confidenceThreshold}
             </Text>
             <Text style={[styles.settingValue, { color: theme.primary }]}>
-              {(settings.confidenceThreshold * 100).toFixed(0)}%
+              {(confidenceThreshold * 100).toFixed(0)}%
             </Text>
           </View>
           <View style={styles.thresholdRow}>
@@ -123,16 +153,16 @@ export default function SettingsScreen() {
                 key={val}
                 style={[
                   styles.thresholdChip,
-                  settings.confidenceThreshold === val
+                  confidenceThreshold === val
                     ? { backgroundColor: theme.primary }
                     : { backgroundColor: 'transparent', borderColor: GLASS.borderSubtle, borderWidth: 1 },
                 ]}
-                onPress={() => settings.setConfidenceThreshold(val)}
+                onPress={() => setConfidenceThreshold(val)}
                 accessibilityRole="button"
                 accessibilityLabel={`Confidence threshold ${(val * 100).toFixed(0)}%`}
-                accessibilityState={{ selected: settings.confidenceThreshold === val }}
+                accessibilityState={{ selected: confidenceThreshold === val }}
               >
-                <Text style={[styles.thresholdText, { color: settings.confidenceThreshold === val ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim }]}>
+                <Text style={[styles.thresholdText, { color: confidenceThreshold === val ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim }]}>
                   {(val * 100).toFixed(0)}%
                 </Text>
               </TouchableOpacity>
@@ -140,10 +170,10 @@ export default function SettingsScreen() {
           </View>
 
           {/* Toggle switches */}
-          <ToggleRow label={t.hapticAlert} desc={t.vibrateOnDetection} value={settings.alertVibration} onToggle={settings.setAlertVibration} theme={theme} />
-          <ToggleRow label={t.audioAlert} desc={t.playWarningSound} value={settings.alertSound} onToggle={settings.setAlertSound} theme={theme} />
-          <ToggleRow label={t.voiceAlert} desc={t.voiceAnnouncement} value={settings.voiceAlert} onToggle={settings.setVoiceAlert} theme={theme} />
-          <ToggleRow label={t.bleScan} desc={t.bleScanDesc} value={settings.bleScanEnabled ?? false} onToggle={settings.setBLEScanEnabled} theme={theme} />
+          <ToggleRow label={t.hapticAlert} desc={t.vibrateOnDetection} value={alertVibration} onToggle={setAlertVibration} theme={theme} />
+          <ToggleRow label={t.audioAlert} desc={t.playWarningSound} value={alertSound} onToggle={setAlertSound} theme={theme} />
+          <ToggleRow label={t.voiceAlert} desc={t.voiceAnnouncement} value={voiceAlert} onToggle={setVoiceAlert} theme={theme} />
+          <ToggleRow label={t.bleScan} desc={t.bleScanDesc} value={bleScanEnabled ?? false} onToggle={setBLEScanEnabled} theme={theme} />
         </View>
 
         {/* ===== PROFILE ===== */}
@@ -156,21 +186,21 @@ export default function SettingsScreen() {
                 style={[
                   styles.profileCard,
                   {
-                    backgroundColor: settings.profile === key ? `${theme.primary}12` : GLASS.cardBg,
-                    borderColor: settings.profile === key ? `${theme.primary}50` : GLASS.borderSubtle,
+                    backgroundColor: profile === key ? `${theme.primary}12` : GLASS.cardBg,
+                    borderColor: profile === key ? `${theme.primary}50` : GLASS.borderSubtle,
                   },
                 ]}
-                onPress={() => settings.setProfile(key as DeviceProfile)}
+                onPress={() => setProfile(key as DeviceProfile)}
                 accessibilityRole="button"
                 accessibilityLabel={`Device profile: ${config.label}`}
-                accessibilityState={{ selected: settings.profile === key }}
+                accessibilityState={{ selected: profile === key }}
               >
-                {settings.profile === key && (
+                {profile === key && (
                   <View style={[styles.profileCheck, { backgroundColor: theme.primary }]}>
                     <Text style={[styles.profileCheckText, { color: theme.mode === 'NIGHT' ? '#FFF' : '#000' }]}>✓</Text>
                   </View>
                 )}
-                <Text style={[styles.profileLabel, { color: settings.profile === key ? theme.primary : theme.text }]}>
+                <Text style={[styles.profileLabel, { color: profile === key ? theme.primary : theme.text }]}>
                   {config.label}
                 </Text>
                 <Text style={[styles.profileDesc, { color: theme.textDim }]} numberOfLines={2}>
@@ -191,7 +221,7 @@ export default function SettingsScreen() {
           <InfoRow label={t.classesLabel || 'Classes'} value={t.patternsCount || '6 patterns'} theme={theme} />
 
           {/* Debug toggle */}
-          <ToggleRow label={t.debugMode} desc={t.showInferenceMetrics} value={settings.debugMode} onToggle={settings.setDebugMode} theme={theme} />
+          <ToggleRow label={t.debugMode} desc={t.showInferenceMetrics} value={debugMode} onToggle={setDebugMode} theme={theme} />
 
           {/* Version */}
           <View style={[styles.versionRow, { borderTopColor: GLASS.borderSubtle }]}>
@@ -208,7 +238,7 @@ export default function SettingsScreen() {
         {/* Reset Onboarding */}
         <TouchableOpacity
           style={[styles.resetBtn, { borderColor: GLASS.borderSubtle }]}
-          onPress={() => settings.setOnboardingComplete(false)}
+          onPress={() => setOnboardingComplete(false)}
           accessibilityRole="button"
         >
           <Text style={[styles.resetBtnText, { color: theme.textMuted }]}>

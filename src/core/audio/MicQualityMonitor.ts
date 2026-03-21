@@ -53,7 +53,11 @@ export class MicQualityMonitor {
     if (this.noiseFloorHistory.length > NOISE_HISTORY_SIZE) {
       this.noiseFloorHistory.shift();
     }
-    this.estimatedNoiseFloor = Math.min(...this.noiseFloorHistory) || 0.001;
+    let minVal = this.noiseFloorHistory[0] ?? 0.001;
+    for (let i = 1; i < this.noiseFloorHistory.length; i++) {
+      if (this.noiseFloorHistory[i] < minVal) minVal = this.noiseFloorHistory[i];
+    }
+    this.estimatedNoiseFloor = minVal || 0.001;
 
     // SNR estimation
     const snrDb = 20 * Math.log10(Math.max(rms, 1e-10) / Math.max(this.estimatedNoiseFloor, 1e-10));

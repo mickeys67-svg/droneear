@@ -44,6 +44,13 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
     MISSILE: t.missile,
     AIRCRAFT: t.aircraft,
     AMBIENT: t.ambient,
+    // New AcousticPattern names
+    MULTIROTOR: t.droneSmall,
+    SINGLE_ENGINE: t.droneLarge,
+    SINGLE_ROTOR: t.helicopter,
+    JET_PROPULSION: t.missile,
+    PROPELLER_FIXED: t.aircraft,
+    BACKGROUND: t.ambient,
   };
 
   const getConfidenceLabel = (conf: number): string => {
@@ -202,7 +209,7 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
             accessibilityLabel={t.track || 'Track'}
             accessibilityRole="button"
           >
-            <Text style={styles.actionBtnTextPrimary}>{t.track || 'TRACK'}</Text>
+            <Text style={[styles.actionBtnTextPrimary, { color: theme.mode === 'NIGHT' ? '#FFF' : '#000' }]}>{t.track || 'TRACK'}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity

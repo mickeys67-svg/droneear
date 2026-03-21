@@ -225,7 +225,7 @@ export default function MapScreen() {
                   style={[
                     styles.waveformBar,
                     {
-                      height: 4 + Math.sin(i * 0.7) * 12 + Math.random() * 6,
+                      height: 4 + Math.sin(i * 0.7) * 12 + Math.sin(i * 1.3 + 2) * 3,
                       opacity: 0.3 + Math.sin(i * 0.5) * 0.4,
                       backgroundColor: theme.primary,
                     },
