@@ -74,11 +74,19 @@ export class HybridEngine {
     this.setStatus('READY');
   }
 
+  private inferencing = false;
+
   async predict(melFrames: Float32Array[]): Promise<Map<ThreatCategory, number>> {
     if (this.currentModelStatus !== 'READY' && this.currentModelStatus !== 'INFERENCE') {
       throw new Error(`HybridEngine not ready. Status: ${this.currentModelStatus}`);
     }
 
+    // Guard against concurrent calls — return rule-based only if already inferencing
+    if (this.inferencing) {
+      return this.ruleEngine.predict(melFrames);
+    }
+
+    this.inferencing = true;
     this.setStatus('INFERENCE');
 
     try {
@@ -101,18 +109,16 @@ export class HybridEngine {
         ? this.fuseResults(rulePrediction, mlPrediction)
         : rulePrediction;
 
-      this.setStatus('READY');
       return fused;
-    } catch (error) {
+    } finally {
+      this.inferencing = false;
       this.setStatus('READY');
-      throw error;
     }
   }
 
   onStatus(callback: (status: ModelStatus) => void): void {
     this.statusCallback = callback;
-    // Also forward to rule engine
-    this.ruleEngine.onStatus(callback);
+    // Do NOT forward to rule engine — HybridEngine owns status lifecycle
   }
 
   get currentStatus(): ModelStatus {

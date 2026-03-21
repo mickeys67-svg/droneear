@@ -28,24 +28,27 @@ export function useBLEScanner() {
 
   const bleScanEnabled = useSettingsStore((s) => s.bleScanEnabled);
 
-  // Check availability on mount
+  // Check availability on mount — stable deps (access store via getState to avoid re-init)
   useEffect(() => {
     const scanner = scannerRef.current;
     if (!scanner) return;
 
     scanner.isAvailable().then((available) => {
       setBleAvailable(available);
+    }).catch(() => {
+      setBleAvailable(false);
     });
 
-    // Wire discovery callback
+    // Wire discovery callback — use getState() to avoid dependency on addBLEDevice
     scanner.onRemoteID((deviceId: string, data: RemoteIDData) => {
-      addBLEDevice(deviceId, data);
+      useDetectionStore.getState().addBLEDevice(deviceId, data);
     });
 
     return () => {
-      scanner.dispose();
+      scanner.stopScanning().catch(() => {});
+      // Do NOT dispose — scannerRef persists for component lifetime
     };
-  }, [addBLEDevice]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startBLE = useCallback(async () => {
     if (!bleAvailable || !bleScanEnabled) return false;

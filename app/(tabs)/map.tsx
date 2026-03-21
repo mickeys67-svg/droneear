@@ -96,10 +96,10 @@ export default function MapScreen() {
           />
           <View style={styles.emptyBanner}>
             <Text style={styles.emptyIcon}>📡</Text>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: theme.text }]}>
               {t.mapNoDetections}
             </Text>
-            <Text style={styles.emptySubText}>
+            <Text style={[styles.emptySubText, { color: theme.textDim }]}>
               {t.mapTitle}
             </Text>
           </View>
@@ -128,7 +128,7 @@ export default function MapScreen() {
 
       {/* Glass Bottom Sheet — animated entry */}
       {selectedMarker && (
-        <Animated.View entering={SlideInDown.duration(350).springify()} exiting={FadeOut.duration(200)} style={styles.bottomSheet}>
+        <Animated.View entering={SlideInDown.duration(350).springify()} exiting={FadeOut.duration(200)} style={[styles.bottomSheet, { backgroundColor: theme.mode === 'DAY' ? 'rgba(245, 245, 250, 0.96)' : 'rgba(20, 20, 30, 0.92)', borderColor: theme.mode === 'DAY' ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)' }]}>
           {/* Drag Handle */}
           <View style={glassStyles.sheetHandle} />
 
@@ -155,7 +155,7 @@ export default function MapScreen() {
               accessibilityRole="button"
               accessibilityLabel={t.close || 'Close'}
             >
-              <Text style={styles.sheetCloseText}>✕</Text>
+              <Text style={[styles.sheetCloseText, { color: theme.textMuted }]}>✕</Text>
             </TouchableOpacity>
           </View>
 
@@ -163,7 +163,7 @@ export default function MapScreen() {
           <View style={styles.sheetStats}>
             {/* Distance — large emphasis */}
             <View style={styles.sheetStatItem}>
-              <Text style={styles.sheetStatLabel}>{t.distance || 'Distance'}</Text>
+              <Text style={[styles.sheetStatLabel, { color: theme.textMuted }]}>{t.distance || 'Distance'}</Text>
               <View style={styles.distanceRow}>
                 <Text style={[styles.distanceValue, { color: theme.text }]}>
                   {selectedMarker.detection?.distanceMeters != null
@@ -171,7 +171,7 @@ export default function MapScreen() {
                     : '?'}
                 </Text>
                 <View style={styles.distanceSuffix}>
-                  <Text style={styles.distanceUnit}>m</Text>
+                  <Text style={[styles.distanceUnit, { color: theme.textDim }]}>m</Text>
                   {selectedMarker.detection?.bearingDegrees != null && (
                     <Text style={[styles.distanceDir, { color: theme.primary }]}>
                       {bearingToDirection(selectedMarker.detection.bearingDegrees)}
@@ -183,7 +183,7 @@ export default function MapScreen() {
 
             {/* Confidence */}
             <View style={styles.sheetStatItem}>
-              <Text style={styles.sheetStatLabel}>{t.confidence || 'Confidence'}</Text>
+              <Text style={[styles.sheetStatLabel, { color: theme.textMuted }]}>{t.confidence || 'Confidence'}</Text>
               <Text style={[styles.confidenceValue, { color: theme.primary }]}>
                 {selectedMarker.detection
                   ? `${(selectedMarker.detection.confidence * 100).toFixed(0)}`
@@ -203,21 +203,21 @@ export default function MapScreen() {
 
             {/* Frequency */}
             <View style={styles.sheetStatItem}>
-              <Text style={styles.sheetStatLabel}>{t.frequency || 'Frequency'}</Text>
+              <Text style={[styles.sheetStatLabel, { color: theme.textMuted }]}>{t.frequency || 'Frequency'}</Text>
               <Text style={[styles.freqValue, { color: theme.text }]}>
                 {selectedMarker.detection?.frequencyPeaks?.[0]
                   ? `${(selectedMarker.detection.frequencyPeaks[0] / 1000).toFixed(1)}`
                   : 'N/A'}
               </Text>
               {selectedMarker.detection?.frequencyPeaks?.[0] && (
-                <Text style={styles.freqUnit}>kHz</Text>
+                <Text style={[styles.freqUnit, { color: theme.textDim }]}>kHz</Text>
               )}
             </View>
           </View>
 
           {/* Acoustic Signature Placeholder */}
           <View style={styles.waveformSection}>
-            <Text style={styles.waveformLabel}>{t.acousticSignature || 'Acoustic Signature'}</Text>
+            <Text style={[styles.waveformLabel, { color: theme.textMuted }]}>{t.acousticSignature || 'Acoustic Signature'}</Text>
             <View style={styles.waveformContainer}>
               {Array.from({ length: 24 }).map((_, i) => (
                 <View
@@ -251,7 +251,7 @@ export default function MapScreen() {
               <Text style={[styles.trackBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.track || 'TRACK'}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.dismissBtn}
+              style={[styles.dismissBtn, { borderColor: theme.mode === 'DAY' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)' }]}
               onPress={() => {
                 if (selectedMarker?.detection?.id) {
                   hideTrackFromMap(selectedMarker.detection.id);
@@ -261,7 +261,7 @@ export default function MapScreen() {
               accessibilityRole="button"
               accessibilityLabel="Dismiss this detection"
             >
-              <Text style={styles.dismissBtnText}>{t.dismiss || 'DISMISS'}</Text>
+              <Text style={[styles.dismissBtnText, { color: theme.textDim }]}>{t.dismiss || 'DISMISS'}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

@@ -55,6 +55,17 @@ export default function OnboardingScreen() {
   const [micGranted, setMicGranted] = useState(false);
   const [micTestResult, setMicTestResult] = useState<'idle' | 'testing' | 'good' | 'bad'>('idle');
   const [micDenied, setMicDenied] = useState(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+
+  // Cleanup recording on unmount
+  React.useEffect(() => {
+    return () => {
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(() => {});
+        recordingRef.current = null;
+      }
+    };
+  }, []);
 
   const goNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -116,10 +127,12 @@ export default function OnboardingScreen() {
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.LOW_QUALITY
       );
+      recordingRef.current = recording;
       // Record for 1.5 seconds
       await new Promise((r) => setTimeout(r, 1500));
       const status = await recording.getStatusAsync();
       await recording.stopAndUnloadAsync();
+      recordingRef.current = null;
 
       // Check if we got audio data (metering level)
       if (status.isRecording || status.durationMillis > 500) {

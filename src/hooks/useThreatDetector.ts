@@ -299,14 +299,18 @@ export function useThreatDetector() {
     detectorRef.current?.setConfidenceThreshold(confidenceThreshold);
   }, [confidenceThreshold]);
 
-  // ===== Acoustic + BLE Fusion =====
+  // ===== Acoustic + BLE Fusion (debounced to avoid excessive re-computation) =====
   useEffect(() => {
     if (!isScanning || Object.keys(bleDevices).length === 0 || currentThreats.length === 0) {
       return;
     }
 
-    const fused = fusionEngineRef.current.fuse(currentThreats, bleDevices);
-    setFusedDetections(fused);
+    const timer = setTimeout(() => {
+      const fused = fusionEngineRef.current.fuse(currentThreats, bleDevices);
+      setFusedDetections(fused);
+    }, 300); // 300ms debounce — avoids running fusion on every detection tick
+
+    return () => clearTimeout(timer);
   }, [currentThreats, bleDevices, isScanning]);
 
   // ===== Scan control =====

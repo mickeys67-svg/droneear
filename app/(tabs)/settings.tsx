@@ -9,7 +9,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView, Switch, Alert } from 'react-native';
 import Constants from 'expo-constants';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTheme } from '@/src/hooks/useTheme';
@@ -100,7 +100,7 @@ export default function SettingsScreen() {
                   accessibilityLabel={opt.label}
                   accessibilityState={{ selected: themeMode === opt.mode }}
                 >
-                  <Text style={[styles.themeChipText, { color: themeMode === opt.mode ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim }]}>
+                  <Text style={[styles.themeChipText, { color: themeMode === opt.mode ? (theme.mode !== 'DAY' ? '#FFF' : '#000') : theme.textDim }]}>
                     {opt.mode}
                   </Text>
                 </TouchableOpacity>
@@ -163,7 +163,7 @@ export default function SettingsScreen() {
                 accessibilityLabel={`Confidence threshold ${(val * 100).toFixed(0)}%`}
                 accessibilityState={{ selected: confidenceThreshold === val }}
               >
-                <Text style={[styles.thresholdText, { color: confidenceThreshold === val ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim }]}>
+                <Text style={[styles.thresholdText, { color: confidenceThreshold === val ? (theme.mode !== 'DAY' ? '#FFF' : '#000') : theme.textDim }]}>
                   {(val * 100).toFixed(0)}%
                 </Text>
               </TouchableOpacity>
@@ -198,7 +198,7 @@ export default function SettingsScreen() {
               >
                 {profile === key && (
                   <View style={[styles.profileCheck, { backgroundColor: theme.primary }]}>
-                    <Text style={[styles.profileCheckText, { color: theme.mode === 'NIGHT' ? '#FFF' : '#000' }]}>✓</Text>
+                    <Text style={[styles.profileCheckText, { color: theme.mode !== 'DAY' ? '#FFF' : '#000' }]}>✓</Text>
                   </View>
                 )}
                 <Text style={[styles.profileLabel, { color: profile === key ? theme.primary : theme.text }]}>
@@ -239,8 +239,16 @@ export default function SettingsScreen() {
         {/* Reset Onboarding */}
         <TouchableOpacity
           style={[styles.resetBtn, { borderColor: GLASS.borderSubtle }]}
-          onPress={() => setOnboardingComplete(false)}
+          onPress={() => Alert.alert(
+            t.resetOnboarding || 'Reset Onboarding',
+            'This will restart the setup process. Continue?',
+            [
+              { text: t.cancel || 'Cancel', style: 'cancel' },
+              { text: 'OK', onPress: () => setOnboardingComplete(false) },
+            ]
+          )}
           accessibilityRole="button"
+          accessibilityLabel={t.resetOnboarding || 'Reset Onboarding'}
         >
           <Text style={[styles.resetBtnText, { color: theme.textMuted }]}>
             ↻ {t.resetOnboarding || 'Reset Onboarding'}
@@ -268,7 +276,7 @@ const ToggleRow: React.FC<{
       value={value}
       onValueChange={onToggle}
       trackColor={{ true: theme.primary, false: GLASS.borderSubtle }}
-      thumbColor={value ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textMuted}
+      thumbColor={value ? (theme.mode !== 'DAY' ? '#FFF' : '#000') : theme.textMuted}
     />
   </View>
 );

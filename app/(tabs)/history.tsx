@@ -230,7 +230,7 @@ export default function HistoryScreen() {
           const isActive = filterSeverity === sev;
           const pillBg = isActive ? GLASS.glowCyan : 'transparent';
           const pillBorder = isActive ? GLASS.glowCyan : GLASS.borderLight;
-          const pillText = isActive ? (theme.mode === 'NIGHT' ? '#FFF' : '#000') : theme.textDim;
+          const pillText = isActive ? (theme.mode !== 'DAY' ? '#FFF' : '#000') : theme.textDim;
           return (
             <TouchableOpacity
               key={sev}
@@ -259,7 +259,7 @@ export default function HistoryScreen() {
             style={[glassStyles.btnPrimary, { backgroundColor: theme.primary, marginTop: 24 }]}
             onPress={() => router.navigate('/(tabs)')}
           >
-            <Text style={[glassStyles.btnPrimaryText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.engageSensors}</Text>
+            <Text style={[glassStyles.btnPrimaryText, theme.mode !== 'DAY' && { color: '#FFF' }]}>{t.engageSensors}</Text>
           </TouchableOpacity>
         </View>
       ) : filteredDetections.length === 0 ? (
@@ -410,7 +410,7 @@ export default function HistoryScreen() {
                   }}
                   accessibilityRole="button"
                 >
-                  <Text style={[glassStyles.btnPrimaryText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.viewOnMap || 'VIEW ON MAP'}</Text>
+                  <Text style={[glassStyles.btnPrimaryText, theme.mode !== 'DAY' && { color: '#FFF' }]}>{t.viewOnMap || 'VIEW ON MAP'}</Text>
                 </TouchableOpacity>
               </>
             )}

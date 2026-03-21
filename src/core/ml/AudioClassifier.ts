@@ -152,7 +152,7 @@ export class AudioClassifierEngine {
     this.melBuffer.splice(0, this.config.hopSizeFrames);
 
     // Step 6: Find best prediction
-    let bestCategory: ThreatCategory = 'AMBIENT';
+    let bestCategory: ThreatCategory = 'BACKGROUND';
     let bestConfidence = 0;
     for (const [category, confidence] of predictions) {
       if (confidence > bestConfidence) {
@@ -181,7 +181,7 @@ export class AudioClassifierEngine {
     });
 
     // Step 8: Apply confidence threshold and temporal voting
-    if (bestCategory === 'AMBIENT' || bestConfidence < this.config.confidenceThreshold) {
+    if (bestCategory === 'BACKGROUND' || (bestCategory as string) === 'AMBIENT' || bestConfidence < this.config.confidenceThreshold) {
       return null;
     }
 
