@@ -251,6 +251,8 @@ export interface Translations {
   exportCSV: string;
   exportJSON: string;
   exportSuccess: string;
+  exportError?: string;
+  all?: string;
 
   // BLE Remote ID
   bleScan: string;
@@ -589,6 +591,8 @@ const ko: Translations = {
   exportCSV: 'CSV로 내보내기',
   exportJSON: 'JSON으로 내보내기',
   exportSuccess: '내보내기 완료!',
+  exportError: '내보내기 오류',
+  all: '전체',
 
   // BLE Remote ID
   bleScan: 'BLE 원격 ID 스캔',
@@ -908,6 +912,8 @@ const en: Translations = {
   exportCSV: 'Export as CSV',
   exportJSON: 'Export as JSON',
   exportSuccess: 'Export complete!',
+  exportError: 'Export Error',
+  all: 'All',
 
   // BLE Remote ID
   bleScan: 'BLE Remote ID Scan',
@@ -1227,6 +1233,8 @@ const uk: Translations = {
   exportCSV: 'Експорт CSV',
   exportJSON: 'Експорт JSON',
   exportSuccess: 'Експорт завершено!',
+  exportError: 'Помилка експорту',
+  all: 'Усі',
 
   // BLE Remote ID
   bleScan: 'BLE сканування Remote ID',

@@ -121,7 +121,7 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
           </Text>
           <View style={styles.statValueRow}>
             <Text style={[styles.statValueLarge, { color: severityColor }]}>
-              ~{detection.distanceMeters}
+              ~{Math.round(detection.distanceMeters)}
             </Text>
             <Text style={[styles.statUnit, { color: `${severityColor}AA` }]}>m</Text>
           </View>

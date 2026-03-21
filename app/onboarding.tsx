@@ -93,8 +93,19 @@ export default function OnboardingScreen() {
       }
       setMicDenied(true);
     } else {
-      setMicGranted(true);
-      goNext();
+      // iOS: request mic permission via expo-av
+      try {
+        const { status } = await Audio.requestPermissionsAsync();
+        if (status === 'granted') {
+          setMicGranted(true);
+          goNext();
+        } else {
+          setMicDenied(true);
+        }
+      } catch {
+        setMicGranted(true); // Fallback: assume granted, will be checked at recording time
+        goNext();
+      }
     }
   };
 

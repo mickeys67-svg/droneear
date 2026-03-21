@@ -158,6 +158,7 @@ function generateAlertWav(severity: string): Uint8Array {
 }
 
 // Cache generated sound objects
+let activeSounds: Audio.Sound[] = [];
 const soundCache = new Map<string, string>();
 
 /**
@@ -168,6 +169,12 @@ export async function playAlertTone(severity: string): Promise<void> {
   if (severity === 'NONE') return;
 
   try {
+    // Stop previous sounds to prevent overlap
+    for (const s of activeSounds) {
+      try { await s.stopAsync(); await s.unloadAsync(); } catch {}
+    }
+    activeSounds = [];
+
     let uri = soundCache.get(severity);
 
     if (!uri) {
@@ -193,17 +200,18 @@ export async function playAlertTone(severity: string): Promise<void> {
       { shouldPlay: true, volume: SEVERITY_TONES[severity]?.volume ?? 0.7 }
     );
 
+    activeSounds.push(sound);
+
     // Safety timeout: unload sound after 5s max (prevents leak if callback never fires)
     const safetyTimer = setTimeout(() => {
+      activeSounds = activeSounds.filter(s => s !== sound);
       sound.unloadAsync().catch(() => {});
     }, 5000);
 
     sound.setOnPlaybackStatusUpdate((status) => {
-      if ('didJustFinish' in status && status.didJustFinish) {
+      if (('didJustFinish' in status && status.didJustFinish) || 'error' in status) {
         clearTimeout(safetyTimer);
-        sound.unloadAsync().catch(() => {});
-      } else if ('error' in status) {
-        clearTimeout(safetyTimer);
+        activeSounds = activeSounds.filter(s => s !== sound);
         sound.unloadAsync().catch(() => {});
       }
     });
@@ -218,31 +226,18 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  // Use global btoa if available, otherwise manual encoding
-  if (typeof btoa !== 'undefined') {
-    return btoa(binary);
-  }
-  // Fallback for React Native
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  let result = '';
-  let i = 0;
-  while (i < binary.length) {
-    const a = binary.charCodeAt(i++);
-    const b = i < binary.length ? binary.charCodeAt(i++) : 0;
-    const c = i < binary.length ? binary.charCodeAt(i++) : 0;
-    const triplet = (a << 16) | (b << 8) | c;
-    result += chars[(triplet >> 18) & 0x3f];
-    result += chars[(triplet >> 12) & 0x3f];
-    result += i - 2 < binary.length ? chars[(triplet >> 6) & 0x3f] : '=';
-    result += i - 1 < binary.length ? chars[triplet & 0x3f] : '=';
-  }
-  return result;
+  return btoa(binary);
 }
 
 /**
  * Clear cached sound files.
  */
 export async function clearAlertToneCache(): Promise<void> {
+  // Unload active sounds first
+  for (const s of activeSounds) {
+    try { await s.unloadAsync(); } catch {}
+  }
+  activeSounds = [];
   for (const [, uri] of soundCache) {
     try { await FileSystem.deleteAsync(uri, { idempotent: true }); } catch {}
   }

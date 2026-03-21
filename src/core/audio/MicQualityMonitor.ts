@@ -140,15 +140,6 @@ export class MicQualityMonitor {
     return Math.sqrt(sum / pcm.length);
   }
 
-  private calculatePeak(pcm: Float32Array): number {
-    let peak = 0;
-    for (let i = 0; i < pcm.length; i++) {
-      const abs = Math.abs(pcm[i]);
-      if (abs > peak) peak = abs;
-    }
-    return peak;
-  }
-
   reset(): void {
     this.noiseFloorHistory = [];
     this.estimatedNoiseFloor = 0.001;

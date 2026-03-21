@@ -64,7 +64,7 @@ export const ActiveThreatsList = memo(function ActiveThreatsList({ activeThreats
               </Text>
             </View>
             <Text style={[styles.dist, { color: theme.primary }]}>
-              ~{latest.distanceMeters}m
+              ~{Math.round(latest.distanceMeters)}m
             </Text>
             <Text style={[styles.conf, { color: theme.textDim }]}>
               {(latest.confidence * 100).toFixed(0)}%

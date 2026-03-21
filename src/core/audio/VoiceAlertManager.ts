@@ -259,7 +259,7 @@ export class VoiceAlertManager {
       this.processingQueue = false;
       // Re-check: items may have been enqueued during processing
       if (this.queue.length > 0) {
-        this.processQueue();
+        setTimeout(() => this.processQueue(), 0);
       }
     }
   }

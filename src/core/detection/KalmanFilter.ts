@@ -142,6 +142,15 @@ export class KalmanFilter2D {
       }
     }
 
+    // Enforce covariance symmetry
+    for (let i = 0; i < 4; i++) {
+      for (let j = i + 1; j < 4; j++) {
+        const avg = (newP[i][j] + newP[j][i]) / 2;
+        newP[i][j] = avg;
+        newP[j][i] = avg;
+      }
+    }
+
     return { x: newX, y: newY, vx: newVx, vy: newVy, P: newP };
   }
 

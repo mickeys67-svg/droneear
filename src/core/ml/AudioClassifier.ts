@@ -149,7 +149,7 @@ export class AudioClassifierEngine {
     const inferenceTimeMs = performance.now() - inferenceStart;
 
     // Advance sliding window
-    this.melBuffer = this.melBuffer.slice(this.config.hopSizeFrames);
+    this.melBuffer.splice(0, this.config.hopSizeFrames);
 
     // Step 6: Find best prediction
     let bestCategory: ThreatCategory = 'AMBIENT';

@@ -152,14 +152,14 @@ const GuideCard: React.FC<{
   </View>
 );
 
-const BulletItem: React.FC<{ text: string; theme: any }> = ({ text, theme }) => (
+const BulletItem: React.FC<{ text: string; theme: TacticalTheme }> = ({ text, theme }) => (
   <View style={styles.bulletRow}>
     <View style={[styles.bulletDot, { backgroundColor: theme.primary }]} />
     <Text style={[styles.bulletText, { color: theme.textDim }]}>{text}</Text>
   </View>
 );
 
-const RangeRow: React.FC<{ label: string; value: string; color: string; theme: any }> = ({
+const RangeRow: React.FC<{ label: string; value: string; color: string; theme: TacticalTheme }> = ({
   label,
   value,
   color,

@@ -173,8 +173,8 @@ export default function HistoryScreen() {
                   t.exportData,
                   '',
                   [
-                    { text: t.exportCSV, onPress: () => exportAsCSV(detections).catch((e) => Alert.alert('Export Error', e.message)) },
-                    { text: t.exportJSON, onPress: () => exportAsJSON(detections).catch((e) => Alert.alert('Export Error', e.message)) },
+                    { text: t.exportCSV, onPress: () => exportAsCSV(detections).catch((e) => Alert.alert(t.exportError || 'Export Error', e.message)) },
+                    { text: t.exportJSON, onPress: () => exportAsJSON(detections).catch((e) => Alert.alert(t.exportError || 'Export Error', e.message)) },
                     { text: t.cancel, style: 'cancel' },
                   ],
                 );
@@ -221,6 +221,12 @@ export default function HistoryScreen() {
       {/* Severity Filter Tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
         {SEVERITY_FILTERS.map(sev => {
+          const SEVERITY_LABEL: Record<string, string> = {
+            ALL: t.all || 'ALL',
+            HIGH: t.highThreat || 'HIGH',
+            MEDIUM: t.mediumThreat || 'MEDIUM',
+            LOW: t.lowThreat || 'LOW',
+          };
           const isActive = filterSeverity === sev;
           const pillBg = isActive ? GLASS.glowCyan : 'transparent';
           const pillBorder = isActive ? GLASS.glowCyan : GLASS.borderLight;
@@ -233,7 +239,7 @@ export default function HistoryScreen() {
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
             >
-              <Text style={[styles.filterPillText, { color: pillText }]}>{sev}</Text>
+              <Text style={[styles.filterPillText, { color: pillText }]}>{SEVERITY_LABEL[sev] || sev}</Text>
             </TouchableOpacity>
           );
         })}
