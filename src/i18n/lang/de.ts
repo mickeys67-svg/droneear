@@ -282,6 +282,8 @@ export const de: Translations = {
   classesLabel: 'Klassen',
   patternsCount: '6 Muster',
   resetOnboarding: 'Einführung zurücksetzen',
+  resetOnboardingMsg: 'Der Einrichtungsprozess wird neu gestartet. Fortfahren?',
+  ok: 'OK',
 
   // History
   historyTab: 'VERLAUF',

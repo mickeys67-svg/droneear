@@ -282,6 +282,8 @@ export const ur: Translations = {
   classesLabel: 'کلاسز',
   patternsCount: '6 پیٹرنز',
   resetOnboarding: 'آن بورڈنگ ری سیٹ',
+  resetOnboardingMsg: 'یہ سیٹ اپ عمل دوبارہ شروع کرے گا۔ جاری رکھیں؟',
+  ok: 'ٹھیک ہے',
 
   // History
   historyTab: 'تاریخ',

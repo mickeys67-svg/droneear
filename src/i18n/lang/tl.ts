@@ -282,6 +282,8 @@ export const tl: Translations = {
   classesLabel: 'Mga Klase',
   patternsCount: '6 na pattern',
   resetOnboarding: 'I-reset ang Onboarding',
+  resetOnboardingMsg: 'I-re-restart nito ang setup process. Magpatuloy?',
+  ok: 'OK',
 
   // History
   historyTab: 'KASAYSAYAN',

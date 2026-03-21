@@ -285,6 +285,8 @@ export const ar_gulf: Translations = {
   classesLabel: 'الفئات',
   patternsCount: '6 أنماط',
   resetOnboarding: 'إعادة تعيين المقدمة',
+  resetOnboardingMsg: 'بيرجع عملية الإعداد من أول. تبي تكمل؟',
+  ok: 'أوكي',
 
   // History
   historyTab: 'السجل',

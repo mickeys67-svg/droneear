@@ -285,6 +285,8 @@ export const ar: Translations = {
   classesLabel: 'الفئات',
   patternsCount: '6 أنماط',
   resetOnboarding: 'إعادة تعيين المقدمة',
+  resetOnboardingMsg: 'سيتم إعادة تشغيل عملية الإعداد. هل تريد المتابعة؟',
+  ok: 'موافق',
 
   // History
   historyTab: 'السجل',

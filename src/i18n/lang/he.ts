@@ -284,6 +284,8 @@ export const he: Translations = {
   classesLabel: 'מחלקות',
   patternsCount: '6 דפוסים',
   resetOnboarding: 'איפוס הדרכה',
+  resetOnboardingMsg: 'פעולה זו תפעיל מחדש את תהליך ההגדרה. להמשיך?',
+  ok: 'אישור',
 
   // History
   historyTab: 'היסטוריה',

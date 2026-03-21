@@ -49,6 +49,7 @@ export default function TabLayout() {
           letterSpacing: 0.8,
           marginTop: 4,
         },
+        tabBarAllowFontScaling: false,
         tabBarIconStyle: {
           marginBottom: 0,
         },

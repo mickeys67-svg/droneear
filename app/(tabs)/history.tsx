@@ -265,7 +265,7 @@ export default function HistoryScreen() {
       ) : filteredDetections.length === 0 ? (
         <View style={styles.empty}>
           <Text style={[styles.emptyText, { color: theme.textMuted }]}>
-            {t.noFilterResults || `No ${filterSeverity.toLowerCase()} severity detections`}
+            {t.noFilterResults || 'No detections for this filter'}
           </Text>
         </View>
       ) : (

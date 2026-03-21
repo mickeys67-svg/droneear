@@ -282,6 +282,8 @@ export const ja: Translations = {
   classesLabel: 'クラス',
   patternsCount: '6パターン',
   resetOnboarding: 'オンボーディングをリセット',
+  resetOnboardingMsg: 'セットアッププロセスを再開します。続行しますか？',
+  ok: 'OK',
 
   // History
   historyTab: '履歴',

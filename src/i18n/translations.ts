@@ -327,6 +327,8 @@ export interface Translations {
   classesLabel?: string;
   patternsCount?: string;
   resetOnboarding?: string;
+  resetOnboardingMsg?: string;
+  ok?: string;
 
   // History
   historyTab?: string;
@@ -673,6 +675,8 @@ const ko: Translations = {
   classesLabel: '클래스',
   patternsCount: '6개 패턴',
   resetOnboarding: '온보딩 초기화',
+  resetOnboardingMsg: '설정 과정을 다시 시작합니다. 계속하시겠습니까?',
+  ok: '확인',
 
   // History
   historyTab: '기록',
@@ -1000,6 +1004,8 @@ const en: Translations = {
   classesLabel: 'Classes',
   patternsCount: '6 patterns',
   resetOnboarding: 'Reset Onboarding',
+  resetOnboardingMsg: 'This will restart the setup process. Continue?',
+  ok: 'OK',
 
   // History
   historyTab: 'HISTORY',
@@ -1327,6 +1333,8 @@ const uk: Translations = {
   classesLabel: 'Класи',
   patternsCount: '6 патернів',
   resetOnboarding: 'Скинути вступний курс',
+  resetOnboardingMsg: 'Це перезапустить процес налаштування. Продовжити?',
+  ok: 'OK',
 
   // History
   historyTab: 'ІСТОРІЯ',

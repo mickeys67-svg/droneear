@@ -241,10 +241,10 @@ export default function SettingsScreen() {
           style={[styles.resetBtn, { borderColor: GLASS.borderSubtle }]}
           onPress={() => Alert.alert(
             t.resetOnboarding || 'Reset Onboarding',
-            'This will restart the setup process. Continue?',
+            t.resetOnboardingMsg || 'This will restart the setup process. Continue?',
             [
               { text: t.cancel || 'Cancel', style: 'cancel' },
-              { text: 'OK', onPress: () => setOnboardingComplete(false) },
+              { text: t.ok || 'OK', onPress: () => setOnboardingComplete(false) },
             ]
           )}
           accessibilityRole="button"

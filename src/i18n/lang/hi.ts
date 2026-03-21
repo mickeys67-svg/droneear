@@ -282,6 +282,8 @@ export const hi: Translations = {
   classesLabel: 'कक्षाएँ',
   patternsCount: '6 पैटर्न',
   resetOnboarding: 'ऑनबोर्डिंग रीसेट करें',
+  resetOnboardingMsg: 'यह सेटअप प्रक्रिया पुनः आरंभ करेगा। जारी रखें?',
+  ok: 'ठीक है',
 
   // History
   historyTab: 'इतिहास',

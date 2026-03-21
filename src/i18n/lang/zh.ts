@@ -282,6 +282,8 @@ export const zh: Translations = {
   classesLabel: '类别',
   patternsCount: '6个模式',
   resetOnboarding: '重置引导',
+  resetOnboardingMsg: '这将重新启动设置过程。是否继续？',
+  ok: '确定',
 
   // History
   historyTab: '历史',

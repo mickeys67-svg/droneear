@@ -282,6 +282,8 @@ export const it: Translations = {
   classesLabel: 'Classi',
   patternsCount: '6 pattern',
   resetOnboarding: 'Ripristina introduzione',
+  resetOnboardingMsg: 'Questo riavvierà il processo di configurazione. Continuare?',
+  ok: 'OK',
 
   // History
   historyTab: 'CRONOLOGIA',
