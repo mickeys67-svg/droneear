@@ -10,7 +10,7 @@
 
 import { FFTProcessor } from '../audio/FFTProcessor';
 import { MelSpectrogram } from '../audio/MelSpectrogram';
-import { ModelManager } from './ModelManager';
+import { HybridEngine } from './HybridEngine';
 import { DOAEstimator } from '../detection/DOAEstimator';
 import { getTopSimilarDrones } from '../DroneDatabase';
 import { SEVERITY_THRESHOLDS, DRONE_FREQUENCY_RANGES } from '../../constants/micConfig';
@@ -44,7 +44,7 @@ const DEFAULT_CONFIG: ClassifierConfig = {
 export class AudioClassifierEngine {
   private fft: FFTProcessor;
   private mel: MelSpectrogram;
-  private model: ModelManager;
+  private model: HybridEngine;
   private config: ClassifierConfig;
 
   // Sliding window buffer
@@ -78,7 +78,7 @@ export class AudioClassifierEngine {
       125,   // fMin: drone frequency lower bound
       8000,  // fMax: drone frequency upper bound
     );
-    this.model = new ModelManager();
+    this.model = new HybridEngine();
     this.doaEstimator = new DOAEstimator(44100, 0.12, 343);
   }
 
