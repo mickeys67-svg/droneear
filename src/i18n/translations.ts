@@ -332,6 +332,10 @@ export interface Translations {
   resetOnboardingMsg?: string;
   ok?: string;
   privacyPolicy?: string;
+  batteryWarning?: string;
+  batteryHalf?: string;
+  batteryLow?: string;
+  batteryCritical?: string;
 
   // History
   historyTab?: string;
@@ -683,6 +687,10 @@ const ko: Translations = {
   resetOnboardingMsg: '설정 과정을 다시 시작합니다. 계속하시겠습니까?',
   ok: '확인',
   privacyPolicy: '개인정보 처리방침',
+  batteryWarning: '배터리 부족',
+  batteryHalf: '배터리가 50% 이하입니다. 장시간 스캔을 위해 보조배터리 연결을 권장합니다.',
+  batteryLow: '배터리가 30% 이하입니다. 보조배터리 또는 전원을 연결하세요.',
+  batteryCritical: '배터리가 매우 부족합니다. 즉시 전원을 연결하세요.',
 
   // History
   historyTab: '기록',
@@ -1015,6 +1023,10 @@ const en: Translations = {
   resetOnboardingMsg: 'This will restart the setup process. Continue?',
   ok: 'OK',
   privacyPolicy: 'Privacy Policy',
+  batteryWarning: 'Low Battery',
+  batteryHalf: 'Battery below 50%. Consider connecting a power bank for extended scanning.',
+  batteryLow: 'Battery below 30%. Connect a power bank or charger to continue scanning.',
+  batteryCritical: 'Battery critically low. Connect power immediately.',
 
   // History
   historyTab: 'HISTORY',
@@ -1347,6 +1359,10 @@ const uk: Translations = {
   resetOnboardingMsg: 'Це перезапустить процес налаштування. Продовжити?',
   ok: 'OK',
   privacyPolicy: 'Політика конфіденційності',
+  batteryWarning: 'Низький заряд',
+  batteryHalf: 'Заряд батареї нижче 50%. Рекомендуємо підключити павербанк для тривалого сканування.',
+  batteryLow: 'Заряд батареї нижче 30%. Підключіть павербанк або зарядний пристрій.',
+  batteryCritical: 'Критично низький заряд. Негайно підключіть живлення.',
 
   // History
   historyTab: 'ІСТОРІЯ',

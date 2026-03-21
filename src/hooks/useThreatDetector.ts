@@ -42,6 +42,7 @@ export function useThreatDetector() {
   const batteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const statusIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const envVoiceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const batteryAlertShownRef = useRef<Set<number>>(new Set()); // Track which thresholds were already alerted
 
   // Sensor status state (exposed to UI)
   const [sensorState, setSensorState] = useState<SensorState>({
@@ -437,13 +438,44 @@ export function useThreatDetector() {
     }, 30000);
 
     // Battery monitoring (60s interval — battery changes slowly)
+    batteryAlertShownRef.current.clear();
     batteryIntervalRef.current = setInterval(async () => {
       try {
         const level = await Battery.getBatteryLevelAsync();
         const pct = Math.round(level * 100);
         setBatteryLevel(pct);
+
+        // Low battery performance throttling
         if (pct < 20 && detectorRef.current) {
           detectorRef.current.setFrameSkipRate(4);
+        }
+
+        // Battery alert thresholds (50%, 30%, 15%) — show once per threshold
+        const thresholds = [50, 30, 15];
+        for (const threshold of thresholds) {
+          if (pct <= threshold && !batteryAlertShownRef.current.has(threshold)) {
+            batteryAlertShownRef.current.add(threshold);
+
+            // Voice alert
+            const currentLocale = useSettingsStore.getState().locale;
+            const tr = getTranslation(currentLocale);
+            const msg = pct <= 15
+              ? (tr.batteryCritical || `Battery critical: ${pct}%. Connect power immediately.`)
+              : pct <= 30
+              ? (tr.batteryLow || `Battery low: ${pct}%. Connect a power bank to continue scanning.`)
+              : (tr.batteryHalf || `Battery at ${pct}%. Consider connecting a power bank for extended scanning.`);
+            voiceRef.current.enqueueCustom(msg, pct <= 15 ? 1 : 2);
+
+            // Visual alert (only for 50% and below — not spammy)
+            if (pct <= 30) {
+              Alert.alert(
+                tr.batteryWarning || 'Low Battery',
+                msg,
+                [{ text: tr.ok || 'OK' }],
+              );
+            }
+            break; // Only alert for the lowest matching threshold
+          }
         }
       } catch (err) {
         console.warn('[DroneMonitor] Battery check failed:', err);
