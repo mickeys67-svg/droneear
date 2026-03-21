@@ -308,6 +308,29 @@ export default function OnboardingScreen() {
             <View style={[styles.iconCircle, { borderColor: `${theme.primary}30` }, primaryGlow(theme.primary,15)]}>
               <Text style={styles.iconEmoji}>📶</Text>
             </View>
+            {/* Detection method info banner */}
+            <View style={[styles.infoBanner, { backgroundColor: `${theme.primary}10`, borderColor: `${theme.primary}25` }]}>
+              <Text style={[styles.infoBannerTitle, { color: theme.primary }]}>
+                🎧 {t.audioDetectionNote || 'Audio + BLE Dual Detection'}
+              </Text>
+              <Text style={[styles.infoBannerText, { color: theme.textDim }]}>
+                {t.audioDetectionDesc || 'DroneEar detects drones using acoustic sound analysis alongside BLE Remote ID scanning for maximum detection accuracy.'}
+              </Text>
+              {Platform.OS === 'ios' && (
+                <View style={[styles.infoBannerDivider, { borderTopColor: `${theme.primary}15` }]}>
+                  <Text style={[styles.infoBannerText, { color: theme.warning }]}>
+                    ⚠️ {t.bleWifiNoticeDesc || 'On iOS, WiFi scanning is blocked by Apple policy. Only Bluetooth (BLE) Remote ID can be received.'}
+                  </Text>
+                </View>
+              )}
+              {Platform.OS === 'android' && (
+                <View style={[styles.infoBannerDivider, { borderTopColor: `${theme.primary}15` }]}>
+                  <Text style={[styles.infoBannerText, { color: theme.success || '#4ADE80' }]}>
+                    ✓ {t.bleWifiAndroidOnly || 'WiFi Remote ID: Android only'} — {t.androidWifiSupported || 'WiFi Remote ID supported on this device'}
+                  </Text>
+                </View>
+              )}
+            </View>
             <TouchableOpacity style={[styles.ctaBtn, { backgroundColor: theme.primary }, primaryGlow(theme.primary,10)]} onPress={() => {
               setBLEScanEnabled(true);
               goNext();
@@ -448,6 +471,12 @@ const styles = StyleSheet.create({
 
   // Disclaimer
   disclaimerText: { fontSize: 11, textAlign: 'center', marginBottom: 24, lineHeight: 16, fontStyle: 'italic', paddingHorizontal: 20 },
+
+  // Info banner (BLE step)
+  infoBanner: { marginHorizontal: 20, marginBottom: 20, padding: 14, borderRadius: 12, borderWidth: 1 },
+  infoBannerTitle: { fontSize: 13, fontWeight: '700', marginBottom: 6, textAlign: 'center' },
+  infoBannerText: { fontSize: 11, lineHeight: 16, textAlign: 'center' },
+  infoBannerDivider: { marginTop: 8, paddingTop: 8, borderTopWidth: 1 },
 
   // Step indicators
   indicators: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingBottom: 40 },

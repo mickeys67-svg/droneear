@@ -265,6 +265,12 @@ export interface Translations {
   bleSerialNumber: string;
   bleOperatorLocation: string;
   bleNoDevices: string;
+  bleWifiNotice?: string;
+  bleWifiNoticeDesc?: string;
+  bleWifiAndroidOnly?: string;
+  audioDetectionNote?: string;
+  audioDetectionDesc?: string;
+  androidWifiSupported?: string;
 
   // Map Screen
   mapTab: string;
@@ -605,6 +611,12 @@ const ko: Translations = {
   bleSerialNumber: '시리얼 번호',
   bleOperatorLocation: '운영자 위치',
   bleNoDevices: '발견된 BLE 기기 없음',
+  bleWifiNotice: 'DJI, Skydio 등 주요 드론은 WiFi로 Remote ID를 송출합니다. WiFi Remote ID 수신은 Android에서만 가능합니다.',
+  bleWifiNoticeDesc: 'iOS에서는 Apple 정책으로 WiFi 스캔이 차단됩니다. 블루투스(BLE) Remote ID만 수신 가능합니다.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: Android 전용',
+  audioDetectionNote: '음향 + BLE 이중 탐지',
+  audioDetectionDesc: 'DroneEar는 음향 분석과 BLE Remote ID 스캔을 동시에 사용하여 최대 탐지 정확도를 제공합니다.',
+  androidWifiSupported: '이 기기에서 WiFi Remote ID 수신 가능',
 
   // Map
   mapTab: '지도',
@@ -926,6 +938,12 @@ const en: Translations = {
   bleSerialNumber: 'Serial Number',
   bleOperatorLocation: 'Operator Location',
   bleNoDevices: 'No BLE Devices Found',
+  bleWifiNotice: 'Major drones (DJI, Skydio, etc.) broadcast Remote ID via WiFi. WiFi Remote ID reception is available on Android only.',
+  bleWifiNoticeDesc: 'On iOS, WiFi scanning is blocked by Apple policy. Only Bluetooth (BLE) Remote ID can be received.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: Android only',
+  audioDetectionNote: 'Audio + BLE Dual Detection',
+  audioDetectionDesc: 'DroneEar detects drones using acoustic sound analysis alongside BLE Remote ID scanning for maximum detection accuracy.',
+  androidWifiSupported: 'WiFi Remote ID supported on this device',
 
   // Map
   mapTab: 'MAP',
@@ -1247,6 +1265,12 @@ const uk: Translations = {
   bleSerialNumber: 'Серійний номер',
   bleOperatorLocation: 'Місце оператора',
   bleNoDevices: 'BLE пристрої не знайдено',
+  bleWifiNotice: 'Основні дрони (DJI, Skydio тощо) транслюють Remote ID через WiFi. Прийом WiFi Remote ID доступний лише на Android.',
+  bleWifiNoticeDesc: 'На iOS сканування WiFi заблоковано політикою Apple. Приймається лише Bluetooth (BLE) Remote ID.',
+  bleWifiAndroidOnly: 'WiFi Remote ID: лише Android',
+  audioDetectionNote: 'Аудіо + BLE подвійне виявлення',
+  audioDetectionDesc: 'DroneEar виявляє дрони за допомогою акустичного аналізу звуку та BLE Remote ID для максимальної точності.',
+  androidWifiSupported: 'WiFi Remote ID підтримується на цьому пристрої',
 
   // Map
   mapTab: 'КАРТА',
