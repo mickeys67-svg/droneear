@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DroneEar App Store Screenshots - iPad</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #222; display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; font-family: -apple-system, system-ui, sans-serif; }
+
+  .tablet {
+    width: 1024px; /* 2048/2 */
+    height: 1366px; /* 2732/2 */
+    background: #0A0A0F;
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Status bar */
+  .statusbar {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 36px 0;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .statusbar-right { display: flex; gap: 8px; align-items: center; }
+
+  /* Common */
+  .screen { padding: 0 40px; }
+  .text-white { color: #FFFFFF; }
+  .text-cyan { color: #00E5CC; }
+  .text-dim { color: #A0A0B0; }
+  .text-muted { color: #666670; }
+  .text-danger { color: #FF4444; }
+  .text-warning { color: #FFBB33; }
+
+  /* Glass card */
+  .glass {
+    background: rgba(20, 20, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .glass-active {
+    border-color: rgba(0, 229, 204, 0.4);
+    box-shadow: 0 0 16px rgba(0, 229, 204, 0.15);
+  }
+  .glass-danger {
+    border-color: rgba(255, 68, 68, 0.4);
+    box-shadow: 0 0 16px rgba(255, 68, 68, 0.15);
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 24px;
+  }
+  .brand { font-size: 36px; font-weight: 900; letter-spacing: 3px; color: #fff; }
+  .brand span { color: #00E5CC; }
+  .badge {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-radius: 12px;
+    border: 1px solid rgba(0, 229, 204, 0.4);
+    background: rgba(0, 229, 204, 0.1);
+  }
+  .badge-dot { width: 10px; height: 10px; border-radius: 5px; background: #00E5CC; }
+  .badge-text { font-size: 15px; font-weight: 800; color: #00E5CC; letter-spacing: 1px; }
+  .badge-inactive { border-color: rgba(255,255,255,0.08); background: rgba(20,20,30,0.7); }
+  .badge-inactive .badge-dot { background: #666670; }
+  .badge-inactive .badge-text { color: #666670; }
+
+  /* Radar */
+  .radar-wrap { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
+  .radar {
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 229, 204, 0.2);
+    position: relative;
+    background: radial-gradient(circle, rgba(0,229,204,0.03) 0%, transparent 70%);
+  }
+  .radar-ring { position: absolute; border: 1px solid rgba(0, 229, 204, 0.1); border-radius: 50%; }
+  .radar-ring-1 { width: 100px; height: 100px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .radar-ring-2 { width: 200px; height: 200px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .radar-ring-3 { width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .radar-axis-v { position: absolute; width: 1px; height: 100%; left: 50%; background: rgba(0,229,204,0.1); }
+  .radar-axis-h { position: absolute; height: 1px; width: 100%; top: 50%; background: rgba(0,229,204,0.1); }
+  .radar-center { position: absolute; width: 8px; height: 8px; border-radius: 4px; background: #00E5CC; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .radar-label { position: absolute; font-size: 14px; font-weight: bold; color: rgba(0,229,204,0.4); }
+  .radar-label-n { top: 6px; left: 50%; transform: translateX(-50%); }
+  .radar-label-s { bottom: 6px; left: 50%; transform: translateX(-50%); }
+  .radar-label-e { right: 8px; top: 50%; transform: translateY(-50%); }
+  .radar-label-w { left: 8px; top: 50%; transform: translateY(-50%); }
+
+  /* Sweep */
+  .radar-sweep {
+    position: absolute; top: 0; left: 50%; width: 50%; height: 50%;
+    transform-origin: bottom left;
+    background: linear-gradient(135deg, rgba(0,229,204,0.15) 0%, transparent 60%);
+    border-top-right-radius: 300px;
+    transform: rotate(45deg);
+  }
+
+  /* Signal dots */
+  .signal-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 10px; }
+  .signal-dot-red { background: #FF4444; box-shadow: 0 0 12px #FF4444; }
+  .signal-dot-orange { background: #FFBB33; box-shadow: 0 0 12px #FFBB33; }
+  .signal-dot-ble { background: #4488FF; width: 12px; height: 12px; border-radius: 3px; box-shadow: 0 0 10px #4488FF; }
+
+  .scan-status { font-size: 16px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #00E5CC; margin-top: 16px; }
+
+  /* Spectrogram bars */
+  .spectrogram { display: flex; gap: 4px; align-items: flex-end; height: 80px; margin: 12px 0; }
+  .spec-bar { width: 14px; border-radius: 3px; background: linear-gradient(to top, #00E5CC, #00E5CC88); }
+
+  /* Scan button */
+  .scan-btn {
+    width: 100%; padding: 20px; border-radius: 16px;
+    text-align: center; font-size: 18px; font-weight: 800;
+    letter-spacing: 3px; text-transform: uppercase;
+    margin: 16px 0;
+  }
+  .scan-btn-active { background: #FF4444; color: #fff; box-shadow: 0 0 24px rgba(255,68,68,0.3); }
+  .scan-btn-inactive { background: #00E5CC; color: #000; box-shadow: 0 0 24px rgba(0,229,204,0.3); }
+
+  /* Alert card */
+  .alert-card {
+    background: rgba(255, 68, 68, 0.08);
+    border: 1px solid rgba(255, 68, 68, 0.4);
+    border-radius: 20px; padding: 24px;
+    margin-bottom: 16px;
+  }
+  .alert-title { font-size: 16px; font-weight: 800; color: #FF4444; text-transform: uppercase; letter-spacing: 1.5px; }
+  .alert-category { font-size: 28px; font-weight: 900; color: #fff; margin: 8px 0; }
+  .alert-stats { display: flex; gap: 40px; margin-top: 12px; }
+  .alert-stat-val { font-size: 36px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .alert-stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666670; }
+
+  /* BLE list */
+  .ble-row { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .ble-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(68,136,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .ble-info { flex: 1; }
+  .ble-name { font-size: 18px; font-weight: 700; color: #fff; }
+  .ble-detail { font-size: 13px; color: #A0A0B0; margin-top: 3px; }
+  .ble-rssi { font-size: 22px; font-weight: 900; color: #4488FF; font-variant-numeric: tabular-nums; }
+
+  /* Settings row */
+  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .settings-label { font-size: 18px; color: #fff; font-weight: 600; }
+  .settings-value { font-size: 16px; color: #00E5CC; font-weight: 600; }
+  .toggle { width: 56px; height: 32px; border-radius: 16px; position: relative; }
+  .toggle-on { background: #00E5CC; }
+  .toggle-off { background: #333; }
+  .toggle-knob { width: 28px; height: 28px; border-radius: 14px; background: #fff; position: absolute; top: 2px; }
+  .toggle-on .toggle-knob { right: 2px; }
+  .toggle-off .toggle-knob { left: 2px; }
+
+  /* History */
+  .history-row { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .history-dot { width: 12px; height: 12px; border-radius: 6px; }
+  .history-info { flex: 1; }
+  .history-type { font-size: 17px; font-weight: 700; color: #fff; }
+  .history-time { font-size: 13px; color: #666670; margin-top: 3px; }
+  .history-conf { font-size: 24px; font-weight: 900; color: #00E5CC; font-variant-numeric: tabular-nums; }
+
+  /* Tab bar */
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: rgba(10, 10, 15, 0.9);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; justify-content: space-around; align-items: flex-start;
+    padding-top: 12px;
+    backdrop-filter: blur(20px);
+  }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .tab-icon { font-size: 24px; }
+  .tab-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tab-active .tab-label { color: #00E5CC; }
+  .tab-inactive .tab-label { color: #666670; }
+
+  /* Onboarding */
+  .onboard-circle {
+    width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,204,0.15) 0%, rgba(0,229,204,0.03) 60%, transparent 100%);
+    border: 2px solid rgba(0,229,204,0.2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 40px auto 32px;
+    font-size: 110px;
+  }
+  .onboard-title { font-size: 32px; font-weight: 900; color: #fff; text-align: center; letter-spacing: 1.5px; }
+  .onboard-desc { font-size: 18px; color: #A0A0B0; text-align: center; line-height: 1.6; margin: 16px 80px; }
+  .onboard-btn {
+    display: block; width: calc(100% - 160px); margin: 28px auto;
+    padding: 20px; border-radius: 16px; background: #00E5CC;
+    text-align: center; font-size: 18px; font-weight: 800;
+    color: #000; letter-spacing: 2px; text-transform: uppercase;
+    box-shadow: 0 0 24px rgba(0,229,204,0.2);
+  }
+  .step-dots { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+  .step-dot { width: 10px; height: 10px; border-radius: 5px; }
+  .step-dot-active { background: #00E5CC; }
+  .step-dot-inactive { background: rgba(255,255,255,0.15); }
+
+  /* iPad two-column layout */
+  .two-col { display: flex; gap: 20px; }
+  .two-col > * { flex: 1; }
+
+  .screenshot-label {
+    width: 1024px; text-align: center; color: #888;
+    font-size: 14px; margin-top: -10px; margin-bottom: 10px;
+  }
+
+  /* Mic quality bar */
+  .mic-bar { display: flex; align-items: center; gap: 12px; }
+  .mic-bar-track { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); }
+  .mic-bar-fill { height: 100%; border-radius: 4px; background: #00E5CC; }
+  .mic-label { font-size: 13px; color: #A0A0B0; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<!-- ===== SCREENSHOT 1: Main Scan - SAFE State ===== -->
+<div>
+<div class="tablet">
+  <div class="statusbar">
+    <span>9:41</span>
+    <div class="statusbar-right">
+      <span style="font-size:13px">Wi-Fi</span>
+      <span style="font-size:15px">&#9679;&#9679;&#9679;</span>
+    </div>
+  </div>
+  <div class="screen">
+    <div class="header">
+      <div class="brand">Drone<span>Ear</span></div>
+      <div style="display:flex;gap:10px">
+        <div class="badge badge-inactive">
+          <div class="badge-dot" style="background:#666670"></div>
+          <div class="badge-text" style="color:#666670">STANDBY</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="radar-wrap">
+          <div class="radar">
+            <div class="radar-ring radar-ring-1"></div>
+            <div class="radar-ring radar-ring-2"></div>
+            <div class="radar-ring radar-ring-3"></div>
+            <div class="radar-axis-v"></div>
+            <div class="radar-axis-h"></div>
+            <div class="radar-center"></div>
+            <span class="radar-label radar-label-n">N</span>
+            <span class="radar-label radar-label-s">S</span>
+            <span class="radar-label radar-label-e">E</span>
+            <span class="radar-label radar-label-w">W</span>
+          </div>
+          <div class="scan-status" style="color:#666670; opacity:0.5">SENSOR OFFLINE</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center">
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">AUDIO SPECTRUM</div>
+          <div class="spectrogram">
+            <div class="spec-bar" style="height:10px;opacity:0.2"></div><div class="spec-bar" style="height:7px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:15px;opacity:0.2"></div><div class="spec-bar" style="height:8px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:12px;opacity:0.2"></div><div class="spec-bar" style="height:5px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:10px;opacity:0.2"></div><div class="spec-bar" style="height:18px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:9px;opacity:0.2"></div><div class="spec-bar" style="height:6px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:11px;opacity:0.2"></div><div class="spec-bar" style="height:8px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:14px;opacity:0.2"></div><div class="spec-bar" style="height:10px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:6px;opacity:0.2"></div><div class="spec-bar" style="height:16px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:9px;opacity:0.2"></div><div class="spec-bar" style="height:11px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:5px;opacity:0.2"></div><div class="spec-bar" style="height:13px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:8px;opacity:0.2"></div><div class="spec-bar" style="height:10px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:12px;opacity:0.2"></div><div class="spec-bar" style="height:7px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:9px;opacity:0.2"></div><div class="spec-bar" style="height:15px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:8px;opacity:0.2"></div><div class="spec-bar" style="height:11px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:10px;opacity:0.2"></div><div class="spec-bar" style="height:6px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:13px;opacity:0.2"></div><div class="spec-bar" style="height:8px;opacity:0.2"></div>
+            <div class="spec-bar" style="height:11px;opacity:0.2"></div><div class="spec-bar" style="height:5px;opacity:0.2"></div>
+          </div>
+        </div>
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">MIC STATUS</div>
+          <div class="mic-bar" style="margin-bottom:8px">
+            <div class="mic-label">SNR</div>
+            <div class="mic-bar-track"><div class="mic-bar-fill" style="width:0%"></div></div>
+            <span style="font-size:14px;color:#666670;font-weight:700">--</span>
+          </div>
+          <div class="mic-bar">
+            <div class="mic-label">NOISE</div>
+            <div class="mic-bar-track"><div class="mic-bar-fill" style="width:0%"></div></div>
+            <span style="font-size:14px;color:#666670;font-weight:700">--</span>
+          </div>
+        </div>
+        <div class="scan-btn scan-btn-inactive">START LISTENING</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab-item tab-active"><div class="tab-icon">&#128226;</div><div class="tab-label">SCAN</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#127758;</div><div class="tab-label">MAP</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128203;</div><div class="tab-label">LOG</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#9881;</div><div class="tab-label">SET</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128214;</div><div class="tab-label">GUIDE</div></div>
+  </div>
+</div>
+<div class="screenshot-label">1. Main Screen - Standby</div>
+</div>
+
+<!-- ===== SCREENSHOT 2: Active Scanning with Detection ===== -->
+<div>
+<div class="tablet">
+  <div class="statusbar">
+    <span>9:41</span>
+    <div class="statusbar-right"><span style="font-size:13px">Wi-Fi</span></div>
+  </div>
+  <div class="screen">
+    <div class="header">
+      <div class="brand">Drone<span>Ear</span></div>
+      <div style="display:flex;gap:10px">
+        <div class="badge"><div class="badge-dot"></div><div class="badge-text">03:42</div></div>
+        <div class="badge"><div class="badge-dot"></div><div class="badge-text">SCANNING</div></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <!-- Alert -->
+        <div class="alert-card">
+          <div class="alert-title">DETECTION ALERT</div>
+          <div class="alert-category">MULTIROTOR</div>
+          <div class="alert-stats">
+            <div><div class="alert-stat-val text-danger">127<span style="font-size:16px">m</span></div><div class="alert-stat-label">DISTANCE</div></div>
+            <div><div class="alert-stat-val text-warning">94<span style="font-size:16px">%</span></div><div class="alert-stat-label">CONFIDENCE</div></div>
+            <div><div class="alert-stat-val text-cyan">045<span style="font-size:16px">&deg;</span></div><div class="alert-stat-label">BEARING</div></div>
+          </div>
+          <div style="margin-top:12px;font-size:14px;color:#A0A0B0">Similar: DJI Mavic 3 (78%), DJI Air 2S (65%)</div>
+        </div>
+
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">AUDIO SPECTRUM</div>
+          <div class="spectrogram">
+            <div class="spec-bar" style="height:30px"></div><div class="spec-bar" style="height:42px"></div>
+            <div class="spec-bar" style="height:60px"></div><div class="spec-bar" style="height:55px"></div>
+            <div class="spec-bar" style="height:68px"></div><div class="spec-bar" style="height:45px"></div>
+            <div class="spec-bar" style="height:52px"></div><div class="spec-bar" style="height:72px"></div>
+            <div class="spec-bar" style="height:38px"></div><div class="spec-bar" style="height:58px"></div>
+            <div class="spec-bar" style="height:65px"></div><div class="spec-bar" style="height:40px"></div>
+            <div class="spec-bar" style="height:55px"></div><div class="spec-bar" style="height:35px"></div>
+            <div class="spec-bar" style="height:48px"></div><div class="spec-bar" style="height:68px"></div>
+            <div class="spec-bar" style="height:42px"></div><div class="spec-bar" style="height:28px"></div>
+            <div class="spec-bar" style="height:36px"></div><div class="spec-bar" style="height:22px"></div>
+            <div class="spec-bar" style="height:30px"></div><div class="spec-bar" style="height:18px"></div>
+            <div class="spec-bar" style="height:24px"></div><div class="spec-bar" style="height:15px"></div>
+            <div class="spec-bar" style="height:12px"></div><div class="spec-bar" style="height:10px"></div>
+            <div class="spec-bar" style="height:16px"></div><div class="spec-bar" style="height:12px"></div>
+            <div class="spec-bar" style="height:8px"></div><div class="spec-bar" style="height:10px"></div>
+            <div class="spec-bar" style="height:14px"></div><div class="spec-bar" style="height:8px"></div>
+            <div class="spec-bar" style="height:6px"></div><div class="spec-bar" style="height:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="radar-wrap">
+          <div class="radar">
+            <div class="radar-ring radar-ring-1"></div>
+            <div class="radar-ring radar-ring-2"></div>
+            <div class="radar-ring radar-ring-3"></div>
+            <div class="radar-axis-v"></div>
+            <div class="radar-axis-h"></div>
+            <div class="radar-sweep"></div>
+            <div class="radar-center"></div>
+            <span class="radar-label radar-label-n">N</span>
+            <span class="radar-label radar-label-s">S</span>
+            <span class="radar-label radar-label-e">E</span>
+            <span class="radar-label radar-label-w">W</span>
+            <div class="signal-dot signal-dot-red" style="top:38%;left:62%"></div>
+            <div class="signal-dot signal-dot-orange" style="top:26%;left:35%"></div>
+          </div>
+          <div class="scan-status">SCANNING &middot; 2 TRACKS</div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:4px;background:#FF4444"></div><span style="font-size:13px;color:#FF4444;font-weight:600">ACOUSTIC (2)</span></div>
+            <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:4px;background:#4488FF"></div><span style="font-size:13px;color:#4488FF;font-weight:600">BLE (1)</span></div>
+          </div>
+        </div>
+        <div class="scan-btn scan-btn-active">STOP LISTENING</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab-item tab-active"><div class="tab-icon">&#128226;</div><div class="tab-label">SCAN</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#127758;</div><div class="tab-label">MAP</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128203;</div><div class="tab-label">LOG</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#9881;</div><div class="tab-label">SET</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128214;</div><div class="tab-label">GUIDE</div></div>
+  </div>
+</div>
+<div class="screenshot-label">2. Active Detection</div>
+</div>
+
+<!-- ===== SCREENSHOT 3: BLE Remote ID ===== -->
+<div>
+<div class="tablet">
+  <div class="statusbar"><span>9:41</span><div class="statusbar-right"><span style="font-size:13px">Wi-Fi</span></div></div>
+  <div class="screen">
+    <div class="header">
+      <div class="brand">Drone<span>Ear</span></div>
+      <div class="badge"><div class="badge-dot"></div><div class="badge-text">SCANNING</div></div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="glass glass-active">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;color:#4488FF;text-transform:uppercase;letter-spacing:1.5px">BLE REMOTE ID</div>
+            <div style="font-size:13px;color:#00E5CC;font-weight:600">2 DEVICES</div>
+          </div>
+
+          <div class="ble-row">
+            <div class="ble-icon">&#9992;</div>
+            <div class="ble-info">
+              <div class="ble-name">DJI-MAVIC3-A7F2</div>
+              <div class="ble-detail">S/N: 1581F913AA72 &middot; Alt: 120m</div>
+              <div class="ble-detail">Lat: 37.5665 Lon: 126.9780</div>
+            </div>
+            <div class="ble-rssi">-62<span style="font-size:13px;color:#666670">dBm</span></div>
+          </div>
+
+          <div class="ble-row" style="border:none">
+            <div class="ble-icon">&#9992;</div>
+            <div class="ble-info">
+              <div class="ble-name">PARROT-ANAFI-3B1C</div>
+              <div class="ble-detail">S/N: PAR-2024-X991 &middot; Alt: 85m</div>
+              <div class="ble-detail">Lat: 37.5670 Lon: 126.9785</div>
+            </div>
+            <div class="ble-rssi">-78<span style="font-size:13px;color:#666670">dBm</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">SIGNAL DETAILS</div>
+          <div style="display:flex;gap:30px">
+            <div style="text-align:center">
+              <div style="font-size:42px;font-weight:900;color:#00E5CC;font-variant-numeric:tabular-nums">120<span style="font-size:18px">m</span></div>
+              <div class="alert-stat-label">ALTITUDE</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:42px;font-weight:900;color:#4488FF;font-variant-numeric:tabular-nums">12.5<span style="font-size:18px">m/s</span></div>
+              <div class="alert-stat-label">SPEED</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:42px;font-weight:900;color:#FFBB33;font-variant-numeric:tabular-nums">045<span style="font-size:18px">&deg;</span></div>
+              <div class="alert-stat-label">HEADING</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">OPERATOR INFO</div>
+          <div style="display:flex;gap:14px;align-items:center">
+            <div style="font-size:32px">&#128100;</div>
+            <div>
+              <div style="font-size:17px;color:#fff;font-weight:600">Operator Location</div>
+              <div style="font-size:14px;color:#A0A0B0;margin-top:4px">37.5660, 126.9775 &middot; 340m away</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">FLIGHT PATH</div>
+          <div style="height:120px;border-radius:12px;background:rgba(0,229,204,0.05);border:1px solid rgba(0,229,204,0.1);display:flex;align-items:center;justify-content:center">
+            <span style="font-size:14px;color:#666670">Flight path visualization</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab-item tab-active"><div class="tab-icon">&#128226;</div><div class="tab-label">SCAN</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#127758;</div><div class="tab-label">MAP</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128203;</div><div class="tab-label">LOG</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#9881;</div><div class="tab-label">SET</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128214;</div><div class="tab-label">GUIDE</div></div>
+  </div>
+</div>
+<div class="screenshot-label">3. BLE Remote ID</div>
+</div>
+
+<!-- ===== SCREENSHOT 4: Detection History ===== -->
+<div>
+<div class="tablet">
+  <div class="statusbar"><span>9:41</span><div class="statusbar-right"><span style="font-size:13px">Wi-Fi</span></div></div>
+  <div class="screen">
+    <div class="header">
+      <div class="brand">Drone<span>Ear</span></div>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px">DETECTION HISTORY</div>
+
+    <div class="glass" style="margin-bottom:24px">
+      <div style="display:flex;justify-content:space-around;text-align:center">
+        <div><div style="font-size:40px;font-weight:900;color:#00E5CC">12</div><div class="alert-stat-label">DETECTIONS</div></div>
+        <div><div style="font-size:40px;font-weight:900;color:#4488FF">3</div><div class="alert-stat-label">SESSIONS</div></div>
+        <div><div style="font-size:40px;font-weight:900;color:#FFBB33">2h 15m</div><div class="alert-stat-label">TOTAL TIME</div></div>
+        <div><div style="font-size:40px;font-weight:900;color:#FF4444">4</div><div class="alert-stat-label">HIGH CONF</div></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="glass">
+          <div style="font-size:11px;font-weight:700;color:#00E5CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">TODAY</div>
+          <div class="history-row">
+            <div class="history-dot" style="background:#FF4444"></div>
+            <div class="history-info">
+              <div class="history-type">MULTIROTOR</div>
+              <div class="history-time">14:32 &middot; Session #3 &middot; BLE+Acoustic</div>
+            </div>
+            <div class="history-conf">94%</div>
+          </div>
+          <div class="history-row">
+            <div class="history-dot" style="background:#FFBB33"></div>
+            <div class="history-info">
+              <div class="history-type">SINGLE ENGINE</div>
+              <div class="history-time">14:28 &middot; Session #3 &middot; Acoustic</div>
+            </div>
+            <div class="history-conf">82%</div>
+          </div>
+          <div class="history-row">
+            <div class="history-dot" style="background:#00FF88"></div>
+            <div class="history-info">
+              <div class="history-type">MULTIROTOR</div>
+              <div class="history-time">11:15 &middot; Session #2 &middot; BLE</div>
+            </div>
+            <div class="history-conf">88%</div>
+          </div>
+          <div class="history-row" style="border:none">
+            <div class="history-dot" style="background:#FFBB33"></div>
+            <div class="history-info">
+              <div class="history-type">JET PROPULSION</div>
+              <div class="history-time">10:52 &middot; Session #2 &middot; Acoustic</div>
+            </div>
+            <div class="history-conf">71%</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="glass">
+          <div style="font-size:11px;font-weight:700;color:#00E5CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">YESTERDAY</div>
+          <div class="history-row">
+            <div class="history-dot" style="background:#FF4444"></div>
+            <div class="history-info">
+              <div class="history-type">SINGLE ROTOR</div>
+              <div class="history-time">16:45 &middot; Session #1 &middot; Acoustic</div>
+            </div>
+            <div class="history-conf">91%</div>
+          </div>
+          <div class="history-row">
+            <div class="history-dot" style="background:#FFBB33"></div>
+            <div class="history-info">
+              <div class="history-type">PROPELLER FIXED</div>
+              <div class="history-time">16:40 &middot; Session #1 &middot; Acoustic</div>
+            </div>
+            <div class="history-conf">76%</div>
+          </div>
+          <div class="history-row" style="border:none">
+            <div class="history-dot" style="background:#00FF88"></div>
+            <div class="history-info">
+              <div class="history-type">MULTIROTOR</div>
+              <div class="history-time">16:32 &middot; Session #1 &middot; BLE+Acoustic</div>
+            </div>
+            <div class="history-conf">96%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128226;</div><div class="tab-label">SCAN</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#127758;</div><div class="tab-label">MAP</div></div>
+    <div class="tab-item tab-active"><div class="tab-icon">&#128203;</div><div class="tab-label">LOG</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#9881;</div><div class="tab-label">SET</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128214;</div><div class="tab-label">GUIDE</div></div>
+  </div>
+</div>
+<div class="screenshot-label">4. Detection History</div>
+</div>
+
+<!-- ===== SCREENSHOT 5: Settings ===== -->
+<div>
+<div class="tablet">
+  <div class="statusbar"><span>9:41</span><div class="statusbar-right"><span style="font-size:13px">Wi-Fi</span></div></div>
+  <div class="screen">
+    <div class="header">
+      <div class="brand">Drone<span>Ear</span></div>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:#A0A0B0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px">SETTINGS</div>
+
+    <div class="two-col">
+      <div>
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#00E5CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">DETECTION</div>
+          <div class="settings-row">
+            <div class="settings-label">Mic Profile</div>
+            <div class="settings-value">BALANCED</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Confidence Threshold</div>
+            <div class="settings-value">75%</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">BLE Remote ID Scan</div>
+            <div class="toggle toggle-on"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row" style="border:none">
+            <div class="settings-label">Background Monitoring</div>
+            <div class="toggle toggle-off"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#00E5CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">ALERTS</div>
+          <div class="settings-row">
+            <div class="settings-label">Voice Alerts</div>
+            <div class="toggle toggle-on"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Haptic Feedback</div>
+            <div class="toggle toggle-on"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row" style="border:none">
+            <div class="settings-label">Alert Sound</div>
+            <div class="toggle toggle-on"><div class="toggle-knob"></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#00E5CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">LANGUAGE</div>
+          <div class="settings-row" style="border:none">
+            <div class="settings-label">App Language</div>
+            <div class="settings-value">English</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(0,229,204,0.15);color:#00E5CC;font-size:13px;font-weight:600;border:1px solid rgba(0,229,204,0.3)">EN</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">KO</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">JA</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">ZH</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">DE</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">FR</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">ES</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">IT</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">AR</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">HI</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">UR</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">TL</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">UK</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">HE</span>
+            <span style="padding:6px 14px;border-radius:14px;background:rgba(255,255,255,0.05);color:#666670;font-size:13px;font-weight:600">GA</span>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div style="font-size:13px;font-weight:700;color:#00E5CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">ABOUT</div>
+          <div class="settings-row">
+            <div class="settings-label">Version</div>
+            <div style="font-size:16px;color:#A0A0B0">2.1.0</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Debug Mode</div>
+            <div class="toggle toggle-off"><div class="toggle-knob"></div></div>
+          </div>
+          <div class="settings-row" style="border:none">
+            <div class="settings-label">Export Data</div>
+            <div class="settings-value">JSON</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128226;</div><div class="tab-label">SCAN</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#127758;</div><div class="tab-label">MAP</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128203;</div><div class="tab-label">LOG</div></div>
+    <div class="tab-item tab-active"><div class="tab-icon">&#9881;</div><div class="tab-label">SET</div></div>
+    <div class="tab-item tab-inactive"><div class="tab-icon">&#128214;</div><div class="tab-label">GUIDE</div></div>
+  </div>
+</div>
+<div class="screenshot-label">5. Settings</div>
+</div>
+
+<!-- ===== SCREENSHOT 6: Onboarding ===== -->
+<div>
+<div class="tablet">
+  <div class="statusbar"><span>9:41</span><div class="statusbar-right"><span style="font-size:13px">Wi-Fi</span></div></div>
+  <div class="screen" style="display:flex;flex-direction:column;justify-content:center;height:calc(100% - 50px);padding:0 40px">
+
+    <div class="onboard-circle">&#128266;</div>
+
+    <div class="onboard-title">Acoustic Pattern Analysis</div>
+    <div class="onboard-desc">
+      DroneEar uses your microphone to analyze acoustic patterns in real time.<br>
+      All audio processing happens 100% on-device. Nothing is recorded or uploaded.
+    </div>
+
+    <div class="onboard-btn">CONTINUE</div>
+
+    <div style="text-align:center;margin-top:16px;font-size:15px;color:#666670">Step 2 of 6</div>
+
+    <div class="step-dots">
+      <div class="step-dot step-dot-active"></div>
+      <div class="step-dot step-dot-active"></div>
+      <div class="step-dot step-dot-inactive"></div>
+      <div class="step-dot step-dot-inactive"></div>
+      <div class="step-dot step-dot-inactive"></div>
+      <div class="step-dot step-dot-inactive"></div>
+    </div>
+  </div>
+</div>
+<div class="screenshot-label">6. Onboarding</div>
+</div>
+
+</body>
+</html>
