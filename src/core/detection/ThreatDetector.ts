@@ -105,6 +105,7 @@ export class ThreatDetector {
     this.recoveryAttempts = 0;
 
     this.startAudioCapture();
+    // Start watchdog AFTER audio capture to avoid false stall detection
     this.startWatchdog();
 
     this.callbacks.onStatusChange?.('SCANNING');

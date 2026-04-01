@@ -86,7 +86,7 @@ export function EnvironmentWarningBanner({
         pulseAnimRef.current = null;
       }
     };
-  }, [micPermissionDenied, environmentState?.environment, pulseAnim]);
+  }, [micPermissionDenied, environmentState?.environment]);
 
   // Animate detection capability meter — FIXED: cleanup on re-render/unmount
   useEffect(() => {

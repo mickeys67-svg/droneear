@@ -11,7 +11,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.droneear.app",
-      "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
       },

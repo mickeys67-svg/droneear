@@ -678,6 +678,7 @@ export class ModelManager {
     maxScore: number,
     temperature: number,
   ): Map<ThreatCategory, number> {
+    temperature = Math.min(temperature, 10.0);
     let expSum = 0;
     const expScores = new Map<ThreatCategory, number>();
 

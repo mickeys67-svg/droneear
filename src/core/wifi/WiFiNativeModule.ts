@@ -156,7 +156,7 @@ export class AndroidWiFiAdapter implements WiFiAdapter {
     for (let i = 0; i < chars.length; i++) lookup[chars.charCodeAt(i)] = i;
 
     const len = base64.length;
-    let bufLen = (len * 3) / 4;
+    let bufLen = Math.floor((len * 3) / 4);
     if (base64[len - 1] === '=') bufLen--;
     if (base64[len - 2] === '=') bufLen--;
 

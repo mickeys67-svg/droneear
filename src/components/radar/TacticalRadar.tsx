@@ -124,7 +124,11 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
   };
 
   return (
-    <View style={[styles.container, { width: size, height: size, borderColor: theme.border }]}>
+    <View
+      style={[styles.container, { width: size, height: size, borderColor: theme.border }]}
+      accessibilityLabel={`Radar display, ${isActive ? 'scanning' : 'inactive'}, ${threats.filter(t => t.isActive).length} active signals`}
+      accessibilityRole="image"
+    >
       {/* Background */}
       <View style={[styles.background, { backgroundColor: theme.background }]} />
 

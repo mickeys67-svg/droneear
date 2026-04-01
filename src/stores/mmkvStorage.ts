@@ -23,6 +23,10 @@ function getMMKVInstance(id: string, encryptionKey: string): StateStorage {
   // Lazy import to avoid web bundling issues
   try {
     const { MMKV } = require('react-native-mmkv');
+    if (mmkvInstances.size > 10) {
+      console.warn('[MMKV] Too many instances, clearing cache');
+      mmkvInstances.clear();
+    }
     if (!mmkvInstances.has(id)) {
       mmkvInstances.set(id, new MMKV({ id, encryptionKey }));
     }

@@ -44,7 +44,7 @@ import { ActiveThreatsList } from '@/src/components/scan/ActiveThreatsList';
 
 import type { TacticalTheme } from '@/src/types';
 
-export default function HomeScreen() {
+function HomeScreenInner() {
   const theme = useTheme();
   const t = useTranslation();
   const debugMode = useSettingsStore((s) => s.debugMode);
@@ -339,6 +339,26 @@ const DebugItem: React.FC<{ label: string; value: string; color: TacticalTheme }
     <Text style={[styles.debugValue, { color: color.textDim }]}>{value}</Text>
   </View>
 );
+
+class HomeErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0A0A0F' }}>
+          <Text style={{ color: '#FF4444', fontSize: 16, fontWeight: '700' }}>Detection Engine Error</Text>
+          <Text style={{ color: '#A0A0B0', fontSize: 13, marginTop: 8 }}>Please restart the app</Text>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function HomeScreen() {
+  return <HomeErrorBoundary><HomeScreenInner /></HomeErrorBoundary>;
+}
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },

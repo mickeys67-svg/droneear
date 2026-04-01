@@ -227,14 +227,13 @@ export class VoiceAlertManager {
       this.isSpeaking = false;
       this.queue = [item, ...this.queue];
     } else {
+      // Keep queue bounded — check before push, not after
+      if (this.queue.length >= 5) {
+        this.queue = this.queue.slice(0, 4);
+      }
       this.queue.push(item);
       // Sort by priority
       this.queue.sort((a, b) => a.priority - b.priority);
-    }
-
-    // Keep queue bounded
-    if (this.queue.length > 5) {
-      this.queue = this.queue.slice(0, 5);
     }
 
     this.processQueue();

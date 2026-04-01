@@ -77,6 +77,7 @@ export function haversineBearing(
  * Angular difference between two bearings, accounting for 360° wrap.
  */
 function bearingDifference(a: number, b: number): number {
+  if (!isFinite(a) || !isFinite(b)) return 180;
   const diff = Math.abs(a - b) % 360;
   return diff > 180 ? 360 - diff : diff;
 }

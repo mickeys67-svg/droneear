@@ -267,7 +267,9 @@ export class EnvironmentDetector {
     let audioScore = 0.5;
     if (this.ambientLevels.length >= 5) {
       const avgRms = this.ambientLevels.reduce((a, b) => a + b, 0) / this.ambientLevels.length;
-      const variance = this.ambientLevels.reduce((sum, v) => sum + (v - avgRms) ** 2, 0) / this.ambientLevels.length;
+      const variance = isFinite(avgRms)
+        ? this.ambientLevels.reduce((sum, v) => sum + (v - avgRms) ** 2, 0) / this.ambientLevels.length
+        : 0;
 
       this.state.ambientNoiseLevel = avgRms;
 
@@ -286,7 +288,9 @@ export class EnvironmentDetector {
     let barometerScore = 0.5;
     if (this.pressureHistory.length >= 5) {
       const avgPressure = this.pressureHistory.reduce((a, b) => a + b, 0) / this.pressureHistory.length;
-      const variance = this.pressureHistory.reduce((sum, v) => sum + (v - avgPressure) ** 2, 0) / this.pressureHistory.length;
+      const variance = isFinite(avgPressure)
+        ? this.pressureHistory.reduce((sum, v) => sum + (v - avgPressure) ** 2, 0) / this.pressureHistory.length
+        : 0;
       const stdDev = Math.sqrt(variance);
 
       // Outdoor: more pressure fluctuation from wind

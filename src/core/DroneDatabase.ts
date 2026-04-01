@@ -100,6 +100,8 @@ const LEGACY_MAP: Record<string, MappedPattern> = {
 };
 
 export function getSimilarDrones(pattern: AcousticPattern | ThreatCategory): SimilarDrone[] {
+  // BACKGROUND and AMBIENT patterns intentionally return an empty array
+  // because they represent ambient/environmental noise with no drone match.
   if (pattern === 'BACKGROUND' || (pattern as string) === 'AMBIENT') return [];
 
   const mapped = LEGACY_MAP[pattern] || pattern;

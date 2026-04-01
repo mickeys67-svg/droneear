@@ -1,8 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Platform, NativeModules } from 'react-native';
 import { createMMKVStorage } from './mmkvStorage';
 import type { AppSettings, DeviceProfile, ThemeMode } from '../types';
 import type { SupportedLocale } from '../i18n/translations';
+
+// Detect device locale, fallback to 'en'
+const SUPPORTED_LOCALES: SupportedLocale[] = ['ko', 'en', 'uk', 'ar', 'ar_gulf', 'he', 'hi', 'ur', 'tl', 'de', 'es', 'fr', 'it', 'zh', 'ja'];
+const rawDeviceLocale = (Platform.OS === 'ios'
+  ? NativeModules.SettingsManager?.settings?.AppleLocale
+  : NativeModules.I18nManager?.localeIdentifier
+)?.split('_')[0] || 'en';
+const deviceLocale: SupportedLocale = SUPPORTED_LOCALES.includes(rawDeviceLocale as SupportedLocale)
+  ? (rawDeviceLocale as SupportedLocale)
+  : 'en';
 
 const mmkvStorage = createMMKVStorage('dronefinder-settings', 'df-settings-2026');
 
@@ -42,7 +53,7 @@ const DEFAULT_SETTINGS: AppSettings & { locale: SupportedLocale; voiceAlert: boo
   debugMode: false,
   bleScanEnabled: true,
   wifiScanEnabled: true,
-  locale: 'ko',
+  locale: deviceLocale,
   onboardingComplete: false,
 };
 

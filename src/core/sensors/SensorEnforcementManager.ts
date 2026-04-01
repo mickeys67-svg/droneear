@@ -295,11 +295,10 @@ export class SensorEnforcementManager {
   }
 
   private calculateHeading(x: number, y: number, _z: number): number {
-    // atan2 gives angle from magnetic north
+    // atan2(y,x) gives angle from East axis, CCW positive
+    // Convert to compass heading: 0 = North, 90 = East (CW)
     let heading = Math.atan2(y, x) * (180 / Math.PI);
-    heading = (heading + 360) % 360;
-    // Adjust: 0 = North, 90 = East
-    heading = (360 - heading) % 360;
+    heading = (90 - heading + 360) % 360;
     return Math.round(heading);
   }
 

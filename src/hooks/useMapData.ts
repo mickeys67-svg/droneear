@@ -152,7 +152,7 @@ export function useMapData() {
     for (const fused of fusedDetections) {
       if (fused.source !== 'FUSED') continue;
       const rid = fused.remoteIdData;
-      if (!rid?.uavLatitude || !rid?.uavLongitude) continue;
+      if (rid?.uavLatitude == null || rid?.uavLongitude == null) continue;
 
       result.push({
         id: fused.id,

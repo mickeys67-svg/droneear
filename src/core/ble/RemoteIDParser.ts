@@ -139,7 +139,7 @@ export class RemoteIDParser {
     // Byte 3: speed in 0.25 m/s units (multiplier in high bit)
     const speedMultiplier = (data[3] & 0x80) ? 0.75 : 0.25;
     const speedRaw = data[3] & 0x7F;
-    const speed = speedRaw < 127 ? speedRaw * speedMultiplier + ((data[3] & 0x80) ? 31.75 : 0) : undefined;
+    const speed = speedRaw < 127 ? speedRaw * speedMultiplier : undefined;
 
     // Byte 4: vertical speed in 0.5 m/s, offset by 63
     const vsRaw = data[4];

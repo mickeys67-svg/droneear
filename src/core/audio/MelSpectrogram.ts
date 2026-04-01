@@ -152,9 +152,13 @@ export class MelSpectrogram {
     const filterbank: Float32Array[] = [];
     for (let m = 0; m < this.numMelBins; m++) {
       const filter = new Float32Array(numFFTBins);
-      const start = Math.floor(binIndices[m]);
-      const center = Math.floor(binIndices[m + 1]);
-      const end = Math.floor(binIndices[m + 2]);
+      let start = Math.floor(binIndices[m]);
+      let center = Math.floor(binIndices[m + 1]);
+      let end = Math.floor(binIndices[m + 2]);
+
+      start = Math.max(0, Math.min(numFFTBins - 1, start));
+      center = Math.max(0, Math.min(numFFTBins - 1, center));
+      end = Math.max(0, Math.min(numFFTBins - 1, end));
 
       // Rising slope
       for (let k = start; k < center && k < numFFTBins; k++) {
