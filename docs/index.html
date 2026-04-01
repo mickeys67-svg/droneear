@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DroneEar - Support</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0A0A0F;
+      color: #FFFFFF;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .logo {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .logo-drone { color: #FFFFFF; }
+    .logo-ear { color: #00E5CC; }
+
+    .tagline {
+      color: #A0A0B0;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Language Toggle */
+    .lang-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .lang-btn {
+      background: rgba(20, 20, 30, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #A0A0B0;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .lang-btn.active {
+      border-color: rgba(0, 229, 204, 0.4);
+      color: #00E5CC;
+      box-shadow: 0 0 12px rgba(0, 229, 204, 0.15);
+    }
+
+    .lang-btn:hover {
+      border-color: rgba(0, 229, 204, 0.3);
+      color: #FFFFFF;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(20, 20, 30, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #00E5CC;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .card p, .card li {
+      color: #A0A0B0;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .card ul li {
+      padding: 6px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .card ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 6px;
+      height: 6px;
+      background: #00E5CC;
+      border-radius: 50%;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 16px 0;
+    }
+
+    .faq-item:last-child { border-bottom: none; }
+
+    .faq-q {
+      font-weight: 700;
+      color: #FFFFFF;
+      font-size: 15px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-q::after {
+      content: '+';
+      color: #00E5CC;
+      font-size: 20px;
+      font-weight: 300;
+      transition: transform 0.3s;
+    }
+
+    .faq-item.open .faq-q::after {
+      content: '-';
+    }
+
+    .faq-a {
+      color: #A0A0B0;
+      font-size: 14px;
+      line-height: 1.7;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-item.open .faq-a {
+      max-height: 300px;
+    }
+
+    /* Contact */
+    .contact-btn {
+      display: inline-block;
+      background: #00E5CC;
+      color: #000000;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px rgba(0, 229, 204, 0.15);
+    }
+
+    .contact-btn:hover {
+      box-shadow: 0 0 30px rgba(0, 229, 204, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: #666670;
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container { padding: 24px 16px; }
+      .logo { font-size: 28px; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <div class="logo"><span class="logo-drone">Drone</span><span class="logo-ear">Ear</span></div>
+      <p class="tagline" id="tagline">AI Acoustic Drone Pattern Identifier</p>
+    </div>
+
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('ko')">한국어</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+    </div>
+
+    <!-- About -->
+    <div class="card">
+      <h2 id="about-title">앱 소개</h2>
+      <p id="about-text">DroneEar는 스마트폰 마이크와 블루투스를 이용하여 주변 드론의 음향 패턴을 실시간으로 분석하고, 유사한 드론 타입을 식별하는 온디바이스 AI 앱입니다. 모든 오디오 처리는 기기 내에서만 이루어지며, 외부 서버로 데이터가 전송되지 않습니다.</p>
+    </div>
+
+    <!-- Features -->
+    <div class="card">
+      <h2 id="features-title">주요 기능</h2>
+      <ul id="features-list">
+        <li>AI 기반 실시간 드론 음향 패턴 분석</li>
+        <li>BLE Remote ID (ASTM F3411) 스캔</li>
+        <li>실내/실외 환경 자동 감지 및 감도 조절</li>
+        <li>나침반 기반 음원 방향 추정</li>
+        <li>15개 언어 음성 알림 지원</li>
+        <li>100% 온디바이스 처리 (프라이버시 보호)</li>
+      </ul>
+    </div>
+
+    <!-- FAQ -->
+    <div class="card">
+      <h2 id="faq-title">자주 묻는 질문</h2>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="faq-q1">어떤 권한이 필요한가요?</div>
+        <div class="faq-a" id="faq-a1">마이크(음향 분석), 위치(실내/실외 판별), 블루투스(Remote ID 스캔), 모션 센서(방향 추정)에 대한 권한이 필요합니다. 모든 데이터는 기기 내에서만 처리됩니다.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="faq-q2">녹음이 저장되나요?</div>
+        <div class="faq-a" id="faq-a2">아니요. DroneEar는 오디오를 녹음하거나 저장하지 않습니다. 마이크 입력은 실시간으로 분석된 후 즉시 폐기됩니다.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="faq-q3">인터넷 연결이 필요한가요?</div>
+        <div class="faq-a" id="faq-a3">아니요. 모든 AI 분석은 기기 내에서 수행되므로 오프라인 환경에서도 사용할 수 있습니다.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="faq-q4">식별 결과는 정확한가요?</div>
+        <div class="faq-a" id="faq-a4">DroneEar는 음향 패턴을 기반으로 유사한 드론 타입을 추정하는 참고용 도구입니다. 환경 소음, 거리, 기기 성능에 따라 결과가 달라질 수 있으며, 100% 정확한 식별을 보장하지 않습니다.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="faq-q5">배터리 소모가 큰가요?</div>
+        <div class="faq-a" id="faq-a5">백그라운드 모니터링 시 일정 수준의 배터리가 소모됩니다. 앱 내에서 배터리 잔량을 모니터링하며, 낮은 배터리 상태에서는 알림을 제공합니다.</div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="card" style="text-align: center;">
+      <h2 id="contact-title">문의하기</h2>
+      <p id="contact-text" style="margin-bottom: 20px;">문제가 발생하거나 개선 제안이 있으시면 아래로 연락해 주세요.</p>
+      <a class="contact-btn" href="https://github.com/mickeys67-svg/droneear/issues" id="contact-btn">GitHub Issues</a>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="card">
+      <h2 id="disclaimer-title">면책 조항</h2>
+      <p id="disclaimer-text">DroneEar는 음향 패턴을 분석하여 유사한 드론 타입을 추정하는 참고용 도구입니다. 식별 결과의 정확성을 보장하지 않으며, 안전이나 보안 관련 의사결정에 단독으로 사용해서는 안 됩니다. 사용자는 본 앱의 결과에 기반한 모든 행동에 대해 스스로 책임을 집니다.</p>
+    </div>
+
+    <div class="footer">
+      &copy; 2026 DroneEar. All rights reserved.
+    </div>
+
+  </div>
+
+  <script>
+    const translations = {
+      ko: {
+        tagline: 'AI 기반 드론 음향 패턴 식별기',
+        'about-title': '앱 소개',
+        'about-text': 'DroneEar는 스마트폰 마이크와 블루투스를 이용하여 주변 드론의 음향 패턴을 실시간으로 분석하고, 유사한 드론 타입을 식별하는 온디바이스 AI 앱입니다. 모든 오디오 처리는 기기 내에서만 이루어지며, 외부 서버로 데이터가 전송되지 않습니다.',
+        'features-title': '주요 기능',
+        'features-list': [
+          'AI 기반 실시간 드론 음향 패턴 분석',
+          'BLE Remote ID (ASTM F3411) 스캔',
+          '실내/실외 환경 자동 감지 및 감도 조절',
+          '나침반 기반 음원 방향 추정',
+          '15개 언어 음성 알림 지원',
+          '100% 온디바이스 처리 (프라이버시 보호)'
+        ],
+        'faq-title': '자주 묻는 질문',
+        'faq-q1': '어떤 권한이 필요한가요?',
+        'faq-a1': '마이크(음향 분석), 위치(실내/실외 판별), 블루투스(Remote ID 스캔), 모션 센서(방향 추정)에 대한 권한이 필요합니다. 모든 데이터는 기기 내에서만 처리됩니다.',
+        'faq-q2': '녹음이 저장되나요?',
+        'faq-a2': '아니요. DroneEar는 오디오를 녹음하거나 저장하지 않습니다. 마이크 입력은 실시간으로 분석된 후 즉시 폐기됩니다.',
+        'faq-q3': '인터넷 연결이 필요한가요?',
+        'faq-a3': '아니요. 모든 AI 분석은 기기 내에서 수행되므로 오프라인 환경에서도 사용할 수 있습니다.',
+        'faq-q4': '식별 결과는 정확한가요?',
+        'faq-a4': 'DroneEar는 음향 패턴을 기반으로 유사한 드론 타입을 추정하는 참고용 도구입니다. 환경 소음, 거리, 기기 성능에 따라 결과가 달라질 수 있으며, 100% 정확한 식별을 보장하지 않습니다.',
+        'faq-q5': '배터리 소모가 큰가요?',
+        'faq-a5': '백그라운드 모니터링 시 일정 수준의 배터리가 소모됩니다. 앱 내에서 배터리 잔량을 모니터링하며, 낮은 배터리 상태에서는 알림을 제공합니다.',
+        'contact-title': '문의하기',
+        'contact-text': '문제가 발생하거나 개선 제안이 있으시면 아래로 연락해 주세요.',
+        'contact-btn': 'GitHub Issues',
+        'disclaimer-title': '면책 조항',
+        'disclaimer-text': 'DroneEar는 음향 패턴을 분석하여 유사한 드론 타입을 추정하는 참고용 도구입니다. 식별 결과의 정확성을 보장하지 않으며, 안전이나 보안 관련 의사결정에 단독으로 사용해서는 안 됩니다. 사용자는 본 앱의 결과에 기반한 모든 행동에 대해 스스로 책임을 집니다.'
+      },
+      en: {
+        tagline: 'AI Acoustic Drone Pattern Identifier',
+        'about-title': 'About',
+        'about-text': 'DroneEar is an on-device AI app that analyzes acoustic patterns of nearby drones in real time using your smartphone\'s microphone and Bluetooth, identifying similar drone types. All audio processing happens entirely on your device — no data is ever sent to external servers.',
+        'features-title': 'Key Features',
+        'features-list': [
+          'Real-time AI-powered drone acoustic pattern analysis',
+          'BLE Remote ID (ASTM F3411) scanning',
+          'Automatic indoor/outdoor environment detection',
+          'Compass-based sound source direction estimation',
+          'Voice alerts in 15 languages',
+          '100% on-device processing (privacy-first)'
+        ],
+        'faq-title': 'FAQ',
+        'faq-q1': 'What permissions are required?',
+        'faq-a1': 'Microphone (acoustic analysis), Location (indoor/outdoor detection), Bluetooth (Remote ID scanning), and Motion sensors (direction estimation). All data is processed on-device only.',
+        'faq-q2': 'Is my audio recorded or stored?',
+        'faq-a2': 'No. DroneEar does not record or store any audio. Microphone input is analyzed in real time and immediately discarded.',
+        'faq-q3': 'Does it require an internet connection?',
+        'faq-a3': 'No. All AI analysis runs on-device, so DroneEar works fully offline.',
+        'faq-q4': 'How accurate is the identification?',
+        'faq-a4': 'DroneEar is a reference tool that estimates similar drone types based on acoustic patterns. Results may vary depending on ambient noise, distance, and device performance. It does not guarantee 100% accurate identification.',
+        'faq-q5': 'Does it drain battery?',
+        'faq-a5': 'Background monitoring uses some battery. The app monitors battery level and provides alerts when it gets low.',
+        'contact-title': 'Contact Us',
+        'contact-text': 'If you encounter any issues or have suggestions, please reach out below.',
+        'contact-btn': 'GitHub Issues',
+        'disclaimer-title': 'Disclaimer',
+        'disclaimer-text': 'DroneEar is a reference tool that estimates similar drone types by analyzing acoustic patterns. It does not guarantee the accuracy of identification results and should not be used as the sole basis for safety or security decisions. Users assume full responsibility for any actions taken based on the app\'s results.'
+      }
+    };
+
+    function setLang(lang) {
+      const t = translations[lang];
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === (lang === 'ko' ? '한국어' : 'English'));
+      });
+      document.documentElement.lang = lang;
+
+      // Update text elements
+      for (const [id, value] of Object.entries(t)) {
+        if (id === 'features-list') continue;
+        const el = document.getElementById(id);
+        if (el) {
+          if (el.tagName === 'A') {
+            el.textContent = value;
+          } else {
+            el.textContent = value;
+          }
+        }
+      }
+
+      // Update features list
+      const list = document.getElementById('features-list');
+      list.innerHTML = '';
+      t['features-list'].forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleFaq(el) {
+      el.classList.toggle('open');
+    }
+
+    // Default: Korean
+    setLang('ko');
+  </script>
+</body>
+</html>
