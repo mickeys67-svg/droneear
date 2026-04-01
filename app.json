@@ -45,7 +45,9 @@
         ],
         "ITSAppUsesNonExemptEncryption": false,
         "NSBluetoothAlwaysUsageDescription": "DroneEar uses Bluetooth to detect nearby drones broadcasting Remote ID signals.",
-        "NSBluetoothPeripheralUsageDescription": "DroneEar uses Bluetooth to scan for drone Remote ID broadcasts."
+        "NSBluetoothPeripheralUsageDescription": "DroneEar uses Bluetooth to scan for drone Remote ID broadcasts.",
+        "NSPhotoLibraryUsageDescription": "DroneEar may access your photo library to save detection screenshots and exported data.",
+        "NSSpeechRecognitionUsageDescription": "DroneEar uses speech recognition capabilities for voice alert features. All processing is on-device."
       }
     },
     "android": {

@@ -30,6 +30,11 @@
   },
   "submit": {
     "production": {
+      "ios": {
+        "ascAppId": "6761462031",
+        "appleId": "mickeys67@naver.com",
+        "appleTeamId": "WQB72B3X5L"
+      },
       "android": {
         "serviceAccountKeyPath": "./google-play-key.json",
         "track": "internal"
