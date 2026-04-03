@@ -301,13 +301,13 @@ export const ja: Translations = {
   welcome: 'ようこそ',
   acousticDroneDetection: '音響ドローン検出',
   stepOf: (step: number, total: number) => `ステップ${step}/${total}`,
-  allow: '許可',
+  allow: '続ける',
   selectDevice: 'デバイスを選択',
   continueBtn: '続行',
   speakOrMakeSound: '話すか音を出してください',
   listeningTest: 'リスニング中...',
   detectControllersDesc: '近くのドローンコントローラーを検出',
-  enableBLE: '有効化',
+  enableBLE: '続ける',
   startScanningBtn: 'スキャン開始',
 
   // Tracking overlay

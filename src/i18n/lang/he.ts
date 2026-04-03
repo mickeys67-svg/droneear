@@ -303,13 +303,13 @@ export const he: Translations = {
   welcome: 'ברוך הבא',
   acousticDroneDetection: 'זיהוי אקוסטי של רחפנים',
   stepOf: (step: number, total: number) => `שלב ${step} מתוך ${total}`,
-  allow: 'אפשר',
+  allow: 'המשך',
   selectDevice: 'בחר מכשיר',
   continueBtn: 'המשך',
   speakOrMakeSound: 'דבר או השמע צליל',
   listeningTest: 'מאזין...',
   detectControllersDesc: 'זיהוי שלטי רחפנים בקרבת מקום',
-  enableBLE: 'הפעל',
+  enableBLE: 'המשך',
   startScanningBtn: 'התחל סריקה',
 
   // Tracking overlay

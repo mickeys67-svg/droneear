@@ -301,13 +301,13 @@ export const zh: Translations = {
   welcome: '欢迎',
   acousticDroneDetection: '声学无人机检测',
   stepOf: (step: number, total: number) => `第${step}步，共${total}步`,
-  allow: '允许',
+  allow: '继续',
   selectDevice: '选择设备',
   continueBtn: '继续',
   speakOrMakeSound: '请说话或发出声音',
   listeningTest: '聆听中...',
   detectControllersDesc: '检测附近的无人机遥控器',
-  enableBLE: '启用',
+  enableBLE: '继续',
   startScanningBtn: '开始扫描',
 
   // Tracking overlay

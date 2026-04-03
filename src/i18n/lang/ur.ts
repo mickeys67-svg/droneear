@@ -301,13 +301,13 @@ export const ur: Translations = {
   welcome: 'خوش آمدید',
   acousticDroneDetection: 'صوتی ڈرون شناخت',
   stepOf: (step: number, total: number) => `مرحلہ ${step} از ${total}`,
-  allow: 'اجازت دیں',
+  allow: 'جاری رکھیں',
   selectDevice: 'ڈیوائس منتخب کریں',
   continueBtn: 'جاری رکھیں',
   speakOrMakeSound: 'بولیں یا آواز نکالیں',
   listeningTest: 'سن رہے ہیں...',
   detectControllersDesc: 'قریبی ڈرون کنٹرولرز کا پتہ لگائیں',
-  enableBLE: 'فعال کریں',
+  enableBLE: 'جاری رکھیں',
   startScanningBtn: 'اسکیننگ شروع کریں',
 
   // Tracking overlay

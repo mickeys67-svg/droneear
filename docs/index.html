@@ -264,11 +264,43 @@
       </div>
     </div>
 
+    <!-- Troubleshooting -->
+    <div class="card">
+      <h2 id="troubleshoot-title">문제 해결</h2>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="ts-q1">마이크 권한을 허용했는데 감지가 안 돼요</div>
+        <div class="faq-a" id="ts-a1">설정 → DroneEar에서 마이크 권한이 활성화되어 있는지 확인해 주세요. 다른 앱이 마이크를 사용 중이면 충돌할 수 있습니다. 앱을 재시작하거나 기기를 재부팅해 보세요.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="ts-q2">오탐(false positive)이 자주 발생해요</div>
+        <div class="faq-a" id="ts-a2">바람, 교통 소음, 에어컨 등 환경 소음이 오탐의 원인이 될 수 있습니다. 설정에서 감지 임계값(Confidence Threshold)을 높여 보세요. 실외 조용한 환경에서 최적의 성능을 발휘합니다.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="ts-q3">BLE Remote ID가 감지되지 않아요</div>
+        <div class="faq-a" id="ts-a3">모든 드론이 Remote ID를 브로드캐스트하지는 않습니다. 블루투스가 활성화되어 있는지 확인하고, 드론이 ASTM F3411 Remote ID를 지원하는 모델인지 확인해 주세요. iOS에서는 WiFi Remote ID가 지원되지 않습니다.</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q" id="ts-q4">지원되는 기기는 무엇인가요?</div>
+        <div class="faq-a" id="ts-a4">iOS 15.1 이상의 iPhone/iPad, Android 8.0 이상의 기기에서 사용 가능합니다. 마이크 성능이 좋은 기기에서 더 정확한 결과를 얻을 수 있습니다.</div>
+      </div>
+    </div>
+
     <!-- Contact -->
     <div class="card" style="text-align: center;">
       <h2 id="contact-title">문의하기</h2>
       <p id="contact-text" style="margin-bottom: 20px;">문제가 발생하거나 개선 제안이 있으시면 아래로 연락해 주세요.</p>
-      <a class="contact-btn" href="https://github.com/mickeys67-svg/droneear/issues" id="contact-btn">GitHub Issues</a>
+      <a class="contact-btn" href="mailto:mickeys67@gmail.com" id="contact-email-btn" style="margin-right: 12px;">이메일 문의</a>
+      <a class="contact-btn" href="https://github.com/mickeys67-svg/droneear/issues" id="contact-btn" style="background: rgba(20,20,30,0.7); color: #00E5CC; border: 1px solid rgba(0,229,204,0.4); margin-top: 12px;">GitHub Issues</a>
+    </div>
+
+    <!-- Links -->
+    <div class="card" style="text-align: center;">
+      <h2 id="links-title">관련 링크</h2>
+      <p style="margin-bottom: 12px;"><a href="privacy.html" style="color: #00E5CC; text-decoration: none;" id="privacy-link">개인정보처리방침</a></p>
     </div>
 
     <!-- Disclaimer -->
@@ -309,9 +341,21 @@
         'faq-a4': 'DroneEar는 음향 패턴을 기반으로 유사한 드론 타입을 추정하는 참고용 도구입니다. 환경 소음, 거리, 기기 성능에 따라 결과가 달라질 수 있으며, 100% 정확한 식별을 보장하지 않습니다.',
         'faq-q5': '배터리 소모가 큰가요?',
         'faq-a5': '백그라운드 모니터링 시 일정 수준의 배터리가 소모됩니다. 앱 내에서 배터리 잔량을 모니터링하며, 낮은 배터리 상태에서는 알림을 제공합니다.',
+        'troubleshoot-title': '문제 해결',
+        'ts-q1': '마이크 권한을 허용했는데 감지가 안 돼요',
+        'ts-a1': '설정 → DroneEar에서 마이크 권한이 활성화되어 있는지 확인해 주세요. 다른 앱이 마이크를 사용 중이면 충돌할 수 있습니다. 앱을 재시작하거나 기기를 재부팅해 보세요.',
+        'ts-q2': '오탐(false positive)이 자주 발생해요',
+        'ts-a2': '바람, 교통 소음, 에어컨 등 환경 소음이 오탐의 원인이 될 수 있습니다. 설정에서 감지 임계값(Confidence Threshold)을 높여 보세요. 실외 조용한 환경에서 최적의 성능을 발휘합니다.',
+        'ts-q3': 'BLE Remote ID가 감지되지 않아요',
+        'ts-a3': '모든 드론이 Remote ID를 브로드캐스트하지는 않습니다. 블루투스가 활성화되어 있는지 확인하고, 드론이 ASTM F3411 Remote ID를 지원하는 모델인지 확인해 주세요. iOS에서는 WiFi Remote ID가 지원되지 않습니다.',
+        'ts-q4': '지원되는 기기는 무엇인가요?',
+        'ts-a4': 'iOS 15.1 이상의 iPhone/iPad, Android 8.0 이상의 기기에서 사용 가능합니다. 마이크 성능이 좋은 기기에서 더 정확한 결과를 얻을 수 있습니다.',
         'contact-title': '문의하기',
         'contact-text': '문제가 발생하거나 개선 제안이 있으시면 아래로 연락해 주세요.',
+        'contact-email-btn': '이메일 문의',
         'contact-btn': 'GitHub Issues',
+        'links-title': '관련 링크',
+        'privacy-link': '개인정보처리방침',
         'disclaimer-title': '면책 조항',
         'disclaimer-text': 'DroneEar는 음향 패턴을 분석하여 유사한 드론 타입을 추정하는 참고용 도구입니다. 식별 결과의 정확성을 보장하지 않으며, 안전이나 보안 관련 의사결정에 단독으로 사용해서는 안 됩니다. 사용자는 본 앱의 결과에 기반한 모든 행동에 대해 스스로 책임을 집니다.'
       },
@@ -339,9 +383,21 @@
         'faq-a4': 'DroneEar is a reference tool that estimates similar drone types based on acoustic patterns. Results may vary depending on ambient noise, distance, and device performance. It does not guarantee 100% accurate identification.',
         'faq-q5': 'Does it drain battery?',
         'faq-a5': 'Background monitoring uses some battery. The app monitors battery level and provides alerts when it gets low.',
+        'troubleshoot-title': 'Troubleshooting',
+        'ts-q1': 'Detection doesn\'t work even after granting microphone permission',
+        'ts-a1': 'Check that microphone permission is enabled in Settings → DroneEar. If another app is using the microphone, it may conflict. Try restarting the app or rebooting your device.',
+        'ts-q2': 'I\'m getting frequent false positives',
+        'ts-a2': 'Wind, traffic noise, and air conditioning can cause false positives. Try increasing the Confidence Threshold in Settings. The app performs best in quiet outdoor environments.',
+        'ts-q3': 'BLE Remote ID is not detected',
+        'ts-a3': 'Not all drones broadcast Remote ID. Make sure Bluetooth is enabled and the drone supports ASTM F3411 Remote ID. WiFi Remote ID is not available on iOS.',
+        'ts-q4': 'What devices are supported?',
+        'ts-a4': 'iPhone/iPad with iOS 15.1 or later, and Android devices with Android 8.0 or later. Devices with better microphone hardware will produce more accurate results.',
         'contact-title': 'Contact Us',
         'contact-text': 'If you encounter any issues or have suggestions, please reach out below.',
+        'contact-email-btn': 'Email Support',
         'contact-btn': 'GitHub Issues',
+        'links-title': 'Links',
+        'privacy-link': 'Privacy Policy',
         'disclaimer-title': 'Disclaimer',
         'disclaimer-text': 'DroneEar is a reference tool that estimates similar drone types by analyzing acoustic patterns. It does not guarantee the accuracy of identification results and should not be used as the sole basis for safety or security decisions. Users assume full responsibility for any actions taken based on the app\'s results.'
       }

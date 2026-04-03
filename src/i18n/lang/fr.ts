@@ -301,13 +301,13 @@ export const fr: Translations = {
   welcome: 'Bienvenue',
   acousticDroneDetection: 'Détection acoustique de drones',
   stepOf: (step: number, total: number) => `Étape ${step} sur ${total}`,
-  allow: 'AUTORISER',
+  allow: 'CONTINUER',
   selectDevice: 'Sélectionner l\'appareil',
   continueBtn: 'CONTINUER',
   speakOrMakeSound: 'Parlez ou faites un bruit',
   listeningTest: 'ÉCOUTE EN COURS...',
   detectControllersDesc: 'Détecter les télécommandes de drones à proximité',
-  enableBLE: 'ACTIVER',
+  enableBLE: 'CONTINUER',
   startScanningBtn: 'DÉMARRER LE SCAN',
 
   // Tracking overlay

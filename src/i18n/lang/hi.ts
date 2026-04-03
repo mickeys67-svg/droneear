@@ -301,13 +301,13 @@ export const hi: Translations = {
   welcome: 'स्वागत है',
   acousticDroneDetection: 'ध्वनि आधारित ड्रोन डिटेक्शन',
   stepOf: (step: number, total: number) => `चरण ${step} / ${total}`,
-  allow: 'अनुमति दें',
+  allow: 'जारी रखें',
   selectDevice: 'डिवाइस चुनें',
   continueBtn: 'जारी रखें',
   speakOrMakeSound: 'बोलें या आवाज़ करें',
   listeningTest: 'सुन रहे हैं...',
   detectControllersDesc: 'आसपास ड्रोन कंट्रोलर का पता लगाएं',
-  enableBLE: 'सक्रिय करें',
+  enableBLE: 'जारी रखें',
   startScanningBtn: 'स्कैनिंग शुरू करें',
 
   // Tracking overlay

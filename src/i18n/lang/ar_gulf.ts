@@ -304,13 +304,13 @@ export const ar_gulf: Translations = {
   welcome: 'أهلاً وسهلاً',
   acousticDroneDetection: 'كشف صوتي عن الطائرات',
   stepOf: (step: number, total: number) => `الخطوة ${step} من ${total}`,
-  allow: 'السماح',
+  allow: 'متابعة',
   selectDevice: 'اختر الجهاز',
   continueBtn: 'متابعة',
   speakOrMakeSound: 'تكلم أو سوّ صوت',
   listeningTest: 'نسمع...',
   detectControllersDesc: 'كشف أجهزة التحكم القريبة',
-  enableBLE: 'تفعيل',
+  enableBLE: 'متابعة',
   startScanningBtn: 'ابدأ المسح',
 
   // Tracking overlay

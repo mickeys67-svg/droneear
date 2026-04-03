@@ -184,10 +184,10 @@ export default function OnboardingScreen() {
                   style={[styles.ctaBtn, { backgroundColor: micDenied ? theme.danger : theme.primary }, micDenied ? {} : primaryGlow(theme.primary,10)]}
                   onPress={micPermanentlyDenied ? () => Linking.openSettings() : requestMic}
                   accessibilityRole="button"
-                  accessibilityLabel={micPermanentlyDenied ? 'Open device settings' : micDenied ? 'Retry microphone permission' : 'Allow microphone access'}
+                  accessibilityLabel={micPermanentlyDenied ? 'Open device settings' : micDenied ? 'Retry microphone permission' : 'Continue to microphone access'}
                 >
                   <Text style={[styles.ctaBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>
-                    {micPermanentlyDenied ? (t.openSettings || 'OPEN SETTINGS') : micDenied ? (t.tryAgain || 'TRY AGAIN') : (t.allow || 'ALLOW')}
+                    {micPermanentlyDenied ? (t.openSettings || 'OPEN SETTINGS') : micDenied ? (t.tryAgain || 'TRY AGAIN') : (t.allow || 'CONTINUE')}
                   </Text>
                 </TouchableOpacity>
                 {micDenied && (
@@ -324,8 +324,8 @@ export default function OnboardingScreen() {
             <TouchableOpacity style={[styles.ctaBtn, { backgroundColor: theme.primary }, primaryGlow(theme.primary,10)]} onPress={() => {
               setBLEScanEnabled(true);
               goNext();
-            }} accessibilityRole="button" accessibilityLabel="Enable BLE detection">
-              <Text style={[styles.ctaBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.enableBLE || 'ENABLE'}</Text>
+            }} accessibilityRole="button" accessibilityLabel="Continue with BLE detection">
+              <Text style={[styles.ctaBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.enableBLE || 'CONTINUE'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ marginTop: 16, padding: 8, minHeight: 48, justifyContent: 'center' }} onPress={() => {
               setBLEScanEnabled(false);

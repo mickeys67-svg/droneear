@@ -304,13 +304,13 @@ export const ar: Translations = {
   welcome: 'مرحباً',
   acousticDroneDetection: 'الكشف الصوتي عن الطائرات',
   stepOf: (step: number, total: number) => `الخطوة ${step} من ${total}`,
-  allow: 'السماح',
+  allow: 'متابعة',
   selectDevice: 'اختر الجهاز',
   continueBtn: 'متابعة',
   speakOrMakeSound: 'تحدث أو أصدر صوتاً',
   listeningTest: 'جارٍ الاستماع...',
   detectControllersDesc: 'اكتشاف أجهزة التحكم القريبة',
-  enableBLE: 'تفعيل',
+  enableBLE: 'متابعة',
   startScanningBtn: 'بدء المسح',
 
   // Tracking overlay

@@ -720,13 +720,13 @@ const ko: Translations = {
   welcome: '환영합니다',
   acousticDroneDetection: '음향 드론 감지',
   stepOf: (step, total) => `${total}단계 중 ${step}단계`,
-  allow: '허용',
+  allow: '계속',
   selectDevice: '기기 선택',
   continueBtn: '계속',
   speakOrMakeSound: '말하거나 소리를 내세요',
   listeningTest: '듣는 중...',
   detectControllersDesc: '근처 드론 원격 조종기를 감지합니다',
-  enableBLE: '활성화',
+  enableBLE: '계속',
   startScanningBtn: '청취 시작',
 };
 
@@ -1056,13 +1056,13 @@ const en: Translations = {
   welcome: 'Welcome',
   acousticDroneDetection: 'Acoustic Drone Detection',
   stepOf: (step, total) => `Step ${step} of ${total}`,
-  allow: 'ALLOW',
+  allow: 'CONTINUE',
   selectDevice: 'Select Device',
   continueBtn: 'CONTINUE',
   speakOrMakeSound: 'Speak or make a sound',
   listeningTest: 'LISTENING...',
   detectControllersDesc: 'Detect drone remote controllers nearby',
-  enableBLE: 'ENABLE',
+  enableBLE: 'CONTINUE',
   startScanningBtn: 'START SCANNING',
 };
 
@@ -1392,13 +1392,13 @@ const uk: Translations = {
   welcome: 'Вітаємо',
   acousticDroneDetection: 'Акустичне виявлення дронів',
   stepOf: (step, total) => `Крок ${step} з ${total}`,
-  allow: 'ДОЗВОЛИТИ',
+  allow: 'ПРОДОВЖИТИ',
   selectDevice: 'Вибір пристрою',
   continueBtn: 'ПРОДОВЖИТИ',
   speakOrMakeSound: 'Говоріть або зробіть звук',
   listeningTest: 'СЛУХАЮ...',
   detectControllersDesc: 'Виявлення пультів дронів поблизу',
-  enableBLE: 'УВІМКНУТИ',
+  enableBLE: 'ПРОДОВЖИТИ',
   startScanningBtn: 'ПОЧАТИ СКАНУВАННЯ',
 };
 

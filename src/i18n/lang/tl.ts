@@ -301,13 +301,13 @@ export const tl: Translations = {
   welcome: 'Maligayang pagdating',
   acousticDroneDetection: 'Acoustic Drone Detection',
   stepOf: (step: number, total: number) => `Hakbang ${step} ng ${total}`,
-  allow: 'PAYAGAN',
+  allow: 'MAGPATULOY',
   selectDevice: 'Pumili ng Device',
   continueBtn: 'MAGPATULOY',
   speakOrMakeSound: 'Magsalita o gumawa ng tunog',
   listeningTest: 'NAKIKINIG...',
   detectControllersDesc: 'Mag-detect ng drone controllers sa malapit',
-  enableBLE: 'I-ENABLE',
+  enableBLE: 'MAGPATULOY',
   startScanningBtn: 'MAGSIMULANG MAG-SCAN',
 
   // Tracking overlay
