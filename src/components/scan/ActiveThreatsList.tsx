@@ -7,6 +7,7 @@ import { View, Text, TouchableOpacity, StyleSheet, type TextStyle } from 'react-
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
+import { categoryLabel } from '@/src/i18n/categoryLabels';
 import { GLASS, glassStyles } from '@/src/constants/glass';
 
 interface ActiveThreatsListProps {
@@ -57,7 +58,7 @@ export const ActiveThreatsList = memo(function ActiveThreatsList({ activeThreats
             <View style={[styles.dot, { backgroundColor: severityColor }]} />
             <View style={styles.info}>
               <Text style={[styles.type, { color: theme.text }]}>
-                {latest.threatCategory.replace(/_/g, ' ')}
+                {categoryLabel(t, latest.threatCategory)}
               </Text>
               <Text style={[styles.confLabel, { color: theme.textMuted }]}>
                 {getConfidenceLabel(latest.confidence, t)}

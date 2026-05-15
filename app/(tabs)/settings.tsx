@@ -151,7 +151,7 @@ export default function SettingsScreen() {
             </Text>
           </View>
           <View style={styles.thresholdRow}>
-            {[0.5, 0.65, 0.75, 0.85, 0.95].map((val) => (
+            {[0.5, 0.6, 0.65, 0.75, 0.85, 0.95].map((val) => (
               <TouchableOpacity
                 key={val}
                 style={[
@@ -171,6 +171,18 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             ))}
           </View>
+          {/* Guidance under the threshold row — tells the user what value to
+              aim for, and warns when they go too aggressive. Without this
+              users either leave it at default and complain "nothing gets
+              detected" or drop to 50% and complain "everything is a drone". */}
+          <Text style={[styles.thresholdHint, { color: theme.textMuted }]}>
+            {t.thresholdRecommended || 'Recommended: 60-65%'}
+          </Text>
+          {confidenceThreshold <= 0.5 && (
+            <Text style={[styles.thresholdHint, { color: theme.warning, marginTop: 2 }]}>
+              ⚠ {t.thresholdTooLowWarning || 'Below 50% may cause false positives'}
+            </Text>
+          )}
 
           {/* Toggle switches */}
           <ToggleRow label={t.hapticAlert} desc={t.vibrateOnDetection} value={alertVibration} onToggle={setAlertVibration} theme={theme} />
@@ -212,6 +224,21 @@ export default function SettingsScreen() {
                 <Text style={[styles.profileDesc, { color: theme.textDim }]} numberOfLines={2}>
                   {config.description}
                 </Text>
+                {/* Real-world example so users don't have to guess which
+                    profile fits their phone. Pulled from i18n so each
+                    locale picks something idiomatic. */}
+                {(() => {
+                  const example =
+                    key === 'BALANCED' ? t.profileExampleBalanced :
+                    key === 'SAMSUNG_OPTIMIZED' ? t.profileExampleSamsung :
+                    key === 'HIGH_SENSITIVITY' ? t.profileExampleHighSensitivity :
+                    key === 'RAW_EXPERT' ? t.profileExampleRawExpert : undefined;
+                  return example ? (
+                    <Text style={[styles.profileExample, { color: theme.textMuted }]} numberOfLines={2}>
+                      {example}
+                    </Text>
+                  ) : null;
+                })()}
               </TouchableOpacity>
             ))}
           </View>
@@ -336,9 +363,10 @@ const styles = StyleSheet.create({
   langText: { fontSize: 13, fontWeight: '600' },
 
   // Threshold chips
-  thresholdRow: { flexDirection: 'row', gap: 6, marginBottom: 16, flexWrap: 'wrap' },
+  thresholdRow: { flexDirection: 'row', gap: 6, marginBottom: 8, flexWrap: 'wrap' },
   thresholdChip: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8, minHeight: 44, minWidth: 60, alignItems: 'center', justifyContent: 'center' },
   thresholdText: { fontSize: 12, fontWeight: '700' },
+  thresholdHint: { fontSize: 11, fontWeight: '600', marginBottom: 8, marginLeft: 2 },
 
   // Toggle rows
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: GLASS.borderSubtle },
@@ -350,6 +378,7 @@ const styles = StyleSheet.create({
   profileCard: { padding: 14, borderRadius: 12, borderWidth: 1, position: 'relative' },
   profileLabel: { fontSize: 14, fontWeight: '700' },
   profileDesc: { fontSize: 11, marginTop: 4, lineHeight: 16 },
+  profileExample: { fontSize: 10, marginTop: 2, lineHeight: 14, fontStyle: 'italic' },
   profileCheck: { position: 'absolute', top: 10, right: 10, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   profileCheckText: { fontSize: 12, fontWeight: '900' },
 

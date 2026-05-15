@@ -2,6 +2,91 @@
 
 ---
 
+## v2.1.4 — User-journey polish: categories, guidance, map auto-refresh (2026-05-15)
+
+### Why this release
+Large-scale user-journey simulation surfaced ~17 stuck points across
+onboarding, listen, history, settings, map and guide screens. This release
+clears the CRITICAL + HIGH + most MEDIUM ones. No new screens; existing
+flows get clearer copy, localised category names, and one missing
+permission-refresh path.
+
+### Map screen — auto-refresh on permission grant (CRITICAL)
+- After the "Open Settings" CTA sends the user to iOS Settings to grant
+  Location, returning to the app would leave the map stuck on "Location
+  unavailable" until the user manually started a scan. Map now subscribes
+  to AppState and runs a one-shot `getCurrentPositionAsync` whenever the
+  app returns to the foreground with permission granted (no long-lived
+  watcher — `useThreatDetector` still owns the watcher during scans).
+
+### Listen screen — clearer model output (HIGH)
+- HEARING pill now resolves the raw category identifier into the user's
+  language ("배경 소음 (드론 아님)" / "Background noise (not a drone)"
+  / "Hintergrundgeräusch" etc.) via the new `categoryLabel` helper.
+- Pill font size 10/11 → 11/12 with maxWidth 90% so long category names
+  truncate cleanly instead of forcing line break.
+- Before the first inference lands, the pill shows the localised
+  "Analyzing..." instead of staying empty.
+- `ActiveThreatsList` row title also uses `categoryLabel` so live + log
+  use the same vocabulary.
+
+### Settings — threshold guidance + profile examples (HIGH)
+- Added a sixth threshold chip at 60% (matches the new default in v2.1.3).
+- Below the threshold row: `Recommended: 60-65%` hint, plus a warning
+  if the user picks ≤50% explaining false-positive risk.
+- Each device-profile card now includes a one-liner real-world example
+  (`Recommended for most phones`, `Optimized for Samsung Galaxy`,
+  `Distant sounds in quiet environments (higher battery use)`,
+  `Expert mode — minimal post-processing`).
+
+### Onboarding — mic test reassurance (HIGH)
+- The "Low microphone sensitivity" step previously left users thinking
+  their phone was broken. Added a short note explaining quiet indoor
+  rooms routinely score low and outdoor sensitivity is normally higher.
+
+### Radar — distance ring labels (MEDIUM)
+- Ring labels go from `fontSize: 11, opacity: 0.5` to
+  `fontSize: 12, fontWeight: 700, opacity: 0.85` plus a subtle text
+  shadow so the value stays readable when the cyan sweep passes over it.
+
+### Guide screen — "How identification works" section (MEDIUM)
+- New card explains the temporal voting (3 consecutive frames, ≥60%
+  consensus) + confidence threshold gate, so users understand why a
+  short YouTube test clip can show in the live HEARING pill but not
+  appear in History.
+- Includes a note about the radar's N/E/S/W being true magnetic north
+  (not phone-relative) so users stop expecting it to rotate with the
+  device.
+
+### Category label helper
+- New `src/i18n/categoryLabels.ts` exports `categoryLabel(t, key)` —
+  the single source of truth for "BACKGROUND" → "배경 소음 (드론 아님)"
+  style translation. Falls back to a humanised version of the raw
+  identifier so unknown categories never render blank.
+
+### Internationalisation — 13 new keys × 15 locales
+- `analyzing`, `recordingResumed`, `thresholdRecommended`,
+  `thresholdTooLowWarning`, `profileExampleBalanced`,
+  `profileExampleSamsung`, `profileExampleHighSensitivity`,
+  `profileExampleRawExpert`, `catMultirotor`, `catSingleEngine`,
+  `catSingleRotor`, `catJet`, `catPropellerFixed`, `catBackground`,
+  `micLowSensitivityHint`, `guideHowItDecides`,
+  `guideHowItDecidesBody`, `guideRadarOrientationNote`
+- Translated for ko / en / uk / ar / ar_gulf / he / hi / ur / tl / de /
+  es / fr / it / zh / ja.
+
+### Deferred to v2.1.5
+- Inline toast for `onRecordingRecovered` (needs transient-state
+  infrastructure beyond a single hook).
+- Battery alert `Alert.alert()` → inline toast (same dependency).
+- iPhone SE specific layout pass.
+
+### Verification
+- `tsc --noEmit`: 0 errors.
+- `jest`: 13 suites / 155 tests all passing.
+
+---
+
 ## v2.1.3 — Always-on hearing pill, scrollable history, brand icon (2026-05-15)
 
 ### Why this release

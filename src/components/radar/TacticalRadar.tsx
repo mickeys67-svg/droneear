@@ -290,9 +290,15 @@ const styles = StyleSheet.create({
   },
   rangeLabel: {
     position: 'absolute',
-    fontSize: 11,
-    opacity: 0.5,
-  },
+    fontSize: 12,
+    fontWeight: '700',
+    opacity: 0.85,
+    fontVariant: ['tabular-nums'],
+    // Small shadow so the label stays readable against the cyan signal sweep
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  } as any,
   // Sweep — a thin radial line that rotates around the centre.
   // Was previously a 90° pie-slice (borderTopLeftRadius:1000 on a radius-square)
   // which users mistook for "detected sector" even when 0 tracks were present.

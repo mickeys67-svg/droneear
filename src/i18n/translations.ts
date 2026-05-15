@@ -47,6 +47,32 @@ export interface Translations {
   emptyHistoryWhyNot?: string;
   // Live indicator on listen screen: "HEARING: X 41%"
   hearing?: string;
+  // "Analyzing..." shown until first inference arrives after starting a scan
+  analyzing?: string;
+  // Toast-style inline message after audio capture auto-recovers
+  recordingResumed?: string;
+  // Settings: confidence-threshold guidance
+  thresholdRecommended?: string;
+  thresholdTooLowWarning?: string;
+  // Settings: device profile examples
+  profileExampleBalanced?: string;
+  profileExampleSamsung?: string;
+  profileExampleHighSensitivity?: string;
+  profileExampleRawExpert?: string;
+  // Category labels (replace raw MULTIROTOR / BACKGROUND identifiers)
+  catMultirotor?: string;
+  catSingleEngine?: string;
+  catSingleRotor?: string;
+  catJet?: string;
+  catPropellerFixed?: string;
+  catBackground?: string;
+  // Onboarding mic test: "low sensitivity" explanation
+  micLowSensitivityHint?: string;
+  // Guide screen: how the verdict pipeline works (temporal voting etc)
+  guideHowItDecides?: string;
+  guideHowItDecidesBody?: string;
+  // RTL note
+  guideRadarOrientationNote?: string;
 
   // Signal Levels
   criticalThreat: string;
@@ -406,6 +432,24 @@ const ko: Translations = {
   locationUnavailableHint: '청취를 시작하면 GPS가 활성화되거나, 설정에서 위치 권한을 허용해 주세요.',
   emptyHistoryWhyNot: 'DroneEar는 드론 음향 모델과 일치하는 소리만 기록합니다. 일상 소리(목소리·음악·박수)는 자동으로 백그라운드로 분류됩니다. 설정에서 신뢰도 임계값을 낮추거나 디버그 모드를 켜면 모델이 무엇을 듣고 있는지 청취 화면에서 확인할 수 있습니다.',
   hearing: '듣는 중',
+  analyzing: '분석 중...',
+  recordingResumed: '청취가 재개되었습니다',
+  thresholdRecommended: '권장: 60~65%',
+  thresholdTooLowWarning: '50% 이하는 오탐(잡음을 드론으로 오인)이 늘어날 수 있습니다',
+  profileExampleBalanced: '대부분의 휴대폰에 권장 (균형)',
+  profileExampleSamsung: 'Samsung Galaxy 시리즈에 최적화',
+  profileExampleHighSensitivity: '조용한 환경에서 멀리 있는 소리까지 (배터리 소모↑)',
+  profileExampleRawExpert: '전문가 모드 — 후처리 최소화',
+  catMultirotor: '멀티로터 (소형 드론)',
+  catSingleEngine: '단일엔진 (대형 드론)',
+  catSingleRotor: '싱글로터 (헬기형)',
+  catJet: '제트/터빈',
+  catPropellerFixed: '프로펠러 고정익',
+  catBackground: '배경 소음 (드론 아님)',
+  micLowSensitivityHint: '실내 조용한 환경에서는 정상 표시될 수 있습니다. 실외에서는 일반적으로 더 높은 감도를 보입니다.',
+  guideHowItDecides: '식별 동작 방식',
+  guideHowItDecidesBody: 'DroneEar는 마이크 입력을 음향 카테고리로 분류한 뒤, 3개의 연속 프레임 중 60% 이상이 동일 카테고리이고 신뢰도가 임계값(기본 60%)을 넘을 때만 탐지로 기록합니다. 이 때문에 짧게 들려준 소리는 화면에 표시되어도 기록에 남지 않을 수 있습니다.',
+  guideRadarOrientationNote: '※ 레이더의 N/E/S/W는 실제 나침반 방위 기준이며 휴대폰 방향에 따라 회전하지 않습니다. 탐지된 방위는 청취 결과 카드에서 정확한 각도(°)로 확인하세요.',
 
   // Signal Levels
   criticalThreat: '강한 신호',
@@ -763,6 +807,24 @@ const en: Translations = {
   locationUnavailableHint: 'Start scanning to enable GPS, or grant location permission in Settings.',
   emptyHistoryWhyNot: 'Only sounds matching DroneEar\'s drone acoustic models are logged. Everyday sounds (voice, music, claps) are automatically filtered out as background. Lower the confidence threshold in Settings, or enable Debug Mode to see what the model is hearing on the listen screen.',
   hearing: 'Hearing',
+  analyzing: 'Analyzing...',
+  recordingResumed: 'Listening resumed',
+  thresholdRecommended: 'Recommended: 60-65%',
+  thresholdTooLowWarning: 'Below 50% may cause false positives (background noise mistaken for drones)',
+  profileExampleBalanced: 'Recommended for most phones (balanced)',
+  profileExampleSamsung: 'Optimized for Samsung Galaxy devices',
+  profileExampleHighSensitivity: 'Distant sounds in quiet environments (higher battery use)',
+  profileExampleRawExpert: 'Expert mode — minimal post-processing',
+  catMultirotor: 'Multirotor (small drone)',
+  catSingleEngine: 'Single engine (large drone)',
+  catSingleRotor: 'Single rotor (helicopter-like)',
+  catJet: 'Jet / turbine',
+  catPropellerFixed: 'Fixed-wing propeller',
+  catBackground: 'Background noise (not a drone)',
+  micLowSensitivityHint: 'This may be normal in a quiet indoor environment. Outdoors you should see higher sensitivity.',
+  guideHowItDecides: 'How identification works',
+  guideHowItDecidesBody: 'DroneEar classifies microphone input into acoustic categories, then only logs a detection when 3 consecutive frames agree (≥60% consensus) and the verdict confidence clears the threshold (60% by default). That is why a short test sound can show up live but not appear in History.',
+  guideRadarOrientationNote: 'Note: the radar N/E/S/W is true compass north and does not rotate with the phone. Read the exact bearing (°) from the detection cards below the radar.',
 
   criticalThreat: 'STRONG SIGNAL',
   highThreat: 'MODERATE SIGNAL',
@@ -1103,6 +1165,24 @@ const uk: Translations = {
   locationUnavailableHint: 'Розпочніть прослуховування для активації GPS або надайте дозвіл на місцезнаходження в Налаштуваннях.',
   emptyHistoryWhyNot: 'У журналі реєструються лише звуки, що відповідають акустичним моделям дронів DroneEar. Повсякденні звуки (голос, музика, оплески) автоматично фільтруються як фон. Знизьте поріг достовірності в Налаштуваннях або увімкніть Режим налагодження, щоб бачити, що чує модель.',
   hearing: 'Чути',
+  analyzing: 'Аналіз...',
+  recordingResumed: 'Прослуховування відновлено',
+  thresholdRecommended: 'Рекомендовано: 60-65%',
+  thresholdTooLowWarning: 'Нижче 50% можливі помилкові спрацювання (фонові шуми)',
+  profileExampleBalanced: 'Рекомендовано для більшості телефонів',
+  profileExampleSamsung: 'Оптимізовано для Samsung Galaxy',
+  profileExampleHighSensitivity: 'Далекі звуки в тихих умовах (більше заряду)',
+  profileExampleRawExpert: 'Експертний режим — мінімум обробки',
+  catMultirotor: 'Мультиротор (малий дрон)',
+  catSingleEngine: 'Одномоторний (великий дрон)',
+  catSingleRotor: 'Однороторний (вертоліт)',
+  catJet: 'Реактивний / турбіна',
+  catPropellerFixed: 'Літак з пропелером',
+  catBackground: 'Фоновий шум (не дрон)',
+  micLowSensitivityHint: 'Це нормально в тихому приміщенні. На вулиці чутливість зазвичай вища.',
+  guideHowItDecides: 'Як працює ідентифікація',
+  guideHowItDecidesBody: 'DroneEar класифікує звук з мікрофона та реєструє виявлення лише коли 3 кадри поспіль збігаються (≥60%) і впевненість перевищує поріг (60% за замовчуванням). Тому короткий тестовий звук може з\'явитися наживо, але не потрапити в журнал.',
+  guideRadarOrientationNote: 'Примітка: N/E/S/W на радарі — справжня магнітна північ і не обертається з телефоном. Точний пеленг (°) — у картках виявлення.',
 
   criticalThreat: 'СИЛЬНИЙ СИГНАЛ',
   highThreat: 'ПОМІРНИЙ СИГНАЛ',

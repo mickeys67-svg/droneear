@@ -27,6 +27,7 @@ import { TacticalSpectrogram } from '@/src/components/spectrogram/TacticalSpectr
 import { ThreatAlert } from '@/src/components/alerts/ThreatAlert';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTranslation } from '@/src/i18n/useTranslation';
+import { categoryLabel } from '@/src/i18n/categoryLabels';
 import { EnvironmentWarningBanner } from '@/src/components/alerts/EnvironmentWarningBanner';
 import { GLASS, glassStyles } from '@/src/constants/glass';
 import { TrackingOverlay } from '@/src/components/TrackingOverlay';
@@ -276,19 +277,29 @@ function HomeScreenInner() {
           {/* Always-on "what the model is hearing" pill — even when the verdict
               is below threshold or filtered as BACKGROUND. Without this the
               app feels deaf to the user when they play test sounds; now it
-              continuously says "Heard: BACKGROUND 23%" / "MULTIROTOR 41%"
-              so it is obvious the pipeline is alive. */}
-          {isScanning && lastRawCategory && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: `${theme.primary}30`, backgroundColor: `${theme.primary}08` }}>
-              <Text style={{ fontSize: 10, color: theme.textMuted, fontWeight: '700', letterSpacing: 0.8 }}>
+              continuously says e.g. "Hearing: 배경 소음 23%" so it is obvious
+              the pipeline is alive. Until the first inference arrives we
+              show "Analyzing..." so the gap between SCAN tap and the first
+              classification isn't silent either. */}
+          {isScanning && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: `${theme.primary}30`, backgroundColor: `${theme.primary}08`, maxWidth: '90%' }}>
+              <Text style={{ fontSize: 11, color: theme.textMuted, fontWeight: '800', letterSpacing: 0.8 }}>
                 {(t.hearing || 'HEARING').toUpperCase()}:
               </Text>
-              <Text style={{ fontSize: 11, color: theme.text, fontWeight: '700' }}>
-                {lastRawCategory.replace('_', ' ')}
-              </Text>
-              <Text style={{ fontSize: 11, color: theme.textDim, fontWeight: '600', fontVariant: ['tabular-nums'] }}>
-                {Math.round(lastRawConfidence * 100)}%
-              </Text>
+              {lastRawCategory ? (
+                <>
+                  <Text style={{ fontSize: 12, color: theme.text, fontWeight: '700', flexShrink: 1 }} numberOfLines={1}>
+                    {categoryLabel(t, lastRawCategory)}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: theme.textDim, fontWeight: '600', fontVariant: ['tabular-nums'] }}>
+                    {Math.round(lastRawConfidence * 100)}%
+                  </Text>
+                </>
+              ) : (
+                <Text style={{ fontSize: 12, color: theme.textDim, fontWeight: '600', fontStyle: 'italic' }}>
+                  {t.analyzing || 'Analyzing...'}
+                </Text>
+              )}
             </View>
           )}
         </View>

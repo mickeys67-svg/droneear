@@ -105,6 +105,30 @@ export default function GuideScreen() {
           </Text>
         </View>
 
+        {/* How identification actually works — explains the temporal voting +
+            threshold gate that makes short YouTube clips not show in History
+            even though the live "Hearing" pill catches them. */}
+        {t.guideHowItDecides && (
+          <View style={[glassStyles.card, styles.section]}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.iconCircle, { borderColor: `${theme.primary}40` }]}>
+                <Text style={styles.iconEmoji}>🧠</Text>
+              </View>
+              <Text style={[styles.sectionTitle, { color: theme.primary }]}>
+                {t.guideHowItDecides}
+              </Text>
+            </View>
+            <Text style={[styles.bodyText, { color: theme.textDim }]}>
+              {t.guideHowItDecidesBody}
+            </Text>
+            {t.guideRadarOrientationNote && (
+              <Text style={[styles.noteText, { color: theme.textMuted, marginTop: 10, fontStyle: 'italic' }]}>
+                {t.guideRadarOrientationNote}
+              </Text>
+            )}
+          </View>
+        )}
+
         {/* Accuracy Notes */}
         <View style={[glassStyles.card, styles.section]}>
           <Text style={[glassStyles.sectionLabel, { color: theme.textDim }]}>

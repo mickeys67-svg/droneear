@@ -8,8 +8,9 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Linking, AppState, type AppStateStatus } from 'react-native';
 import Animated, { SlideInDown, FadeOut } from 'react-native-reanimated';
+import * as Location from 'expo-location';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
 import { useMapData, MapMarker } from '@/src/hooks/useMapData';
@@ -61,6 +62,35 @@ export default function MapScreen() {
       setSelectedMarker(null);
     }
   }, [markers, selectedMarker]);
+
+  // Auto-refresh GPS when the user returns from iOS Settings after granting
+  // location permission. Previously the map stayed stuck on "Location
+  // unavailable" until the user manually went to the listen screen and started
+  // scanning — confusing because the "Open Settings" CTA implies the map will
+  // recover on its own. We only do a one-shot getCurrentPosition (not a
+  // long-lived watch) so we don't conflict with the watcher useThreatDetector
+  // installs while scanning.
+  const setUserLocation = useDetectionStore((s) => s.setUserLocation);
+  useEffect(() => {
+    const refreshLocationIfGranted = async () => {
+      if (userLocation) return; // already have it
+      try {
+        const { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== 'granted') return;
+        const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        setUserLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+      } catch (e) {
+        console.warn('[Map] one-shot location failed:', e);
+      }
+    };
+    // Initial check on mount (handles the case where permission was already
+    // granted before this screen first rendered).
+    refreshLocationIfGranted();
+    const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state === 'active') refreshLocationIfGranted();
+    });
+    return () => sub.remove();
+  }, [userLocation, setUserLocation]);
 
   const handleMarkerPress = useCallback((marker: MapMarker) => {
     setSelectedMarker(marker);

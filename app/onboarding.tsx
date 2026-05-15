@@ -281,6 +281,12 @@ export default function OnboardingScreen() {
             {micTestResult === 'bad' && (
               <View style={{ alignItems: 'center' }}>
                 <Text style={[styles.grantedText, { color: theme.warning }]}>{t.micTestBad}</Text>
+                {/* Quiet indoor environments routinely score "low sensitivity"
+                    even with a healthy mic; reassure the user instead of
+                    leaving them thinking their hardware is broken. */}
+                <Text style={[styles.disclaimerText, { color: theme.textMuted, marginTop: -8, marginBottom: 12, paddingHorizontal: 30 }]}>
+                  {t.micLowSensitivityHint || 'This may be normal in a quiet indoor environment.'}
+                </Text>
                 <TouchableOpacity style={[styles.ctaBtn, { backgroundColor: theme.primary }, primaryGlow(theme.primary,10)]} onPress={goNext} accessibilityRole="button" accessibilityLabel="Next step">
                   <Text style={[styles.ctaBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>{t.next}</Text>
                 </TouchableOpacity>
