@@ -23,6 +23,7 @@ export const es: Translations = {
   grantAccess: 'Conceder acceso',
   locationUnavailable: 'Ubicación no disponible',
   locationUnavailableHint: 'Inicia el escaneo para activar el GPS, o concede el permiso de ubicación en Ajustes.',
+  emptyHistoryWhyNot: 'Solo se registran sonidos que coinciden con los modelos acústicos de drones de DroneEar. Los sonidos cotidianos (voz, música, aplausos) se filtran automáticamente como fondo. Reduce el umbral de confianza en Ajustes o activa el Modo Depuración para ver lo que el modelo está escuchando.',
 
   criticalThreat: 'Señal fuerte',
   highThreat: 'Señal moderada',

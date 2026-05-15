@@ -76,6 +76,10 @@ function HomeScreenInner() {
     submitFeedback,
   } = useThreatDetector();
 
+  // Raw inference (best category + confidence even when filtered out)
+  const lastRawCategory = useDetectionStore((s) => s.lastRawCategory);
+  const lastRawConfidence = useDetectionStore((s) => s.lastRawConfidence);
+
   const activeThreats = currentThreats.filter((tr) => tr.isActive);
 
   // Track selection from store
@@ -281,14 +285,30 @@ function HomeScreenInner() {
 
         {/* Debug Metrics */}
         {debugMode && isScanning && (
-          <View style={[glassStyles.card, styles.debugPanel]}>
-            <DebugItem label="Model" value={modelStatus} color={theme} />
-            <DebugItem label="Inference" value={`${inferenceTimeMs.toFixed(1)}ms`} color={theme} />
-            <DebugItem label="RMS" value={audioLevel.toFixed(3)} color={theme} />
-            <DebugItem label="Tracks" value={String(activeThreats.length)} color={theme} />
-            <DebugItem label="Time" value={formatTime(scanSeconds)} color={theme} />
-            <DebugItem label="Batt" value={`${batteryLevel}%`} color={theme} />
-          </View>
+          <>
+            <View style={[glassStyles.card, styles.debugPanel]}>
+              <DebugItem label="Model" value={modelStatus} color={theme} />
+              <DebugItem label="Inference" value={`${inferenceTimeMs.toFixed(1)}ms`} color={theme} />
+              <DebugItem label="RMS" value={audioLevel.toFixed(3)} color={theme} />
+              <DebugItem label="Tracks" value={String(activeThreats.length)} color={theme} />
+              <DebugItem label="Time" value={formatTime(scanSeconds)} color={theme} />
+              <DebugItem label="Batt" value={`${batteryLevel}%`} color={theme} />
+            </View>
+            {lastRawCategory && (
+              <View style={[glassStyles.card, styles.debugPanel, { marginTop: 6 }]}>
+                <DebugItem
+                  label="Heard"
+                  value={lastRawCategory.replace('_', ' ')}
+                  color={theme}
+                />
+                <DebugItem
+                  label="Confidence"
+                  value={`${Math.round(lastRawConfidence * 100)}%`}
+                  color={theme}
+                />
+              </View>
+            )}
+          </>
         )}
 
         {/* Scan Control Button */}

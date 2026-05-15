@@ -262,12 +262,28 @@ export default function HistoryScreen() {
           <Text style={[styles.emptyHint, { color: theme.textMuted }]}>
             {t.startScanningHint}
           </Text>
-          <TouchableOpacity
-            style={[glassStyles.btnPrimary, { backgroundColor: theme.primary, marginTop: 24 }]}
-            onPress={() => router.navigate('/(tabs)')}
-          >
-            <Text style={[glassStyles.btnPrimaryText, theme.mode !== 'DAY' && { color: '#FFF' }]}>{t.engageSensors}</Text>
-          </TouchableOpacity>
+          {/* Important context: this app only logs sounds that match its drone
+              acoustic models with sufficient confidence. Everyday sounds —
+              music, voice, claps, fan noise — are correctly filtered out as
+              BACKGROUND and won't appear here. Tell the user instead of
+              leaving them wondering why a quiet log == broken app. */}
+          <Text style={[styles.emptyHint, { color: theme.textMuted, marginTop: 12, paddingHorizontal: 24, textAlign: 'center', lineHeight: 18 }]}>
+            {t.emptyHistoryWhyNot || 'Only sounds matching DroneEar\'s drone acoustic models are logged. Everyday sounds (voice, music, claps) are filtered out as background. Lower the confidence threshold in Settings, or enable Debug Mode to see what the model is hearing.'}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
+            <TouchableOpacity
+              style={[glassStyles.btnPrimary, { backgroundColor: theme.primary }]}
+              onPress={() => router.navigate('/(tabs)')}
+            >
+              <Text style={[glassStyles.btnPrimaryText, theme.mode !== 'DAY' && { color: '#FFF' }]}>{t.engageSensors}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[glassStyles.btnPrimary, { backgroundColor: 'transparent', borderWidth: 1, borderColor: GLASS.borderLight }]}
+              onPress={() => router.navigate('/(tabs)/settings')}
+            >
+              <Text style={[glassStyles.btnPrimaryText, { color: theme.textDim }]}>{t.settings || 'Settings'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : filteredDetections.length === 0 ? (
         <View style={styles.empty}>

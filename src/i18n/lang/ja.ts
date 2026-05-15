@@ -23,6 +23,7 @@ export const ja: Translations = {
   grantAccess: 'アクセスを許可',
   locationUnavailable: '位置情報が利用できません',
   locationUnavailableHint: 'スキャンを開始してGPSを有効にするか、設定で位置情報の許可を付与してください。',
+  emptyHistoryWhyNot: 'DroneEarのドローン音響モデルに一致する音のみが記録されます。日常音(声、音楽、拍手)はバックグラウンドとして自動的にフィルタリングされます。設定で信頼度しきい値を下げるか、デバッグモードを有効にしてモデルが何を聞いているか確認してください。',
 
   criticalThreat: '強い信号',
   highThreat: '中程度の信号',

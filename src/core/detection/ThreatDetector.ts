@@ -30,6 +30,10 @@ export interface ThreatDetectorCallbacks {
   onStatusChange?: (status: ThreatDetectorStatus) => void;
   onRecordingError?: (error: string) => void;
   onRecordingRecovered?: () => void;
+  // Fires for every classified frame regardless of confidence / category /
+  // temporal voting filters. Lets the listen screen surface "the model heard X
+  // with Y%" so users testing with non-drone sounds know the pipeline is alive.
+  onRawInference?: (category: string, confidence: number) => void;
 }
 
 export type ThreatDetectorStatus = 'INITIALIZING' | 'READY' | 'SCANNING' | 'STOPPED' | 'ERROR' | 'RECOVERING';
@@ -79,6 +83,10 @@ export class ThreatDetector {
 
       this.classifier.onInferenceMetrics((metrics) => {
         this.callbacks.onMetrics?.(metrics);
+      });
+
+      this.classifier.onRaw((category, confidence) => {
+        this.callbacks.onRawInference?.(category, confidence);
       });
 
       this.isInitialized = true;

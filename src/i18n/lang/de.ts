@@ -23,6 +23,7 @@ export const de: Translations = {
   grantAccess: 'Zugriff gewähren',
   locationUnavailable: 'Standort nicht verfügbar',
   locationUnavailableHint: 'Starten Sie das Scannen, um GPS zu aktivieren, oder erteilen Sie die Standortberechtigung in den Einstellungen.',
+  emptyHistoryWhyNot: 'Es werden nur Geräusche protokolliert, die zu den akustischen Drohnenmodellen von DroneEar passen. Alltagsgeräusche (Stimme, Musik, Klatschen) werden automatisch als Hintergrund herausgefiltert. Senken Sie den Konfidenzschwellenwert in den Einstellungen oder aktivieren Sie den Debug-Modus, um zu sehen, was das Modell hört.',
 
   criticalThreat: 'Starkes Signal',
   highThreat: 'Mittleres Signal',

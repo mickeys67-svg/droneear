@@ -23,6 +23,7 @@ export const he: Translations = {
   grantAccess: 'אשר גישה',
   locationUnavailable: 'המיקום אינו זמין',
   locationUnavailableHint: 'התחל סריקה כדי להפעיל GPS, או אפשר הרשאת מיקום בהגדרות.',
+  emptyHistoryWhyNot: 'נרשמים רק צלילים התואמים למודלים האקוסטיים של רחפנים של DroneEar. צלילים יומיומיים (קול, מוזיקה, מחיאות כפיים) מסוננים אוטומטית כרקע. הורד את סף הביטחון בהגדרות, או הפעל מצב ניפוי באגים כדי לראות מה המודל שומע.',
 
   criticalThreat: 'אות חזק',
   highThreat: 'אות בינוני',

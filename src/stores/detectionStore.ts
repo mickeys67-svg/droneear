@@ -22,6 +22,12 @@ interface DetectionState {
   micSnrDb: number;
   micWarning: MicWarning;
 
+  // Debug surface — last raw inference (filtered out before reaching detection
+  // store, but kept here so the debug panel can show "BACKGROUND 23%" while
+  // listening to non-drone sounds, instead of silence)
+  lastRawCategory: string | null;
+  lastRawConfidence: number;
+
   // Track selection & dismissal (map/UI interactions)
   selectedTrackId: string | null;
   hiddenTrackIds: string[];
@@ -52,6 +58,7 @@ interface DetectionState {
   acknowledgeDetection: () => void;
   setBatteryLevel: (level: number) => void;
   setMicQuality: (quality: MicQuality, snrDb: number, warning: MicWarning) => void;
+  setRawInference: (category: string, confidence: number) => void;
   setFeedbackPending: (pending: boolean, detectionId?: string | null) => void;
   setFusedDetections: (detections: FusedDetection[]) => void;
   setBLEScanActive: (active: boolean) => void;
@@ -76,6 +83,8 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   micQuality: 'GOOD' as MicQuality,
   micSnrDb: 0,
   micWarning: null as MicWarning,
+  lastRawCategory: null as string | null,
+  lastRawConfidence: 0,
   selectedTrackId: null,
   hiddenTrackIds: [],
   bleDevices: {},
@@ -199,6 +208,8 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   setBatteryLevel: (level) => set({ batteryLevel: level }),
 
   setMicQuality: (quality, snrDb, warning) => set({ micQuality: quality, micSnrDb: snrDb, micWarning: warning }),
+
+  setRawInference: (category, confidence) => set({ lastRawCategory: category, lastRawConfidence: confidence }),
 
   setFeedbackPending: (pending, detectionId = null) => set({ feedbackPending: pending, feedbackDetectionId: detectionId }),
 

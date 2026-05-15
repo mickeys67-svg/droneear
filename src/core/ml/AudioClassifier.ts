@@ -70,6 +70,12 @@ export class AudioClassifierEngine {
   private onDetection: ((result: DetectionResult) => void) | null = null;
   private onSpectralData: ((data: SpectralData) => void) | null = null;
   private onMetrics: ((metrics: InferenceMetrics) => void) | null = null;
+  // Debug callback — fires for *every* inference (even when confidence is below
+  // threshold, or when the verdict is BACKGROUND/AMBIENT, or when temporal
+  // voting fails). Lets the listen screen show "the model heard X with Y%
+  // confidence" so users testing with non-drone sounds understand why nothing
+  // shows up in History. Only wired when debugMode is on.
+  private onRawInference: ((category: string, confidence: number) => void) | null = null;
 
   constructor(config: Partial<ClassifierConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -183,6 +189,11 @@ export class AudioClassifierEngine {
       delegate: 'CPU',
     });
 
+    // Always emit the raw best-category/confidence so the debug panel can show
+    // *something* even when the verdict is filtered out below — users testing
+    // with non-drone sounds otherwise see no feedback at all.
+    this.onRawInference?.(String(bestCategory), bestConfidence);
+
     // Step 8: Apply confidence threshold and temporal voting
     if (bestCategory === 'BACKGROUND' || (bestCategory as string) === 'AMBIENT' || bestConfidence < this.config.confidenceThreshold) {
       return null;
@@ -272,6 +283,16 @@ export class AudioClassifierEngine {
    */
   onInferenceMetrics(callback: (metrics: InferenceMetrics) => void): void {
     this.onMetrics = callback;
+  }
+
+  /**
+   * Register raw inference callback — fires for every classified frame
+   * regardless of confidence threshold / temporal voting / category filter.
+   * Used by the debug panel so users testing with non-drone sounds can see
+   * "the model heard X with Y% confidence" instead of total silence.
+   */
+  onRaw(callback: (category: string, confidence: number) => void): void {
+    this.onRawInference = callback;
   }
 
   /**

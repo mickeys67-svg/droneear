@@ -23,6 +23,7 @@ export const tl: Translations = {
   grantAccess: 'Bigyan ng Access',
   locationUnavailable: 'Hindi available ang lokasyon',
   locationUnavailableHint: 'Simulan ang pag-scan para i-enable ang GPS, o pahintulutan ang location sa Settings.',
+  emptyHistoryWhyNot: 'Tanging mga tunog na tumutugma sa drone acoustic models ng DroneEar ang nai-log. Mga pang-araw-araw na tunog (boses, musika, palakpakan) ay awtomatikong sina-salain bilang background. Babaan ang confidence threshold sa Settings, o paganahin ang Debug Mode para makita kung ano ang naririnig ng modelo.',
 
   criticalThreat: 'Malakas na Signal',
   highThreat: 'Katamtamang Signal',

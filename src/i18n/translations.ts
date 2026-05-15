@@ -43,6 +43,8 @@ export interface Translations {
   // Map screen — shown when GPS is unavailable or denied
   locationUnavailable?: string;
   locationUnavailableHint?: string;
+  // History empty state — explains why everyday sounds don't appear here
+  emptyHistoryWhyNot?: string;
 
   // Signal Levels
   criticalThreat: string;
@@ -400,6 +402,7 @@ const ko: Translations = {
   grantAccess: '권한 허용',
   locationUnavailable: '위치 정보를 사용할 수 없습니다',
   locationUnavailableHint: '청취를 시작하면 GPS가 활성화되거나, 설정에서 위치 권한을 허용해 주세요.',
+  emptyHistoryWhyNot: 'DroneEar는 드론 음향 모델과 일치하는 소리만 기록합니다. 일상 소리(목소리·음악·박수)는 자동으로 백그라운드로 분류됩니다. 설정에서 신뢰도 임계값을 낮추거나 디버그 모드를 켜면 모델이 무엇을 듣고 있는지 청취 화면에서 확인할 수 있습니다.',
 
   // Signal Levels
   criticalThreat: '강한 신호',
@@ -755,6 +758,7 @@ const en: Translations = {
   grantAccess: 'Grant Access',
   locationUnavailable: 'Location unavailable',
   locationUnavailableHint: 'Start scanning to enable GPS, or grant location permission in Settings.',
+  emptyHistoryWhyNot: 'Only sounds matching DroneEar\'s drone acoustic models are logged. Everyday sounds (voice, music, claps) are automatically filtered out as background. Lower the confidence threshold in Settings, or enable Debug Mode to see what the model is hearing on the listen screen.',
 
   criticalThreat: 'STRONG SIGNAL',
   highThreat: 'MODERATE SIGNAL',
@@ -1093,6 +1097,7 @@ const uk: Translations = {
   grantAccess: 'Надати доступ',
   locationUnavailable: 'Місцезнаходження недоступне',
   locationUnavailableHint: 'Розпочніть прослуховування для активації GPS або надайте дозвіл на місцезнаходження в Налаштуваннях.',
+  emptyHistoryWhyNot: 'У журналі реєструються лише звуки, що відповідають акустичним моделям дронів DroneEar. Повсякденні звуки (голос, музика, оплески) автоматично фільтруються як фон. Знизьте поріг достовірності в Налаштуваннях або увімкніть Режим налагодження, щоб бачити, що чує модель.',
 
   criticalThreat: 'СИЛЬНИЙ СИГНАЛ',
   highThreat: 'ПОМІРНИЙ СИГНАЛ',

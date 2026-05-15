@@ -81,6 +81,7 @@ export function useThreatDetector() {
   const clearThreats = useDetectionStore((s) => s.clearThreats);
   const setBatteryLevel = useDetectionStore((s) => s.setBatteryLevel);
   const setMicQuality = useDetectionStore((s) => s.setMicQuality);
+  const setRawInference = useDetectionStore((s) => s.setRawInference);
   const setFeedbackPending = useDetectionStore((s) => s.setFeedbackPending);
   const setFusedDetections = useDetectionStore((s) => s.setFusedDetections);
 
@@ -209,6 +210,11 @@ export function useThreatDetector() {
         // Clear stale UNAVAILABLE state so the "Recording stopped unexpectedly"
         // issue disappears from the warning panel once capture restarts.
         sensorMgr.setRecordingState(true);
+      },
+      onRawInference: (category, confidence) => {
+        // Always store so the debug panel can show what the model heard, even
+        // when the verdict was filtered out (BACKGROUND, below threshold, etc).
+        setRawInference(category, confidence);
       },
     });
 

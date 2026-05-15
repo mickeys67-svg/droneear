@@ -24,6 +24,7 @@ export const ar_gulf: Translations = {
   grantAccess: 'اعطِ الإذن',
   locationUnavailable: 'الموقع ما متوفر',
   locationUnavailableHint: 'ابدأ المسح عشان تفعّل GPS، أو سمح بإذن الموقع من الإعدادات.',
+  emptyHistoryWhyNot: 'تنحفظ بس الأصوات اللي تطابق نماذج DroneEar الصوتية للدرونات. الأصوات اليومية (صوت، موسيقى، تصفيق) تنفلتر تلقائيًا كخلفية. قلل عتبة الثقة من الإعدادات، أو فعّل وضع التصحيح عشان تشوف وش يسمعه النموذج.',
 
   criticalThreat: 'إشارة قوية',
   highThreat: 'إشارة متوسطة',

@@ -2,6 +2,46 @@
 
 ---
 
+## v2.1.2 — Debug visibility & empty-history guidance (2026-05-15)
+
+### Why this release
+Users testing with non-drone sounds (voice, music, claps) reported "nothing
+gets logged" — which is correct behaviour (the model filters those out as
+BACKGROUND), but the app gave no feedback to explain it. This release surfaces
+what the model actually heard, and tells users *why* a quiet history is not
+a broken app.
+
+### Debug inference surface
+- `AudioClassifierEngine` now emits a new `onRaw(category, confidence)`
+  callback for every classified frame, regardless of confidence threshold,
+  category filter (`BACKGROUND`/`AMBIENT`), or temporal voting.
+- Wired through `ThreatDetector.onRawInference` → `useThreatDetector` →
+  `detectionStore.lastRawCategory` / `lastRawConfidence`.
+- Listen-screen debug panel (visible when Debug Mode is on) adds a second
+  card showing `Heard: <category>` + `Confidence: <%>`. Users can now see
+  the model classify their test sound as e.g. `BACKGROUND 23%` instead of
+  staring at silence.
+
+### Empty-history UX
+- The history empty state now explicitly explains: "Only sounds matching
+  DroneEar's drone acoustic models are logged. Everyday sounds (voice,
+  music, claps) are filtered out as background. Lower the confidence
+  threshold in Settings, or enable Debug Mode to see what the model is
+  hearing."
+- Adds a Settings shortcut button next to the existing "Engage Sensors"
+  button so users can jump straight to the threshold/debug toggle.
+
+### Internationalisation
+- New `emptyHistoryWhyNot` string in the Translations interface and across
+  all 15 locales (KO, EN, UK, AR, AR_GULF, HE, HI, UR, TL, DE, ES, FR, IT,
+  ZH, JA).
+
+### Verification
+- `tsc --noEmit`: 0 errors.
+- `jest`: 13 suites / 155 tests all passing.
+
+---
+
 ## v2.1.1 — Stability & i18n layout fixes (2026-05-15)
 
 ### Listen screen
