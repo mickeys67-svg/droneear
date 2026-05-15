@@ -21,6 +21,8 @@ export const de: Translations = {
   micPermissionRequired: 'Mikrofonberechtigung für akustische Überwachung erforderlich. Bitte Zugriff in den Geräteeinstellungen gewähren.',
   openSettings: 'Einstellungen öffnen',
   grantAccess: 'Zugriff gewähren',
+  locationUnavailable: 'Standort nicht verfügbar',
+  locationUnavailableHint: 'Starten Sie das Scannen, um GPS zu aktivieren, oder erteilen Sie die Standortberechtigung in den Einstellungen.',
 
   criticalThreat: 'Starkes Signal',
   highThreat: 'Mittleres Signal',

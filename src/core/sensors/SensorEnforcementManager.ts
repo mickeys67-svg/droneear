@@ -128,11 +128,17 @@ export class SensorEnforcementManager {
 
   /**
    * Update mic quality from MicQualityMonitor.
+   * Called on every audio frame (20-30Hz) — must early-return when unchanged
+   * to avoid per-frame emitState/haptic storms that shake the UI.
    */
   setMicQuality(quality: MicQuality, warning: MicWarning): void {
+    if (this.micQuality === quality && this.micWarning === warning) {
+      return;
+    }
     this.micQuality = quality;
     this.micWarning = warning;
 
+    const prevMicState = this.sensorState.microphone;
     if (quality === 'POOR') {
       this.sensorState.microphone = 'DEGRADED';
       const action = warning === 'WIND' ? 'REPOSITION' : warning === 'CLIPPING' ? 'CHANGE_PROFILE' : 'REPOSITION';
@@ -149,13 +155,19 @@ export class SensorEnforcementManager {
       }
       this.clearAlarm('mic_quality');
     }
-    this.emitState();
+    if (prevMicState !== this.sensorState.microphone || quality === 'POOR') {
+      this.emitState();
+    }
   }
 
   /**
    * Update recording state.
    */
   setRecordingState(active: boolean, error?: string): void {
+    const desired: SensorStatus = error || !active ? 'UNAVAILABLE' : 'OK';
+    if (this.sensorState.recording === desired && !error) {
+      return;
+    }
     if (error) {
       this.sensorState.recording = 'UNAVAILABLE';
       this.startEscalatingAlarm('recording', {
@@ -166,7 +178,7 @@ export class SensorEnforcementManager {
         severity: 'CRITICAL',
       });
     } else {
-      this.sensorState.recording = active ? 'OK' : 'UNAVAILABLE';
+      this.sensorState.recording = desired;
       if (active) this.clearAlarm('recording');
     }
     this.emitState();

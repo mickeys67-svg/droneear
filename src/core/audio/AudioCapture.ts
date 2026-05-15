@@ -65,6 +65,14 @@ export class AudioCapture {
   start(onFrame: AudioFrameCallback): void {
     if (this.isRecording) return;
 
+    // Belt-and-suspenders: detach any straggler listener from a prior start
+    // (e.g. if stop() failed to remove it) before registering a new one.
+    // Prevents listener stacking when watchdog recovery cycles start/stop.
+    if (this.dataHandler) {
+      try { (AudioRecord as any).removeListener?.('data', this.dataHandler); } catch {}
+      this.dataHandler = null;
+    }
+
     this.frameCallback = onFrame;
     this.frameCount = 0;
 
@@ -76,12 +84,10 @@ export class AudioCapture {
       wavFile: 'drone_capture.wav',
     });
 
-    // Remove any previous listener to prevent duplicates on start/stop cycles
-    if (this.dataHandler) {
-      try { (AudioRecord as any).removeListener?.('data', this.dataHandler); } catch {}
-    }
+    const handler = (base64Data: string) => {
+      // Late callback after stop() — ignore.
+      if (this.dataHandler !== handler) return;
 
-    this.dataHandler = (base64Data: string) => {
       this.frameCount++;
 
       // Decode base64 to PCM samples
@@ -103,8 +109,9 @@ export class AudioCapture {
       this.frameCallback?.(frame);
     };
 
+    this.dataHandler = handler;
     this.isRecording = true; // Set BEFORE start to prevent double-call race
-    AudioRecord.on('data', this.dataHandler);
+    AudioRecord.on('data', handler);
     AudioRecord.start();
   }
 
@@ -114,13 +121,20 @@ export class AudioCapture {
   async stop(): Promise<void> {
     if (!this.isRecording) return;
 
-    // Remove listener before stopping to prevent stale callbacks
-    if (this.dataHandler) {
-      try { (AudioRecord as any).removeListener?.('data', this.dataHandler); } catch {}
-      this.dataHandler = null;
-    }
-    await AudioRecord.stop();
+    // Flip state first so any in-flight callback short-circuits via the
+    // identity check above before we touch the listener.
     this.isRecording = false;
+    const handler = this.dataHandler;
+    this.dataHandler = null;
+
+    if (handler) {
+      try { (AudioRecord as any).removeListener?.('data', handler); } catch {}
+    }
+    try {
+      await AudioRecord.stop();
+    } catch (err) {
+      console.warn('[AudioCapture] stop() failed:', err);
+    }
     this.frameCallback = null;
   }
 

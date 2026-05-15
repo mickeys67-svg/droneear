@@ -88,6 +88,17 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: 'settings',
       storage: mmkvStorage,
+      // Bump this when the persisted shape changes. zustand/persist will
+      // discard older payloads (or run migrate) instead of merging mismatched
+      // schemas, which previously could leave stale fields polluting state.
+      version: 1,
+      migrate: (persisted: unknown, _version: number) => {
+        // No schema breaks yet; future migrations key on _version. Fold any
+        // unexpected payload back onto defaults so a corrupted store can't
+        // crash the app on startup.
+        if (!persisted || typeof persisted !== 'object') return DEFAULT_SETTINGS;
+        return persisted as SettingsState;
+      },
       partialize: (state) => ({
         profile: state.profile,
         themeMode: state.themeMode,

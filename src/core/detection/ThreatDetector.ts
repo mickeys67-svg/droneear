@@ -29,6 +29,7 @@ export interface ThreatDetectorCallbacks {
   onMetrics?: (metrics: InferenceMetrics) => void;
   onStatusChange?: (status: ThreatDetectorStatus) => void;
   onRecordingError?: (error: string) => void;
+  onRecordingRecovered?: () => void;
 }
 
 export type ThreatDetectorStatus = 'INITIALIZING' | 'READY' | 'SCANNING' | 'STOPPED' | 'ERROR' | 'RECOVERING';
@@ -189,6 +190,10 @@ export class ThreatDetector {
       try {
         this.startAudioCapture();
         this.callbacks.onStatusChange?.('SCANNING');
+        // Notify caller so SensorEnforcementManager can clear the stale
+        // "Recording stopped unexpectedly" issue from the warning panel.
+        this.callbacks.onRecordingRecovered?.();
+        this.recoveryAttempts = 0;
         this.isRecovering = false;
         return; // Recovery succeeded
       } catch (err) {

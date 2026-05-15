@@ -33,10 +33,12 @@ export function useBLEScanner() {
     const scanner = scannerRef.current;
     if (!scanner) return;
 
+    let mounted = true;
     scanner.isAvailable().then((available) => {
-      setBleAvailable(available);
-    }).catch(() => {
-      setBleAvailable(false);
+      if (mounted) setBleAvailable(available);
+    }).catch((e) => {
+      console.warn('[BLE] isAvailable failed:', e);
+      if (mounted) setBleAvailable(false);
     });
 
     // Wire discovery callback — use getState() to avoid dependency on addBLEDevice
@@ -45,7 +47,8 @@ export function useBLEScanner() {
     });
 
     return () => {
-      scanner.stopScanning().catch(() => {});
+      mounted = false;
+      scanner.stopScanning().catch((e) => console.warn('[BLE] stop on unmount failed:', e));
       // Do NOT dispose — scannerRef persists for component lifetime
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

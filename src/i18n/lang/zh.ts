@@ -21,6 +21,8 @@ export const zh: Translations = {
   micPermissionRequired: '声学监测需要麦克风权限。请在设备设置中授予访问权限。',
   openSettings: '打开设置',
   grantAccess: '授予权限',
+  locationUnavailable: '位置不可用',
+  locationUnavailableHint: '开始扫描以启用 GPS，或在"设置"中授予位置权限。',
 
   criticalThreat: '强信号',
   highThreat: '中等信号',

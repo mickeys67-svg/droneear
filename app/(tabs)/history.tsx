@@ -519,15 +519,18 @@ const styles = StyleSheet.create({
   // Filters
   filterRow: {
     paddingHorizontal: 20,
+    paddingRight: 28,
     gap: 8,
     marginBottom: 14,
+    alignItems: 'center',
   },
   filterPill: {
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    minHeight: 48,
+    height: 48,
+    minWidth: 72,
     justifyContent: 'center',
     alignItems: 'center',
   },

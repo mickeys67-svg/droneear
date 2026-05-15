@@ -19,6 +19,9 @@ export function MicQualityPanel({ micQuality, micSnrDb, micWarning }: MicQuality
   const t = useTranslation();
 
   const qualityColor = micQuality === 'GOOD' ? theme.success : micQuality === 'FAIR' ? theme.warning : theme.danger;
+  // Snap to integer to stop the visible jitter from per-frame SNR oscillation.
+  const snrDisplay = Math.round(micSnrDb);
+  const fillPct = Math.min(Math.max((snrDisplay / 40) * 100, 5), 100);
 
   return (
     <View style={[glassStyles.card, styles.container]}>
@@ -31,13 +34,13 @@ export function MicQualityPanel({ micQuality, micSnrDb, micWarning }: MicQuality
           {micQuality === 'GOOD' ? t.micQualityGood : micQuality === 'FAIR' ? t.micQualityFair : t.micQualityPoor}
         </Text>
         <Text style={[styles.snr, { color: theme.textMuted }]}>
-          {micSnrDb}dB
+          {snrDisplay}dB
         </Text>
       </View>
 
       <View style={styles.meterTrack}>
         <View style={[styles.meterFill, {
-          width: `${Math.min(Math.max((micSnrDb / 40) * 100, 5), 100)}%`,
+          width: `${fillPct}%`,
           backgroundColor: qualityColor,
         }]} />
       </View>
@@ -64,6 +67,12 @@ export function MicQualityPanel({ micQuality, micSnrDb, micWarning }: MicQuality
     </View>
   );
 }
+
+// NOTE: previously wrapped in React.memo. Removed because the memo bypasses
+// internal hook updates — useTheme/useTranslation changes would leave this
+// panel rendering with the stale theme/language. The SNR jitter is already
+// damped by the Math.round(micSnrDb) snap above, so per-frame re-renders
+// produce no visual change and React's reconciliation handles the rest.
 
 const styles = StyleSheet.create({
   container: { marginBottom: 14, gap: 8 },

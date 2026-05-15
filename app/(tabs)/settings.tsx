@@ -86,8 +86,8 @@ export default function SettingsScreen() {
           <Text style={[styles.sectionLabel, { color: theme.textDim }]}>{t.appearance || 'APPEARANCE'}</Text>
 
           {/* Theme Toggle */}
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>{t.displayTheme}</Text>
+          <View style={styles.settingBlock}>
+            <Text style={[styles.settingLabel, { color: theme.text, marginBottom: 10 }]}>{t.displayTheme}</Text>
             <View style={styles.themeToggle}>
               {THEME_OPTIONS.map((opt) => (
                 <TouchableOpacity
@@ -111,8 +111,8 @@ export default function SettingsScreen() {
           </View>
 
           {/* Language */}
-          <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>{t.language}</Text>
+          <View style={styles.settingBlock}>
+            <Text style={[styles.settingLabel, { color: theme.text, marginBottom: 10 }]}>{t.language}</Text>
             <View style={styles.langRow}>
               {LANGUAGE_OPTIONS.map((opt) => (
                 <TouchableOpacity
@@ -321,22 +321,23 @@ const styles = StyleSheet.create({
 
   // Settings rows
   settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  settingBlock: { marginBottom: 18 },
   settingLabel: { fontSize: 14, fontWeight: '600' },
   settingValue: { fontSize: 16, fontWeight: '800' },
 
   // Theme toggle
-  themeToggle: { flexDirection: 'row', gap: 6 },
-  themeChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, minHeight: 44 },
+  themeToggle: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  themeChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   themeChipText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
 
   // Language chips
   langRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  langChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: 1, minHeight: 44 },
+  langChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   langText: { fontSize: 13, fontWeight: '600' },
 
   // Threshold chips
-  thresholdRow: { flexDirection: 'row', gap: 6, marginBottom: 16 },
-  thresholdChip: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8, minHeight: 44 },
+  thresholdRow: { flexDirection: 'row', gap: 6, marginBottom: 16, flexWrap: 'wrap' },
+  thresholdChip: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8, minHeight: 44, minWidth: 60, alignItems: 'center', justifyContent: 'center' },
   thresholdText: { fontSize: 12, fontWeight: '700' },
 
   // Toggle rows

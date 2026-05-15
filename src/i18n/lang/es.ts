@@ -21,6 +21,8 @@ export const es: Translations = {
   micPermissionRequired: 'Se requiere permiso del micrófono para la monitorización acústica. Conceda acceso en la configuración del dispositivo.',
   openSettings: 'Abrir ajustes',
   grantAccess: 'Conceder acceso',
+  locationUnavailable: 'Ubicación no disponible',
+  locationUnavailableHint: 'Inicia el escaneo para activar el GPS, o concede el permiso de ubicación en Ajustes.',
 
   criticalThreat: 'Señal fuerte',
   highThreat: 'Señal moderada',

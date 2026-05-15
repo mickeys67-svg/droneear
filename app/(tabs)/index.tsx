@@ -157,17 +157,20 @@ function HomeScreenInner() {
       )}
 
       {/* Tracking Overlay — shown when a track is selected */}
-      {!micPermissionBlocked && !isLoading && !(isError && !isScanning) && trackedDetection && trackedTrack && (
-        <TrackingOverlay
-          trackId={trackedTrack.id}
-          droneName={trackedDetection.similarDrones?.[0]?.name || trackedDetection.threatCategory.replace('_', ' ')}
-          category={trackedDetection.threatCategory.replace('_', ' ')}
-          distance={trackedDetection.distanceMeters}
-          bearing={trackedDetection.bearingDegrees}
-          confidence={trackedDetection.confidence}
-          onClose={() => selectTrack(null)}
-        />
-      )}
+      {!micPermissionBlocked && !isLoading && !(isError && !isScanning) && trackedDetection && trackedTrack && (() => {
+        const categoryLabel = (trackedDetection.threatCategory ?? 'UNKNOWN').replace('_', ' ');
+        return (
+          <TrackingOverlay
+            trackId={trackedTrack.id}
+            droneName={trackedDetection.similarDrones?.[0]?.name || categoryLabel}
+            category={categoryLabel}
+            distance={trackedDetection.distanceMeters ?? 0}
+            bearing={trackedDetection.bearingDegrees ?? 0}
+            confidence={trackedDetection.confidence ?? 0}
+            onClose={() => selectTrack(null)}
+          />
+        );
+      })()}
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 

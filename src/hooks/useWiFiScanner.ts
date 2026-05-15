@@ -35,10 +35,12 @@ export function useWiFiScanner() {
     const scanner = scannerRef.current;
     if (!scanner) return;
 
+    let mounted = true;
     scanner.isAvailable().then((available) => {
-      setWifiAvailable(available);
-    }).catch(() => {
-      setWifiAvailable(false);
+      if (mounted) setWifiAvailable(available);
+    }).catch((e) => {
+      console.warn('[WiFi] isAvailable failed:', e);
+      if (mounted) setWifiAvailable(false);
     });
 
     // Wire discovery callback — use getState() for stable reference
@@ -47,7 +49,8 @@ export function useWiFiScanner() {
     });
 
     return () => {
-      scanner.stopScanning().catch(() => {});
+      mounted = false;
+      scanner.stopScanning().catch((e) => console.warn('[WiFi] stop on unmount failed:', e));
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

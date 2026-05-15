@@ -74,20 +74,22 @@ export class HybridEngine {
     this.setStatus('READY');
   }
 
-  private _lock: Promise<void> | null = null;
+  // Pre-resolved so the very first predict() call doesn't race a `null` lock
+  // with a second concurrent predict() before the first one assigns its own
+  // Promise. Always overwritten on each call.
+  private _lock: Promise<void> = Promise.resolve();
 
   async predict(melFrames: Float32Array[]): Promise<Map<ThreatCategory, number>> {
     if (this.currentModelStatus !== 'READY' && this.currentModelStatus !== 'INFERENCE') {
       throw new Error(`HybridEngine not ready. Status: ${this.currentModelStatus}`);
     }
 
-    // Wait for any in-flight inference to complete before proceeding
-    if (this._lock) {
-      await this._lock;
-    }
-
-    let resolve: () => void;
+    // Snapshot the current lock and install our own before awaiting, so a
+    // sibling call sees our pending Promise instead of the already-resolved one.
+    const prev = this._lock;
+    let resolve: () => void = () => {};
     this._lock = new Promise<void>((r) => { resolve = r; });
+    await prev;
     this.setStatus('INFERENCE');
 
     try {
@@ -112,8 +114,7 @@ export class HybridEngine {
 
       return fused;
     } finally {
-      this._lock = null;
-      resolve!();
+      resolve();
       this.setStatus('READY');
     }
   }

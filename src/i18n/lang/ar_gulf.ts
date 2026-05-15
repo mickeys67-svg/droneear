@@ -22,6 +22,8 @@ export const ar_gulf: Translations = {
   micPermissionRequired: 'نحتاج إذن المايكروفون عشان نراقب الأصوات. افتح الإعدادات واعطنا الإذن.',
   openSettings: 'افتح الإعدادات',
   grantAccess: 'اعطِ الإذن',
+  locationUnavailable: 'الموقع ما متوفر',
+  locationUnavailableHint: 'ابدأ المسح عشان تفعّل GPS، أو سمح بإذن الموقع من الإعدادات.',
 
   criticalThreat: 'إشارة قوية',
   highThreat: 'إشارة متوسطة',

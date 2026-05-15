@@ -16,7 +16,7 @@
 import React, { useState, useRef } from 'react';
 import {
   StyleSheet, Text, View, TouchableOpacity, SafeAreaView,
-  FlatList, Alert, Platform, Linking,
+  FlatList, Alert, Platform, Linking, ScrollView,
   useWindowDimensions,
 } from 'react-native';
 import { Audio } from 'expo-av';
@@ -125,7 +125,12 @@ export default function OnboardingScreen() {
 
   const renderStep = ({ item }: { item: OnboardingStep }) => {
     return (
-      <View style={[styles.stepContainer, { width: SCREEN_WIDTH }]}>
+      <ScrollView
+        style={{ width: SCREEN_WIDTH }}
+        contentContainerStyle={styles.stepContainer}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         {item.key === 'welcome' && (
           <View style={styles.stepContent}>
             <Text style={[styles.brand, { color: theme.primary }]}>
@@ -357,7 +362,7 @@ export default function OnboardingScreen() {
             <Text style={[styles.stepIndicatorText, { color: theme.textMuted }]}>{t.stepOf?.(6, 6) || 'Step 6 of 6'}</Text>
           </View>
         )}
-      </View>
+      </ScrollView>
     );
   };
 
@@ -408,8 +413,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   skipBtn: { position: 'absolute', top: 60, right: 20, zIndex: 10, padding: 8 },
   skipText: { fontSize: 13, fontWeight: '700', letterSpacing: 0.8 },
-  stepContainer: { flex: 1, justifyContent: 'center', paddingHorizontal: 30 },
-  stepContent: { alignItems: 'center' },
+  stepContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 30, paddingVertical: 32, paddingBottom: 80 },
+  stepContent: { alignItems: 'center', width: '100%' },
 
   // Brand
   brand: { fontSize: 20, fontWeight: '800', letterSpacing: 1, marginBottom: 16 },

@@ -24,6 +24,7 @@ import { Alert, AppState, type AppStateStatus } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Battery from 'expo-battery';
 import * as Location from 'expo-location';
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 
 export function useThreatDetector() {
   const detectorRef = useRef<ThreatDetector | null>(null);
@@ -204,6 +205,11 @@ export function useThreatDetector() {
         console.error(`[DroneMonitor] Recording error: ${error}`);
         sensorMgr.setRecordingState(false, error);
       },
+      onRecordingRecovered: () => {
+        // Clear stale UNAVAILABLE state so the "Recording stopped unexpectedly"
+        // issue disappears from the warning panel once capture restarts.
+        sensorMgr.setRecordingState(true);
+      },
     });
 
     detectorRef.current = detector;
@@ -251,18 +257,18 @@ export function useThreatDetector() {
           if (statusIntervalRef.current) { clearInterval(statusIntervalRef.current); statusIntervalRef.current = null; }
           if (envVoiceIntervalRef.current) { clearInterval(envVoiceIntervalRef.current); envVoiceIntervalRef.current = null; }
           // Pause BLE + WiFi scans to prevent background battery drain
-          stopBLE().catch(() => {});
-          stopWiFi().catch(() => {});
+          stopBLE().catch((e) => console.warn('[BLE] background stop failed:', e));
+          stopWiFi().catch((e) => console.warn('[WiFi] background stop failed:', e));
         }
       } else if (nextState === 'active' && wasScanningRef.current) {
         // Resuming from background — restart intervals + BLE/WiFi scans
         wasScanningRef.current = false;
         // Resume BLE + WiFi scans
         if (useSettingsStore.getState().bleScanEnabled) {
-          startBLE().catch(() => {});
+          startBLE().catch((e) => console.warn('[BLE] foreground resume failed:', e));
         }
         if (wifiAvailable) {
-          startWiFi().catch(() => {});
+          startWiFi().catch((e) => console.warn('[WiFi] foreground resume failed:', e));
         }
         if (!batteryIntervalRef.current) {
           batteryIntervalRef.current = setInterval(async () => {
@@ -335,9 +341,33 @@ export function useThreatDetector() {
   const isScanningRef = useRef(isScanning);
   useEffect(() => { isScanningRef.current = isScanning; }, [isScanning]);
 
+  // Synchronous mutex flipped before any async work so a second startScanning
+  // call (e.g. rapid double-tap of the scan button) can't slip past the guard
+  // while the first call is still awaiting permissions/battery/etc.
+  const scanStartingRef = useRef(false);
+
   const startScanning = useCallback(async () => {
-    if (isScanningRef.current || !isInitializedRef.current) return;
+    if (isScanningRef.current || scanStartingRef.current || !isInitializedRef.current) return;
     if (!detectorRef.current) return;
+    scanStartingRef.current = true;
+
+    try {
+    // Configure iOS/Android audio session so recording survives system sounds,
+    // notifications, and brief background transitions. Without this the
+    // AVAudioSession defaults to "ambient" and any interruption silently drops
+    // capture — the watchdog then fires "Recording stopped unexpectedly".
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        shouldDuckAndroid: false,
+      });
+    } catch (err) {
+      console.warn('[ThreatDetector] setAudioModeAsync failed:', err);
+    }
 
     const battLevel = await Battery.getBatteryLevelAsync();
     const battPercent = Math.round(battLevel * 100);
@@ -488,6 +518,9 @@ export function useThreatDetector() {
       const active = threats.filter((t) => t.isActive).length;
       voiceRef.current.announceStatus(active);
     }, 30000);
+    } finally {
+      scanStartingRef.current = false;
+    }
   }, [profile, bleScanEnabled, bleAvailable, startBLE, wifiAvailable, startWiFi]);
 
   const stopScanning = useCallback(async () => {
@@ -502,8 +535,8 @@ export function useThreatDetector() {
     envDetectorRef.current.stop();
 
     // Stop BLE + WiFi scanning
-    await stopBLE();
-    await stopWiFi().catch(() => {});
+    await stopBLE().catch((e) => console.warn('[BLE] stopScanning failed:', e));
+    await stopWiFi().catch((e) => console.warn('[WiFi] stopScanning failed:', e));
     sensorMgrRef.current.setBLEState(bleAvailable, false);
 
     // Stop location watch

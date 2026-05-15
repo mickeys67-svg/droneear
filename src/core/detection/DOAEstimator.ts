@@ -79,7 +79,12 @@ export class DOAEstimator {
    * @returns Absolute bearing (0-360)
    */
   toAbsoluteBearing(relativeBearing: number, compassHeading: number): number {
-    return ((compassHeading + relativeBearing) % 360 + 360) % 360;
+    // Guard against NaN/Infinity from a stale or unavailable compass — if
+    // upstream feeds garbage we'd otherwise emit a non-finite bearing into
+    // the detection pipeline, corrupting tracks and radar positions.
+    const safeRelative = Number.isFinite(relativeBearing) ? relativeBearing : 0;
+    const safeHeading = Number.isFinite(compassHeading) ? compassHeading : 0;
+    return ((safeHeading + safeRelative) % 360 + 360) % 360;
   }
 
   /**

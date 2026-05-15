@@ -202,7 +202,12 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
 
   setFeedbackPending: (pending, detectionId = null) => set({ feedbackPending: pending, feedbackDetectionId: detectionId }),
 
-  setFusedDetections: (detections) => set({ fusedDetections: detections }),
+  // Cap fusedDetections to avoid unbounded growth on long sessions — each
+  // detection carries a 128-bin spectralSignature Float array, so multi-hour
+  // scanning otherwise climbs to tens of MB of retained memory.
+  setFusedDetections: (detections) => set({
+    fusedDetections: detections.length > 500 ? detections.slice(-500) : detections,
+  }),
 
   setBLEScanActive: (active) => set({ bleScanActive: active }),
 

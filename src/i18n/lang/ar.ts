@@ -22,6 +22,8 @@ export const ar: Translations = {
   micPermissionRequired: 'يلزم إذن الميكروفون للمراقبة الصوتية. امنح الوصول من إعدادات الجهاز.',
   openSettings: 'فتح الإعدادات',
   grantAccess: 'منح الوصول',
+  locationUnavailable: 'الموقع غير متاح',
+  locationUnavailableHint: 'ابدأ المسح لتفعيل GPS، أو امنح إذن الموقع في الإعدادات.',
 
   criticalThreat: 'إشارة قوية',
   highThreat: 'إشارة متوسطة',

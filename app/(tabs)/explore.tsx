@@ -165,9 +165,14 @@ const RangeRow: React.FC<{ label: string; value: string; color: string; theme: T
   color,
   theme,
 }) => (
+  // Stacked column layout — label sits on top, the highlighted range badge sits
+  // beneath it right-aligned. Previously this was a single row with label +
+  // value side-by-side, which fit fine in Korean ("멀티로터 (소형 드론)") but
+  // overflowed for English/German labels ("Multirotor (small drone): 50~200m"
+  // wrapping to 2 lines) — the value then got pushed past the viewport edge.
   <View style={styles.rangeRow}>
     <Text style={[styles.rangeLabel, { color: theme.textDim }]}>{label}</Text>
-    <Text style={[styles.rangeValue, { color }]}>{value}</Text>
+    <Text style={[styles.rangeValue, { color }]} numberOfLines={1}>{value}</Text>
   </View>
 );
 
@@ -210,16 +215,21 @@ const styles = StyleSheet.create({
   rangeDesc: { fontSize: 13, lineHeight: 20, marginBottom: 14 },
   rangeTable: { gap: 2 },
   rangeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'stretch',
     paddingVertical: 10,
     paddingHorizontal: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderRadius: 8,
+    gap: 4,
   },
   rangeLabel: { fontSize: 13, fontWeight: '600' },
-  rangeValue: { fontSize: 14, fontWeight: '800', fontVariant: ['tabular-nums'] },
+  rangeValue: {
+    fontSize: 14,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+    textAlign: 'right',
+  },
   rangeNote: { fontSize: 11, fontStyle: 'italic', marginTop: 10, textAlign: 'center' },
 
   // Limits

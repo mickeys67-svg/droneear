@@ -80,18 +80,28 @@ export const useHistoryStore = create<HistoryState>()(
         const now = Date.now();
         const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        // Index buckets by absolute date (YYYY-MM-DD), not day-of-week label.
+        // Previously, looking at stats on a Sunday produced two 'Sun' keys —
+        // 7 days ago and today — and the more recent one overwrote the other,
+        // double-counting that day's detections.
+        const DAY_MS = 24 * 60 * 60 * 1000;
+        const dateKey = (d: Date) =>
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const order: { key: string; label: string }[] = [];
         const counts: Record<string, number> = {};
         for (let i = 6; i >= 0; i--) {
-          const d = new Date(now - i * 24 * 60 * 60 * 1000);
-          counts[dayNames[d.getDay()]] = 0;
+          const d = new Date(now - i * DAY_MS);
+          const key = dateKey(d);
+          counts[key] = 0;
+          order.push({ key, label: dayNames[d.getDay()] });
         }
         for (const det of dets) {
           if (det.timestamp >= weekAgo) {
-            const day = dayNames[new Date(det.timestamp).getDay()];
-            if (day in counts) counts[day]++;
+            const key = dateKey(new Date(det.timestamp));
+            if (key in counts) counts[key]++;
           }
         }
-        return Object.entries(counts).map(([day, count]) => ({ day, count }));
+        return order.map(({ key, label }) => ({ day: label, count: counts[key] }));
       },
     }),
     {

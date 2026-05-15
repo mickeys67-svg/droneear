@@ -1,3 +1,123 @@
+# DroneEar Changelog
+
+---
+
+## v2.1.1 — Stability & i18n layout fixes (2026-05-15)
+
+### Listen screen
+- Eliminated full-screen flicker during listening. SensorEnforcementManager now
+  short-circuits when mic quality / recording state hasn't actually changed, so
+  the warning panel no longer re-creates its issue array (and re-fires the
+  escalating haptic alarm) on every audio frame.
+- Tactical radar sweep was a 90° pie-slice that users misread as a "detected
+  sector" even with zero tracks. Replaced with a thin radial line rotating
+  around the center (transformOrigin 50% 100%).
+- MicQualityPanel SNR display is now snapped to an integer to stop the per-frame
+  jitter between e.g. 2.5 ↔ 2.7 dB.
+- React.memo wrappers removed from SensorIssuesPanel / MicQualityPanel —
+  earlier they would render with stale theme/locale after a DAY↔NIGHT or
+  language switch (memo bypasses internal hook updates).
+
+### Recording & audio session
+- Auto-recovery after a watchdog stall now notifies
+  SensorEnforcementManager (new `onRecordingRecovered` callback). The
+  "Recording stopped unexpectedly" warning no longer stays pinned in the
+  panel after capture restarts.
+- iOS Audio Session is now explicitly configured on every `startScanning`:
+  `allowsRecordingIOS`, `playsInSilentModeIOS`, `staysActiveInBackground`,
+  `interruptionModeIOS: DoNotMix`. System sounds, brief backgrounding, and
+  notifications no longer silently drop capture.
+- AudioCapture listener race fixed: stale data callbacks short-circuit via
+  handler-identity check; stop() flips `isRecording` before touching the
+  listener so in-flight frames bail safely.
+- Rapid double-tap of the scan button can no longer launch two parallel
+  startScanning flows (sync `scanStartingRef` mutex + body-wide try/finally).
+
+### Settings / Explore / History / Onboarding
+- Settings: theme/language/threshold chip rows rewritten as stacked blocks
+  with `flexWrap: 'wrap'`. AMOLED / Deutsch / 95% chips no longer clip on
+  smaller screens or in long-locale builds.
+- Explore: range-by-pattern card converted to a column layout (label on top,
+  value badge underneath, right-aligned) so longer English/German labels
+  no longer push the "~3km+" badge off the viewport.
+- History: filter pill row gets fixed height + minWidth + trailing
+  paddingRight so the last severity pill is always fully scrollable.
+- Onboarding: each step is wrapped in a vertical ScrollView with
+  flexGrow + paddingBottom; the CONTINUE button on the BLE Detection step
+  no longer gets clipped under the page-indicator dots.
+
+### Map
+- Dedicated empty state when GPS is unavailable / denied: a glass card with
+  "Location unavailable" and a one-tap "OPEN SETTINGS" button
+  (`Linking.openSettings()`). Previously the user saw a blank map view with
+  no path to fix the underlying permission.
+- `useMapData` guards against NaN/Infinity in user position and
+  bearing/distance; non-finite values no longer silently disappear from
+  react-native-maps.
+
+### Core algorithms
+- HybridEngine concurrency: replaced the nullable `_lock` with a
+  pre-resolved Promise and switched to "snapshot prev → install own →
+  await prev" pattern so concurrent `predict()` calls form a proper FIFO
+  chain even from a cold start.
+- DOAEstimator guards against NaN/Infinity in compass heading or relative
+  bearing, preventing non-finite values from poisoning detection tracks
+  and radar marker positions.
+- EnvironmentDetector no longer reports INDOOR when the mic feed is
+  identically silent (avgRms = 0, variance = 0); a muted / blocked mic
+  now scores neutral so the verdict falls back to GPS + barometer.
+- detectionStore caps `fusedDetections` at 500 entries (each carries a
+  128-bin spectralSignature Float array — multi-hour sessions could
+  otherwise climb into tens of MB of retained memory).
+
+### BLE / Wi-Fi
+- RealBLEAdapter only flips its `scanning` flag *after*
+  `startDeviceScan()` returns without throwing; a synchronous failure no
+  longer leaves the flag stuck on and a later stopScan() calling
+  `stopDeviceScan()` on a scan that never started.
+- useBLEScanner / useWiFiScanner now use a mounted flag, so the
+  `isAvailable().then(...)` continuation can't setState on an unmounted
+  hook.
+
+### Voice alerts
+- VoiceAlertManager queue is bounded even on the CRITICAL-priority path
+  so a storm of critical detections can't grow it without bound.
+
+### Persistence
+- `settingsStore` persist gets `version: 1` plus a `migrate` function so
+  future schema bumps can move user data safely; a corrupted payload
+  also falls back to defaults instead of crashing on hydrate.
+
+### Internationalization
+- New `locationUnavailable` / `locationUnavailableHint` strings added to
+  the `Translations` interface and to all 15 locale files
+  (KO, EN, UK, AR, AR_GULF, HE, HI, UR, TL, DE, ES, FR, IT, ZH, JA).
+- expo-location / expo-sensors plugin permission messages aligned with
+  the corresponding infoPlist strings so users never see two different
+  permission rationales for the same capability.
+
+### Routing / providers
+- Explicit `SafeAreaProvider` wrap added to the root layout so child
+  screens using `useSafeAreaInsets` work correctly on notched devices.
+
+### Dev infra
+- New `src/utils/logger.ts` with `__DEV__`-gated log/warn (errors always
+  emit). New code can adopt it incrementally; existing `console.*` left
+  in place to avoid a 45-site sweep landing in this release.
+- Silent `.catch(() => {})` blocks in BLE / Wi-Fi lifecycle replaced
+  with `console.warn(...)` so production logs surface real failures.
+- expo SDK patch updates: expo 54.0.33 → 54.0.34, expo-dev-client
+  6.0.20 → 6.0.21, expo-file-system 19.0.21 → 19.0.22, expo-linking
+  8.0.11 → 8.0.12, expo-web-browser 15.0.10 → 15.0.11.
+
+### Verification
+- `tsc --noEmit`: 0 errors.
+- `jest`: 13 suites / 155 tests all passing.
+- `expo lint`: 0 errors (only opt-in style warnings remain).
+- `expo-doctor`: dependencies up to date.
+
+---
+
 # DroneEar v1.0 — Development Summary
 
 **Date:** 2026-03-21

@@ -21,6 +21,8 @@ export const he: Translations = {
   micPermissionRequired: 'נדרשת הרשאת מיקרופון לניטור אקוסטי. אנא אשר גישה בהגדרות המכשיר.',
   openSettings: 'פתח הגדרות',
   grantAccess: 'אשר גישה',
+  locationUnavailable: 'המיקום אינו זמין',
+  locationUnavailableHint: 'התחל סריקה כדי להפעיל GPS, או אפשר הרשאת מיקום בהגדרות.',
 
   criticalThreat: 'אות חזק',
   highThreat: 'אות בינוני',

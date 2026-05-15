@@ -53,6 +53,14 @@ export function SensorIssuesPanel({ issues }: SensorIssuesPanelProps) {
   );
 }
 
+// NOTE: previously wrapped in React.memo with a custom comparator to avoid
+// per-frame re-renders. Removed because the memo bypasses internal hook
+// updates — useTheme/useTranslation changes (DAY ↔ NIGHT, locale switch)
+// would leave the panel rendering with the previous theme/language. The
+// real flicker root cause was new issues array refs every audio frame,
+// now fixed in SensorEnforcementManager.setMicQuality/setRecordingState
+// early-return guards; React reconciliation is cheap when issues are stable.
+
 const styles = StyleSheet.create({
   container: { marginBottom: 14, gap: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 0.5, borderBottomColor: GLASS.borderSubtle, minHeight: 44 },

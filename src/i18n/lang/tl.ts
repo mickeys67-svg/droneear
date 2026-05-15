@@ -21,6 +21,8 @@ export const tl: Translations = {
   micPermissionRequired: 'Kailangan ang microphone permission para sa acoustic monitoring. Buksan ang device settings para bigyan ng access.',
   openSettings: 'Buksan ang Settings',
   grantAccess: 'Bigyan ng Access',
+  locationUnavailable: 'Hindi available ang lokasyon',
+  locationUnavailableHint: 'Simulan ang pag-scan para i-enable ang GPS, o pahintulutan ang location sa Settings.',
 
   criticalThreat: 'Malakas na Signal',
   highThreat: 'Katamtamang Signal',

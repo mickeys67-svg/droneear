@@ -21,6 +21,8 @@ export const ur: Translations = {
   micPermissionRequired: 'صوتی نگرانی کے لیے مائیکروفون کی اجازت ضروری ہے۔ براہ کرم ڈیوائس سیٹنگز سے رسائی دیں۔',
   openSettings: 'سیٹنگز کھولیں',
   grantAccess: 'رسائی دیں',
+  locationUnavailable: 'مقام دستیاب نہیں',
+  locationUnavailableHint: 'GPS فعال کرنے کے لیے اسکیننگ شروع کریں، یا سیٹنگز میں مقام کی اجازت دیں۔',
 
   criticalThreat: 'مضبوط سگنل',
   highThreat: 'درمیانی سگنل',

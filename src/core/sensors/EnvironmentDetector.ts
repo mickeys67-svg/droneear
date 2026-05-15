@@ -273,8 +273,15 @@ export class EnvironmentDetector {
 
       this.state.ambientNoiseLevel = avgRms;
 
-      // Dead quiet with no variation = likely indoor
-      if (avgRms < AMBIENT_INDOOR_MAX && variance < 0.000001) {
+      // Identically-zero RMS for the whole window suggests the mic is muted /
+      // offline / blocked rather than a quiet indoor environment. Don't treat
+      // that as an "indoor" signal — fall back to neutral so the overall
+      // verdict comes from GPS/barometer instead.
+      const allZero = avgRms === 0 && variance === 0;
+      if (allZero) {
+        audioScore = 0.5;
+      } else if (avgRms < AMBIENT_INDOOR_MAX && variance < 0.000001) {
+        // Dead quiet with no variation = likely indoor
         audioScore = 0.1;
       } else if (avgRms > AMBIENT_OUTDOOR_MIN) {
         // Some ambient noise with variation = likely outdoor

@@ -63,6 +63,7 @@ const AnimatedBar = memo<{
     && prev.colorMid === next.colorMid
     && prev.colorHigh === next.colorHigh;
 });
+AnimatedBar.displayName = 'AnimatedBar';
 
 export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
   spectralData,
@@ -124,6 +125,7 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
     </View>
   );
 });
+TacticalSpectrogram.displayName = 'TacticalSpectrogram';
 
 const styles = StyleSheet.create({
   container: {

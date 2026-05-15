@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, Linking } from 'react-native';
 import Animated, { SlideInDown, FadeOut } from 'react-native-reanimated';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
@@ -86,7 +86,31 @@ export default function MapScreen() {
       </View>
 
       {/* Map or empty state */}
-      {markers.length === 0 && userLocation ? (
+      {!userLocation ? (
+        // GPS unavailable — clearly tell the user *why* the map is empty and
+        // give them a one-tap path to fix it instead of just a vague banner.
+        // Previously this fell through to DroneMapView which rendered a bare
+        // "location not available" string with no recovery action.
+        <View style={styles.gpsEmptyContainer}>
+          <Text style={styles.emptyIcon}>📍</Text>
+          <Text style={[styles.emptyText, { color: theme.text, textAlign: 'center' }]}>
+            {t.locationUnavailable || 'Location unavailable'}
+          </Text>
+          <Text style={[styles.emptySubText, { color: theme.textDim, textAlign: 'center', marginBottom: 20 }]}>
+            {t.locationUnavailableHint || 'Start scanning to enable GPS, or grant location permission in Settings.'}
+          </Text>
+          <TouchableOpacity
+            style={[styles.trackBtn, { backgroundColor: theme.primary, alignSelf: 'stretch' }, primaryGlow(theme.primary, 10)]}
+            onPress={() => Linking.openSettings()}
+            accessibilityRole="button"
+            accessibilityLabel={t.openSettings || 'Open Settings'}
+          >
+            <Text style={[styles.trackBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>
+              {t.openSettings || 'OPEN SETTINGS'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : markers.length === 0 ? (
         <View style={styles.emptyOverlay}>
           <DroneMapView
             userLocation={userLocation}
@@ -332,6 +356,12 @@ const styles = StyleSheet.create({
   emptyOverlay: {
     flex: 1,
     position: 'relative',
+  },
+  gpsEmptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
   },
   emptyBanner: {
     position: 'absolute',

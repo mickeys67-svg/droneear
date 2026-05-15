@@ -18,6 +18,19 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Build artifacts
+*.ipa
+*.apk
+*.aab
+
+# Local AI/agent tooling settings
+.claude/
+
+# Secrets (Google Play service account, Apple API keys, etc.)
+google-play-key.json
+google-service-account*.json
+AuthKey_*.p8
+
 # Metro
 .metro-health-check*
 

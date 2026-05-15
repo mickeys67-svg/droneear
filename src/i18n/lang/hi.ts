@@ -21,6 +21,8 @@ export const hi: Translations = {
   micPermissionRequired: 'ध्वनि निगरानी के लिए माइक्रोफ़ोन की अनुमति आवश्यक है। कृपया डिवाइस सेटिंग्स से एक्सेस दें।',
   openSettings: 'सेटिंग्स खोलें',
   grantAccess: 'एक्सेस दें',
+  locationUnavailable: 'स्थान उपलब्ध नहीं है',
+  locationUnavailableHint: 'GPS सक्षम करने के लिए स्कैनिंग शुरू करें, या सेटिंग्स में स्थान अनुमति दें।',
 
   criticalThreat: 'प्रबल संकेत',
   highThreat: 'मध्यम संकेत',

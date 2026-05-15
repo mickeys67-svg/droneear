@@ -221,15 +221,17 @@ export class VoiceAlertManager {
   // ===== Queue System =====
 
   private enqueue(item: QueuedAnnouncement): void {
-    // CRITICAL alerts jump the queue
+    const MAX_QUEUE = 5;
+    // CRITICAL alerts jump the queue — but still cap the queue so a storm
+    // of CRITICAL detections can't grow it without bound.
     if (item.priority === 0) {
       Speech.stop();
       this.isSpeaking = false;
-      this.queue = [item, ...this.queue];
+      this.queue = [item, ...this.queue].slice(0, MAX_QUEUE);
     } else {
       // Keep queue bounded — check before push, not after
-      if (this.queue.length >= 5) {
-        this.queue = this.queue.slice(0, 4);
+      if (this.queue.length >= MAX_QUEUE) {
+        this.queue = this.queue.slice(0, MAX_QUEUE - 1);
       }
       this.queue.push(item);
       // Sort by priority

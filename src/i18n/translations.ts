@@ -40,6 +40,9 @@ export interface Translations {
   micPermissionRequired: string;
   openSettings: string;
   grantAccess: string;
+  // Map screen — shown when GPS is unavailable or denied
+  locationUnavailable?: string;
+  locationUnavailableHint?: string;
 
   // Signal Levels
   criticalThreat: string;
@@ -395,6 +398,8 @@ const ko: Translations = {
   micPermissionRequired: '음향 모니터링을 위해 마이크 권한이 필요합니다. 기기 설정에서 접근을 허용해 주세요.',
   openSettings: '설정 열기',
   grantAccess: '권한 허용',
+  locationUnavailable: '위치 정보를 사용할 수 없습니다',
+  locationUnavailableHint: '청취를 시작하면 GPS가 활성화되거나, 설정에서 위치 권한을 허용해 주세요.',
 
   // Signal Levels
   criticalThreat: '강한 신호',
@@ -748,6 +753,8 @@ const en: Translations = {
   micPermissionRequired: 'Microphone permission is required for acoustic monitoring. Grant access in device settings.',
   openSettings: 'Open Settings',
   grantAccess: 'Grant Access',
+  locationUnavailable: 'Location unavailable',
+  locationUnavailableHint: 'Start scanning to enable GPS, or grant location permission in Settings.',
 
   criticalThreat: 'STRONG SIGNAL',
   highThreat: 'MODERATE SIGNAL',
@@ -1084,6 +1091,8 @@ const uk: Translations = {
   micPermissionRequired: 'Для акустичного моніторингу потрібен доступ до мікрофона. Надайте доступ у налаштуваннях.',
   openSettings: 'Налаштування',
   grantAccess: 'Надати доступ',
+  locationUnavailable: 'Місцезнаходження недоступне',
+  locationUnavailableHint: 'Розпочніть прослуховування для активації GPS або надайте дозвіл на місцезнаходження в Налаштуваннях.',
 
   criticalThreat: 'СИЛЬНИЙ СИГНАЛ',
   highThreat: 'ПОМІРНИЙ СИГНАЛ',

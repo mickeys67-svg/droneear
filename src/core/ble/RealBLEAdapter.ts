@@ -81,25 +81,35 @@ export class RealBLEAdapter implements BLEAdapter {
 
   async startScan(onDevice: (device: BLEAdapterDevice) => void): Promise<void> {
     if (this.scanning) return;
-    this.scanning = true;
 
-    // Scan for ODID service UUID
-    this.manager.startDeviceScan(
-      [ODID_SERVICE_UUID],
-      { allowDuplicates: true },
-      (error, device) => {
-        if (error) {
-          console.warn('[RealBLEAdapter] Scan error:', error.message);
-          return;
-        }
-        if (!device) return;
+    // Only flip the scanning flag after startDeviceScan returns without
+    // throwing. Previously we set scanning=true first, so a synchronous throw
+    // (e.g. BLE briefly unavailable) left the flag stuck on and a later
+    // stopScan() would call stopDeviceScan() on a scan that never started —
+    // undefined behaviour in react-native-ble-plx.
+    try {
+      this.manager.startDeviceScan(
+        [ODID_SERVICE_UUID],
+        { allowDuplicates: true },
+        (error, device) => {
+          if (error) {
+            console.warn('[RealBLEAdapter] Scan error:', error.message);
+            return;
+          }
+          if (!device) return;
 
-        const adapted = this.adaptDevice(device);
-        if (adapted) {
-          onDevice(adapted);
-        }
-      },
-    );
+          const adapted = this.adaptDevice(device);
+          if (adapted) {
+            onDevice(adapted);
+          }
+        },
+      );
+      this.scanning = true;
+    } catch (err) {
+      console.warn('[RealBLEAdapter] startDeviceScan failed:', err);
+      this.scanning = false;
+      throw err;
+    }
   }
 
   async stopScan(): Promise<void> {

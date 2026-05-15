@@ -21,6 +21,8 @@ export const ja: Translations = {
   micPermissionRequired: '音響モニタリングにはマイクの許可が必要です。デバイス設定からアクセスを許可してください。',
   openSettings: '設定を開く',
   grantAccess: 'アクセスを許可',
+  locationUnavailable: '位置情報が利用できません',
+  locationUnavailableHint: 'スキャンを開始してGPSを有効にするか、設定で位置情報の許可を付与してください。',
 
   criticalThreat: '強い信号',
   highThreat: '中程度の信号',

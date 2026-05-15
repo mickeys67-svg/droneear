@@ -8,8 +8,7 @@
 
 import { useMemo } from 'react';
 import { useDetectionStore } from '../stores/detectionStore';
-import type { FusedDetection } from '../core/detection/DetectionFusionEngine';
-import type { RemoteIDData, ThreatTrack, DetectionResult } from '../types';
+import type { RemoteIDData, DetectionResult } from '../types';
 
 export type MarkerType = 'acoustic' | 'ble' | 'wifi' | 'fused' | 'operator';
 
@@ -91,13 +90,18 @@ export function useMapData() {
     );
 
     // 1. Acoustic tracks → radius circles (only unfused, not hidden)
-    if (userLocation) {
+    // Guard against NaN/Infinity from a brief GPS glitch — feeding non-finite
+    // coords into offsetPosition produces NaN lat/lon markers that silently
+    // disappear from react-native-maps with no error.
+    if (userLocation && Number.isFinite(userLocation.latitude) && Number.isFinite(userLocation.longitude)) {
       for (const track of currentThreats) {
         if (!track.isActive || track.detections.length === 0) continue;
         if (fusedTrackIds.has(track.id)) continue;
         if (hiddenTrackIds.includes(track.id)) continue;
 
         const last = track.detections[track.detections.length - 1];
+        if (!Number.isFinite(last.bearingDegrees) || !Number.isFinite(last.distanceMeters)) continue;
+
         const pos = offsetPosition(
           userLocation.latitude, userLocation.longitude,
           last.bearingDegrees, last.distanceMeters,

@@ -21,6 +21,8 @@ export const fr: Translations = {
   micPermissionRequired: 'L\'autorisation du microphone est requise pour la surveillance acoustique. Accordez l\'accès dans les paramètres de l\'appareil.',
   openSettings: 'Ouvrir les paramètres',
   grantAccess: 'Accorder l\'accès',
+  locationUnavailable: 'Localisation indisponible',
+  locationUnavailableHint: 'Démarrez la numérisation pour activer le GPS, ou autorisez la localisation dans les Réglages.',
 
   criticalThreat: 'Signal fort',
   highThreat: 'Signal modéré',

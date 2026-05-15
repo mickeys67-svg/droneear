@@ -63,14 +63,11 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
     }
   }, [isActive, rotation]);
 
+  // Sweep is a thin line rooted at the radar centre that spins clockwise.
+  // The Animated.View sits at the centre (left:radius-1, top:0, w:2, h:radius)
+  // and rotates around its bottom edge — origin is the radar centre.
   const sweepStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: radius / 2 },
-      { translateY: radius / 2 },
-      { rotate: `${rotation.value}deg` },
-      { translateX: -radius / 2 },
-      { translateY: -radius / 2 },
-    ],
+    transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
   // Calculate signal positions on radar
@@ -187,17 +184,21 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
         </Text>
       ))}
 
-      {/* Sweep line */}
+      {/* Sweep line — thin radial line, not a 90° sector */}
       {isActive && (
         <Animated.View
           style={[
             styles.sweep,
             sweepStyle,
-            { width: radius, height: radius },
+            {
+              left: radius - 1,
+              top: 0,
+              width: 2,
+              height: radius,
+              backgroundColor: theme.radarSweep,
+            },
           ]}
-        >
-          <View style={[styles.sweepGlow, { backgroundColor: theme.radarSweep }]} />
-        </Animated.View>
+        />
       )}
 
       {/* Signal dots */}
@@ -292,15 +293,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     opacity: 0.5,
   },
+  // Sweep — a thin radial line that rotates around the centre.
+  // Was previously a 90° pie-slice (borderTopLeftRadius:1000 on a radius-square)
+  // which users mistook for "detected sector" even when 0 tracks were present.
   sweep: {
     position: 'absolute',
-    bottom: '50%',
-    right: '50%',
-  },
-  sweepGlow: {
-    width: '100%',
-    height: '100%',
-    borderTopLeftRadius: 1000,
+    transformOrigin: '50% 100%' as any,
+    opacity: 0.7,
   },
   threatDot: {
     position: 'absolute',
