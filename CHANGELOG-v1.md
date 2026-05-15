@@ -2,6 +2,54 @@
 
 ---
 
+## v2.1.3 — Always-on hearing pill, scrollable history, brand icon (2026-05-15)
+
+### Why this release
+Testers reported playing YouTube drone clips and seeing nothing in History,
+plus the empty History screen wouldn't even scroll. v2.1.2 surfaced the model
+output only in Debug Mode — most users never enable that. This release makes
+the listen feedback always visible and ships the new brand-aligned icon set.
+
+### Listen screen — always-on "hearing" indicator
+- A small pill under the radar status now shows `HEARING: <category> <confidence>%`
+  continuously, regardless of Debug Mode. The pipeline is no longer silent
+  when test sounds fall below the verdict threshold.
+- Wired to the same `lastRawCategory` / `lastRawConfidence` Zustand fields that
+  Debug Mode introduced in v2.1.2.
+
+### Detection sensitivity
+- Default `confidenceThreshold` lowered from **0.75 → 0.60**. Phone-speaker
+  playback of YouTube drone clips arrives at lower SPL than a real drone and
+  rarely clears 0.75; 0.60 catches those tests without flooding the log with
+  obvious false positives. Users who previously set their own threshold keep
+  their saved value (persist store untouched).
+
+### History screen
+- Empty state wrapped in a `ScrollView` so the "why is this empty?"
+  explanation + the Engage Sensors + Settings buttons remain reachable on
+  small devices and with long translations (German, Hindi, Korean).
+
+### Brand icon
+- New aero-style icon set applied across all platforms:
+  `icon.png` (iOS / default), Android adaptive layers
+  (`android-icon-foreground` + `android-icon-background` + `android-icon-monochrome`),
+  and `splash-icon.png`.
+- Alpha channel stripped from iOS `icon.png` and the Android background layer
+  (both opaque slots — Apple rejects alpha on app icons). Foreground +
+  monochrome + splash retain alpha (intentional transparency).
+- Previous icons archived to `assets/images/_backup-<timestamp>/` locally
+  (gitignored) so a rollback is one copy away if needed.
+
+### Internationalisation
+- New `hearing` string in the Translations interface and across all 15
+  locales (KO, EN, UK, AR, AR_GULF, HE, HI, UR, TL, DE, ES, FR, IT, ZH, JA).
+
+### Verification
+- `tsc --noEmit`: 0 errors.
+- `jest`: 13 suites / 155 tests all passing.
+
+---
+
 ## v2.1.2 — Debug visibility & empty-history guidance (2026-05-15)
 
 ### Why this release

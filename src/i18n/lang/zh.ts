@@ -24,6 +24,7 @@ export const zh: Translations = {
   locationUnavailable: '位置不可用',
   locationUnavailableHint: '开始扫描以启用 GPS，或在"设置"中授予位置权限。',
   emptyHistoryWhyNot: '仅记录与 DroneEar 无人机声学模型匹配的声音。日常声音(语音、音乐、掌声)会被自动作为背景过滤。请在"设置"中降低置信度阈值，或启用调试模式以查看模型正在听到什么。',
+  hearing: '正在聆听',
 
   criticalThreat: '强信号',
   highThreat: '中等信号',

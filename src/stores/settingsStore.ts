@@ -43,7 +43,11 @@ interface SettingsState extends AppSettings {
 const DEFAULT_SETTINGS: AppSettings & { locale: SupportedLocale; voiceAlert: boolean; onboardingComplete: boolean } = {
   profile: 'BALANCED',
   themeMode: 'DAY',
-  confidenceThreshold: 0.75,
+  // Lowered from 0.75 → 0.60 so phone-speaker test sounds (e.g. YouTube
+  // drone clips, which the mic picks up at lower SPL than a real drone)
+  // are more likely to clear the verdict gate. Users can still raise it
+  // in Settings if they get too many false positives.
+  confidenceThreshold: 0.60,
   alertVibration: true,
   alertSound: true,
   voiceAlert: true,

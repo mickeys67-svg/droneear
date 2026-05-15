@@ -272,6 +272,25 @@ function HomeScreenInner() {
               )}
             </View>
           )}
+
+          {/* Always-on "what the model is hearing" pill — even when the verdict
+              is below threshold or filtered as BACKGROUND. Without this the
+              app feels deaf to the user when they play test sounds; now it
+              continuously says "Heard: BACKGROUND 23%" / "MULTIROTOR 41%"
+              so it is obvious the pipeline is alive. */}
+          {isScanning && lastRawCategory && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: `${theme.primary}30`, backgroundColor: `${theme.primary}08` }}>
+              <Text style={{ fontSize: 10, color: theme.textMuted, fontWeight: '700', letterSpacing: 0.8 }}>
+                {(t.hearing || 'HEARING').toUpperCase()}:
+              </Text>
+              <Text style={{ fontSize: 11, color: theme.text, fontWeight: '700' }}>
+                {lastRawCategory.replace('_', ' ')}
+              </Text>
+              <Text style={{ fontSize: 11, color: theme.textDim, fontWeight: '600', fontVariant: ['tabular-nums'] }}>
+                {Math.round(lastRawConfidence * 100)}%
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Spectrogram */}

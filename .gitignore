@@ -23,6 +23,9 @@ expo-env.d.ts
 *.apk
 *.aab
 
+# Asset backups created during icon swaps
+assets/images/_backup-*/
+
 # Local AI/agent tooling settings
 .claude/
 

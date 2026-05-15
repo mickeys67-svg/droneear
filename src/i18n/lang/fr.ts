@@ -24,6 +24,7 @@ export const fr: Translations = {
   locationUnavailable: 'Localisation indisponible',
   locationUnavailableHint: 'Démarrez la numérisation pour activer le GPS, ou autorisez la localisation dans les Réglages.',
   emptyHistoryWhyNot: 'Seuls les sons correspondant aux modèles acoustiques de drones de DroneEar sont enregistrés. Les sons quotidiens (voix, musique, applaudissements) sont automatiquement filtrés comme arrière-plan. Réduisez le seuil de confiance dans Réglages, ou activez le Mode Débogage pour voir ce que le modèle entend.',
+  hearing: 'Entend',
 
   criticalThreat: 'Signal fort',
   highThreat: 'Signal modéré',

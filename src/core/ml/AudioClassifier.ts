@@ -37,7 +37,7 @@ const DEFAULT_CONFIG: ClassifierConfig = {
   numMelBins: 128,
   windowSizeFrames: 96,        // ~2 seconds of context at 44.1kHz
   hopSizeFrames: 48,           // 50% overlap
-  confidenceThreshold: 0.75,
+  confidenceThreshold: 0.60,
   temporalVotingWindow: 3,
 };
 

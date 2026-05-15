@@ -254,7 +254,14 @@ export default function HistoryScreen() {
 
       {/* List or Empty State */}
       {detections.length === 0 ? (
-        <View style={styles.empty}>
+        // Wrap in ScrollView — the explanation text + two CTA buttons can run
+        // taller than the viewport on small devices (especially with the
+        // German/Hindi translation), and a plain View would clip everything
+        // below the tab bar without any way to reach it.
+        <ScrollView
+          contentContainerStyle={[styles.empty, { paddingTop: 40, paddingBottom: 80 }]}
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.emptyIcon}>📋</Text>
           <Text style={[styles.emptyText, { color: theme.textMuted }]}>
             {t.noDetections}
@@ -284,7 +291,7 @@ export default function HistoryScreen() {
               <Text style={[glassStyles.btnPrimaryText, { color: theme.textDim }]}>{t.settings || 'Settings'}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       ) : filteredDetections.length === 0 ? (
         <View style={styles.empty}>
           <Text style={[styles.emptyText, { color: theme.textMuted }]}>
