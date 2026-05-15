@@ -31,6 +31,7 @@ import { categoryLabel } from '@/src/i18n/categoryLabels';
 import { EnvironmentWarningBanner } from '@/src/components/alerts/EnvironmentWarningBanner';
 import { GLASS, glassStyles } from '@/src/constants/glass';
 import { TrackingOverlay } from '@/src/components/TrackingOverlay';
+import { Toast } from '@/src/components/Toast';
 import { useDetectionStore } from '@/src/stores/detectionStore';
 
 // Extracted sub-components
@@ -176,6 +177,11 @@ function HomeScreenInner() {
           />
         );
       })()}
+
+      {/* Transient toast — auto-dismisses after a few seconds. Replaces
+          blocking Alert.alert() for low-battery / listening-resumed
+          notifications so users do not have to dismiss a modal mid-scan. */}
+      <Toast />
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
@@ -413,21 +419,33 @@ export default function HomeScreen() {
   return <HomeErrorBoundary><HomeScreenInner /></HomeErrorBoundary>;
 }
 
+// Detect small phones (iPhone SE, older SEs, mini): width <= 380pt.
+// We don't import useWindowDimensions per-render — a one-time measurement
+// at module load is enough since orientation is locked to portrait.
+import { Dimensions } from 'react-native';
+const SMALL_SCREEN = Dimensions.get('window').width <= 380;
+
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  container: { padding: 16, paddingBottom: 100 },
+  // On small phones the radar + status cards otherwise push the SCAN button
+  // well below the fold. Trim the outer padding so above-the-fold density
+  // is comfortable without losing breathing room on large screens.
+  container: {
+    padding: SMALL_SCREEN ? 12 : 16,
+    paddingBottom: SMALL_SCREEN ? 80 : 100,
+  },
 
   // Header
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 8 },
-  brandText: { fontSize: 26, fontWeight: '900', letterSpacing: 2 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SMALL_SCREEN ? 10 : 16, marginTop: SMALL_SCREEN ? 4 : 8 },
+  brandText: { fontSize: SMALL_SCREEN ? 22 : 26, fontWeight: '900', letterSpacing: 2 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   glassBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, gap: 8 },
   statusDot: { width: 8, height: 8, borderRadius: 4 },
   badgeText: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
 
   // Radar
-  radarSection: { alignItems: 'center', marginVertical: 20 },
-  scanStatus: { fontSize: 14, fontWeight: '800', letterSpacing: 2.5, marginTop: 14, textTransform: 'uppercase' },
+  radarSection: { alignItems: 'center', marginVertical: SMALL_SCREEN ? 12 : 20 },
+  scanStatus: { fontSize: 14, fontWeight: '800', letterSpacing: 2.5, marginTop: SMALL_SCREEN ? 10 : 14, textTransform: 'uppercase' },
 
   // Debug panel
   debugPanel: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 12, flexWrap: 'wrap' },

@@ -82,6 +82,7 @@ export function useThreatDetector() {
   const setBatteryLevel = useDetectionStore((s) => s.setBatteryLevel);
   const setMicQuality = useDetectionStore((s) => s.setMicQuality);
   const setRawInference = useDetectionStore((s) => s.setRawInference);
+  const showToast = useDetectionStore((s) => s.showToast);
   const setFeedbackPending = useDetectionStore((s) => s.setFeedbackPending);
   const setFusedDetections = useDetectionStore((s) => s.setFusedDetections);
 
@@ -210,6 +211,9 @@ export function useThreatDetector() {
         // Clear stale UNAVAILABLE state so the "Recording stopped unexpectedly"
         // issue disappears from the warning panel once capture restarts.
         sensorMgr.setRecordingState(true);
+        // Brief inline confirmation so the user notices the gap was closed.
+        const tr = getTranslation(useSettingsStore.getState().locale);
+        showToast(tr.recordingResumed || 'Listening resumed', 4000, 'info');
       },
       onRawInference: (category, confidence) => {
         // Always store so the debug panel can show what the model heard, even
@@ -502,13 +506,11 @@ export function useThreatDetector() {
               : (tr.batteryHalf || `Battery at ${pct}%. Consider connecting a power bank for extended scanning.`);
             voiceRef.current.enqueueCustom(msg, pct <= 15 ? 1 : 2);
 
-            // Visual alert (only for 50% and below — not spammy)
+            // Visual notice — uses the non-blocking inline toast instead of
+            // Alert.alert, so the user can keep interacting with the listen
+            // screen while the warning fades on its own.
             if (pct <= 30) {
-              Alert.alert(
-                tr.batteryWarning || 'Low Battery',
-                msg,
-                [{ text: tr.ok || 'OK' }],
-              );
+              showToast(msg, pct <= 15 ? 8000 : 6000, pct <= 15 ? 'danger' : 'warn');
             }
             break; // Only alert for the lowest matching threshold
           }

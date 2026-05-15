@@ -2,6 +2,58 @@
 
 ---
 
+## v2.1.5 — Transient toasts + small-screen layout (2026-05-15)
+
+### Why this release
+This is the "rollup" of the items v2.1.4 explicitly deferred so the next
+EAS build + App Store submission carries everything at once instead of
+churning a separate review cycle per micro-change.
+
+### Transient toast infrastructure
+- New `transientToast` field on `detectionStore` with `showToast(message,
+  durationMs?, tone?)` + `dismissToast()` actions. `tone` is one of
+  `'info' | 'warn' | 'danger'` and colours the banner against the active
+  theme.
+- New `src/components/Toast.tsx` renders the banner with FadeIn/FadeOut,
+  auto-expires once `until` timestamp passes, and is tappable to dismiss
+  early. Mounted at the top of the listen screen above the ScrollView.
+
+### Listen-resumed inline confirmation
+- `useThreatDetector.onRecordingRecovered` now also fires
+  `showToast(tr.recordingResumed, 4000, 'info')` so the user actually
+  sees that a watchdog auto-recovery happened. Previously the recovery
+  was silent and the user had no way to know whether capture had been
+  interrupted.
+
+### Battery alert → non-blocking toast
+- The 30% / 15% battery warnings used `Alert.alert()`, which blocked the
+  listen screen until the user tapped OK. Now they call
+  `showToast(msg, 6000|8000, 'warn'|'danger')` — the user is informed
+  without losing focus on the radar. The accompanying voice
+  announcement is unchanged.
+
+### Small-screen layout (iPhone SE / mini)
+- One-time `Dimensions.get('window').width <= 380` check at module load
+  drives a `SMALL_SCREEN` flag (orientation is locked to portrait so
+  the value is stable).
+- On small screens: container padding 16 → 12, bottom 100 → 80, header
+  marginBottom 16 → 10, header marginTop 8 → 4, brand fontSize 26 →
+  22, radarSection marginVertical 20 → 12, scanStatus marginTop 14 →
+  10. Above-the-fold density is now comfortable on iPhone SE without
+  losing breathing room on larger devices.
+
+### Why these were deferred from v2.1.4
+- The toast pieces all share `transientToast` infrastructure that didn't
+  exist yet. Building it as part of v2.1.5 in one place keeps the
+  feature consistent (same fade timing, same theme colours, same tap
+  behaviour) instead of three half-baked variants.
+
+### Verification
+- `tsc --noEmit`: 0 errors.
+- `jest`: 13 suites / 155 tests all passing.
+
+---
+
 ## v2.1.4 — User-journey polish: categories, guidance, map auto-refresh (2026-05-15)
 
 ### Why this release

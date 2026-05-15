@@ -28,6 +28,13 @@ interface DetectionState {
   lastRawCategory: string | null;
   lastRawConfidence: number;
 
+  // Transient toast — short non-blocking message at the top/bottom of the
+  // listen screen. Replaces blocking Alert.alert popups for things like
+  // "battery low" or "listening resumed" so the user is informed without
+  // having to dismiss a modal mid-scan. `until` is a Date.now() timestamp;
+  // UI computes visibility on each render against the current clock.
+  transientToast: { message: string; until: number; tone: 'info' | 'warn' | 'danger' } | null;
+
   // Track selection & dismissal (map/UI interactions)
   selectedTrackId: string | null;
   hiddenTrackIds: string[];
@@ -59,6 +66,8 @@ interface DetectionState {
   setBatteryLevel: (level: number) => void;
   setMicQuality: (quality: MicQuality, snrDb: number, warning: MicWarning) => void;
   setRawInference: (category: string, confidence: number) => void;
+  showToast: (message: string, durationMs?: number, tone?: 'info' | 'warn' | 'danger') => void;
+  dismissToast: () => void;
   setFeedbackPending: (pending: boolean, detectionId?: string | null) => void;
   setFusedDetections: (detections: FusedDetection[]) => void;
   setBLEScanActive: (active: boolean) => void;
@@ -85,6 +94,7 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   micWarning: null as MicWarning,
   lastRawCategory: null as string | null,
   lastRawConfidence: 0,
+  transientToast: null as { message: string; until: number; tone: 'info' | 'warn' | 'danger' } | null,
   selectedTrackId: null,
   hiddenTrackIds: [],
   bleDevices: {},
@@ -210,6 +220,11 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   setMicQuality: (quality, snrDb, warning) => set({ micQuality: quality, micSnrDb: snrDb, micWarning: warning }),
 
   setRawInference: (category, confidence) => set({ lastRawCategory: category, lastRawConfidence: confidence }),
+
+  showToast: (message, durationMs = 4000, tone = 'info') => {
+    set({ transientToast: { message, until: Date.now() + durationMs, tone } });
+  },
+  dismissToast: () => set({ transientToast: null }),
 
   setFeedbackPending: (pending, detectionId = null) => set({ feedbackPending: pending, feedbackDetectionId: detectionId }),
 
