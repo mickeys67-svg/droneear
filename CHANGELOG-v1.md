@@ -2,6 +2,52 @@
 
 ---
 
+## v2.1.6 — Pre-submission category-label consistency (2026-05-15)
+
+### Why this release
+Final sweep before submitting the v2.1.x bundle for review. v2.1.4
+introduced `categoryLabel(t, key)` and wired it into the listen screen
+and the live threats list, but three other screens were still rendering
+the raw acoustic identifier (or a different ad-hoc translation table).
+A user could see "MULTIROTOR" on the listen pill, "소형 드론" in the
+alert, and "MULTIROT" in the history badge — three different names for
+the same sound.
+
+### Single source of truth for category text
+- **`app/(tabs)/map.tsx`** — `TrackingOverlay` was getting
+  `trackedDetection.threatCategory.replace('_', ' ')`. Now it gets
+  `categoryLabel(t, threatCategory)` for both `droneName` (fallback)
+  and `category`.
+- **`app/(tabs)/history.tsx`** — `getCategoryShort` previously had a
+  duplicated 12-entry mapping using `t.droneSmall` / `t.helicopter` etc.
+  Replaced with a one-liner that delegates to `categoryLabel`.
+- **`src/components/alerts/ThreatAlert.tsx`** — same story: removed the
+  inline 12-entry `CATEGORY_LABELS` map and replaced with a single
+  `categoryLabel(t, threatCategory)` call. Used both in the visible
+  `<Text>` and the `accessibilityLabel`.
+
+### CJK-friendly badge truncation
+- History card badge previously did
+  `getCategoryShort(...).toUpperCase().slice(0, 8)`. After the helper
+  swap, that would slice a Korean label like "멀티로터 (소형 드론)" to
+  "멀티로터 (소", mid-parenthesis. Now strip the `(...)` suffix
+  (`.split('(')[0].trim()`) and let `numberOfLines={1}` handle the rest.
+  Same change to the detail-modal badge.
+- `TrackingOverlay` `categoryText` style: removed `textTransform:
+  'uppercase'` — a no-op for CJK, but inconsistent for English. Reduced
+  `letterSpacing` 0.6 → 0.4 so Korean/Japanese characters don't get
+  spread out awkwardly.
+
+### Verification
+- `tsc --noEmit`: 0 errors.
+- `jest`: 13 suites / 155 tests passing.
+- `expo lint`: 0 errors.
+- `expo-doctor`: no build-blocking issues.
+- i18n cross-check: 22 new keys × 15 locales — full coverage confirmed.
+- No leaked secrets / API keys.
+
+---
+
 ## v2.1.5 — Transient toasts + small-screen layout (2026-05-15)
 
 ### Why this release

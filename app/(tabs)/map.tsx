@@ -13,6 +13,7 @@ import Animated, { SlideInDown, FadeOut } from 'react-native-reanimated';
 import * as Location from 'expo-location';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
+import { categoryLabel } from '@/src/i18n/categoryLabels';
 import { useMapData, MapMarker } from '@/src/hooks/useMapData';
 import DroneMapView from '@/src/components/map/DroneMapView';
 import { GLASS, glassStyles, cyanGlow, primaryGlow } from '@/src/constants/glass';
@@ -168,17 +169,20 @@ export default function MapScreen() {
       )}
 
       {/* Tracking Overlay — floating glass panel when tracking a drone */}
-      {trackedDetection && trackedTrack && (
-        <TrackingOverlay
-          trackId={trackedTrack.id}
-          droneName={trackedDetection.similarDrones?.[0]?.name || trackedDetection.threatCategory.replace('_', ' ')}
-          category={trackedDetection.threatCategory.replace('_', ' ')}
-          distance={trackedDetection.distanceMeters}
-          bearing={trackedDetection.bearingDegrees}
-          confidence={trackedDetection.confidence}
-          onClose={() => selectTrack(null)}
-        />
-      )}
+      {trackedDetection && trackedTrack && (() => {
+        const catText = categoryLabel(t, trackedDetection.threatCategory);
+        return (
+          <TrackingOverlay
+            trackId={trackedTrack.id}
+            droneName={trackedDetection.similarDrones?.[0]?.name || catText}
+            category={catText}
+            distance={trackedDetection.distanceMeters}
+            bearing={trackedDetection.bearingDegrees}
+            confidence={trackedDetection.confidence}
+            onClose={() => selectTrack(null)}
+          />
+        );
+      })()}
 
       {/* Glass Bottom Sheet — animated entry */}
       {selectedMarker && (

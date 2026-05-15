@@ -15,6 +15,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
 import { useTranslation } from '../../i18n/useTranslation';
+import { categoryLabel } from '../../i18n/categoryLabels';
 import { GLASS, glassStyles, cyanGlow, dangerGlow, primaryGlow } from '@/src/constants/glass';
 import type { DetectionResult, ThreatSeverity, ThreatCategory } from '../../types';
 
@@ -37,21 +38,10 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
     NONE: t.clear,
   };
 
-  const CATEGORY_LABELS: Record<string, string> = {
-    DRONE_SMALL: t.droneSmall,
-    DRONE_LARGE: t.droneLarge,
-    HELICOPTER: t.helicopter,
-    MISSILE: t.missile,
-    AIRCRAFT: t.aircraft,
-    AMBIENT: t.ambient,
-    // New AcousticPattern names
-    MULTIROTOR: t.droneSmall,
-    SINGLE_ENGINE: t.droneLarge,
-    SINGLE_ROTOR: t.helicopter,
-    JET_PROPULSION: t.missile,
-    PROPELLER_FIXED: t.aircraft,
-    BACKGROUND: t.ambient,
-  };
+  // Single source of truth for category text — same helper used by the live
+  // HEARING pill, the ActiveThreatsList rows, and the history modal so a user
+  // sees the same name for a given acoustic pattern across every screen.
+  const categoryText = categoryLabel(t, detection.threatCategory);
 
   const getConfidenceLabel = (conf: number): string => {
     if (conf >= 0.9) return t.veryHighConfidence;
@@ -94,7 +84,7 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
         glowEffect,
       ]}
       accessibilityRole="alert"
-      accessibilityLabel={`${SEVERITY_LABELS[detection.severity]}: ${CATEGORY_LABELS[detection.threatCategory]}`}
+      accessibilityLabel={`${SEVERITY_LABELS[detection.severity]}: ${categoryText}`}
     >
       {/* Severity Badge Header */}
       <View style={styles.headerRow}>
@@ -108,7 +98,7 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
           </Text>
         </View>
         <Text style={[styles.categoryText, { color: `${theme.text}99` }]}>
-          {CATEGORY_LABELS[detection.threatCategory] || detection.threatCategory}
+          {categoryText}
         </Text>
       </View>
 

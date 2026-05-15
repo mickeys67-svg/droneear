@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { useHistoryStore } from '@/src/stores/historyStore';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
+import { categoryLabel } from '@/src/i18n/categoryLabels';
 import { exportAsCSV, exportAsJSON } from '@/src/utils/exportData';
 import { GLASS, glassStyles, cyanGlow, primaryGlow } from '@/src/constants/glass';
 import type { DetectionResult, ThreatSeverity, TacticalTheme } from '@/src/types';
@@ -45,23 +46,11 @@ export default function HistoryScreen() {
     setSelectedDetection(detection);
   }, []);
 
-  const getCategoryShort = (cat: string): string => {
-    const map: Record<string, string> = {
-      DRONE_SMALL: t.droneSmall.split('(')[0].trim(),
-      DRONE_LARGE: t.droneLarge.split('(')[0].trim(),
-      HELICOPTER: t.helicopter,
-      MISSILE: t.missile,
-      AIRCRAFT: t.aircraft,
-      AMBIENT: t.ambient,
-      MULTIROTOR: t.droneSmall.split('(')[0].trim(),
-      SINGLE_ENGINE: t.droneLarge.split('(')[0].trim(),
-      SINGLE_ROTOR: t.helicopter,
-      JET_PROPULSION: t.missile,
-      PROPELLER_FIXED: t.aircraft,
-      BACKGROUND: t.ambient,
-    };
-    return map[cat] || cat;
-  };
+  // Use the shared categoryLabel helper so live HEARING pill,
+  // ActiveThreatsList, history rows, and the detail modal all show the
+  // same vocabulary in the user's language ("멀티로터 (소형 드론)" vs the
+  // earlier ad-hoc per-screen mappings).
+  const getCategoryShort = (cat: string): string => categoryLabel(t, cat);
 
   const stats = useMemo(() => {
     const total = detections.length;
@@ -129,8 +118,11 @@ export default function HistoryScreen() {
                 {item.similarDrones?.[0]?.name || getCategoryShort(item.threatCategory)}
               </Text>
               <View style={[styles.categoryBadge, { backgroundColor: sevColor + '22', borderColor: sevColor + '44' }]}>
-                <Text style={[styles.categoryBadgeText, { color: sevColor }]}>
-                  {getCategoryShort(item.threatCategory).toUpperCase().slice(0, 8)}
+                <Text style={[styles.categoryBadgeText, { color: sevColor }]} numberOfLines={1}>
+                  {/* Strip "(...)" suffix so Korean/CJK labels like "멀티로터
+                      (소형 드론)" don't get awkwardly sliced mid-word in the
+                      narrow badge. We keep just the head ("멀티로터"). */}
+                  {getCategoryShort(item.threatCategory).split('(')[0].trim()}
                 </Text>
               </View>
               {item.source && item.source !== 'ACOUSTIC' && (
@@ -358,8 +350,9 @@ export default function HistoryScreen() {
                     {selectedDetection.similarDrones?.[0]?.name || getCategoryShort(selectedDetection.threatCategory)}
                   </Text>
                   <View style={[styles.categoryBadge, { backgroundColor: getSeverityColor(selectedDetection.severity) + '22', borderColor: getSeverityColor(selectedDetection.severity) + '44', marginTop: 6 }]}>
-                    <Text style={[styles.categoryBadgeText, { color: getSeverityColor(selectedDetection.severity) }]}>
-                      {getCategoryShort(selectedDetection.threatCategory).toUpperCase()}
+                    <Text style={[styles.categoryBadgeText, { color: getSeverityColor(selectedDetection.severity) }]} numberOfLines={1}>
+                      {/* Drop "(...)" suffix so CJK labels stay readable */}
+                      {getCategoryShort(selectedDetection.threatCategory).split('(')[0].trim()}
                     </Text>
                   </View>
                   <Text style={[styles.modalDroneTime, { color: theme.textDim }]}>

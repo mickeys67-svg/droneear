@@ -220,8 +220,9 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    // No textTransform — uppercase is a no-op for Korean/Japanese/Chinese
+    // labels but makes English ones inconsistently LOUDER. Keep natural case.
   },
 
   // Stats
