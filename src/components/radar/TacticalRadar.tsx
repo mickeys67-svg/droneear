@@ -33,22 +33,58 @@ interface TacticalRadarProps {
   isActive: boolean;
   threats: ThreatTrack[];
   bleDevices?: Record<string, RemoteIDData>;
+  /** Phone GPS — required to place BLE drones at their true bearing/range. */
+  userLocation?: { latitude: number; longitude: number } | null;
   maxRange?: number; // Max display range in meters
+  // Device compass heading in degrees (0 = North, 90 = East). When provided
+  // the radar rotates into "front-up" mode: the top of the radar always
+  // points to the direction the phone is facing, and the N/E/S/W labels
+  // spin to show where true compass directions actually are. Omit / pass
+  // null to keep classic north-up mode.
+  headingDegrees?: number | null;
 }
 
 const BEARING_LABELS = ['N', 'E', 'S', 'W'] as const;
 const RANGE_RINGS = [0.25, 0.5, 0.75, 1.0]; // As fraction of radius
+
+/** Great-circle bearing (degrees, 0=N) from point 1 to point 2. */
+function haversineBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const toRad = Math.PI / 180;
+  const φ1 = lat1 * toRad, φ2 = lat2 * toRad;
+  const Δλ = (lon2 - lon1) * toRad;
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+/** Great-circle distance in metres between two lat/lon points. */
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const toRad = Math.PI / 180;
+  const R = 6_371_000;
+  const dφ = (lat2 - lat1) * toRad;
+  const dλ = (lon2 - lon1) * toRad;
+  const a = Math.sin(dφ / 2) ** 2 +
+    Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dλ / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
 
 export const TacticalRadar: React.FC<TacticalRadarProps> = ({
   size = 280,
   isActive,
   threats,
   bleDevices = {},
+  userLocation = null,
   maxRange = 2000,
+  headingDegrees = null,
 }) => {
   const theme = useTheme();
   const rotation = useSharedValue(0);
   const radius = size / 2;
+  // Effective rotation applied to cardinal labels & threats so the radar
+  // becomes front-up when a heading is supplied. We rotate by -heading so
+  // that absolute bearings on screen become relative to the phone facing.
+  const headingRot = headingDegrees != null ? -headingDegrees : 0;
+  const toScreenRad = (bearingDeg: number) => ((bearingDeg + headingRot) * Math.PI) / 180;
 
   useEffect(() => {
     if (isActive) {
@@ -70,14 +106,22 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  // Calculate signal positions on radar
+  // Calculate signal positions on radar.
+  // Only plot tracks that have a REAL position — i.e. BLE Remote ID or FUSED
+  // detections, whose bearing/distance come from the drone's broadcast GPS.
+  // Acoustic-only detections carry no position and must not be placed at a
+  // fabricated angle (they would otherwise pile up at the radar centre).
   const threatDots = useMemo(() => {
     return threats
-      .filter((t) => t.isActive && t.detections.length > 0)
+      .filter((t) => {
+        if (!t.isActive || t.detections.length === 0) return false;
+        const src = t.detections[t.detections.length - 1].source;
+        return src === 'BLE_REMOTE_ID' || src === 'FUSED';
+      })
       .map((track) => {
         const latest = track.detections[track.detections.length - 1];
         const dist = Math.min(latest.distanceMeters / maxRange, 1.0);
-        const radians = (latest.bearingDegrees * Math.PI) / 180;
+        const radians = toScreenRad(latest.bearingDegrees);
         const x = dist * radius * 0.85 * Math.sin(radians);
         const y = -dist * radius * 0.85 * Math.cos(radians);
 
@@ -91,25 +135,38 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
           eta: track.predictedETA,
         };
       });
-  }, [threats, radius, maxRange]);
+  }, [threats, radius, maxRange, headingRot]);
 
-  // Calculate BLE device positions on radar (square dots)
+  // Calculate BLE Remote ID device positions on radar (square dots).
+  // Bearing/range are the REAL great-circle values from the phone GPS to the
+  // drone's broadcast GPS. (Previous code used the drone's own heading as the
+  // bearing — which is the direction the drone is flying, not its direction
+  // from the observer — and RSSI as a fake distance proxy.)
   const bleDots = useMemo(() => {
+    if (!userLocation || !Number.isFinite(userLocation.latitude) || !Number.isFinite(userLocation.longitude)) {
+      return [];
+    }
     return Object.entries(bleDevices)
-      .filter(([, data]) => data.uavLatitude != null && data.uavLongitude != null && data.heading != null)
+      .filter(([, data]) =>
+        data.uavLatitude != null && data.uavLongitude != null &&
+        Number.isFinite(data.uavLatitude) && Number.isFinite(data.uavLongitude))
       .map(([id, data]) => {
-        // Use heading for bearing, RSSI for approximate distance
-        const bearing = data.heading ?? 0;
-        const rssi = data.rssi ?? -70;
-        // Map RSSI (-30 to -100) to distance fraction (0.1 to 0.9)
-        const dist = Math.min(Math.max((-rssi - 30) / 70, 0.1), 0.9);
-        const radians = (bearing * Math.PI) / 180;
+        const bearing = haversineBearing(
+          userLocation.latitude, userLocation.longitude,
+          data.uavLatitude as number, data.uavLongitude as number,
+        );
+        const distM = haversineDistance(
+          userLocation.latitude, userLocation.longitude,
+          data.uavLatitude as number, data.uavLongitude as number,
+        );
+        const dist = Math.min(distM / maxRange, 1.0);
+        const radians = toScreenRad(bearing);
         const x = dist * radius * 0.85 * Math.sin(radians);
         const y = -dist * radius * 0.85 * Math.cos(radians);
 
         return { id, x: radius + x, y: radius + y };
       });
-  }, [bleDevices, radius]);
+  }, [bleDevices, userLocation, radius, maxRange, headingRot]);
 
   const getSeverityColor = (severity: ThreatSeverity): string => {
     switch (severity) {
@@ -149,40 +206,48 @@ export const TacticalRadar: React.FC<TacticalRadarProps> = ({
       <View style={[styles.axisV, { backgroundColor: theme.radarGrid }]} />
       <View style={[styles.axisH, { backgroundColor: theme.radarGrid }]} />
 
-      {/* Bearing labels */}
+      {/* Bearing labels — positioned just inside the outer ring at each
+          cardinal's true compass angle. When headingDegrees is provided the
+          cardinals rotate around the radar so that the top of the display
+          shows the direction the phone is facing (front-up compass). */}
       {BEARING_LABELS.map((label, i) => {
-        const positions = [
-          { top: 4, left: radius - 5 },
-          { top: radius - 7, right: 4 },
-          { bottom: 4, left: radius - 5 },
-          { top: radius - 7, left: 4 },
-        ];
+        const baseAngle = i * 90; // N=0, E=90, S=180, W=270
+        const radians = toScreenRad(baseAngle);
+        const labelRadius = radius - 10;
+        const cx = radius + labelRadius * Math.sin(radians) - 5;
+        const cy = radius - labelRadius * Math.cos(radians) - 7;
         return (
           <Text
             key={label}
-            style={[styles.bearingLabel, { color: theme.radarGrid }, positions[i]]}
+            style={[styles.bearingLabel, { color: theme.radarGrid, left: cx, top: cy }]}
           >
             {label}
           </Text>
         );
       })}
 
-      {/* Range labels */}
-      {RANGE_RINGS.map((ring) => (
-        <Text
-          key={`range-${ring}`}
-          style={[
-            styles.rangeLabel,
-            {
-              color: theme.textMuted,
-              bottom: radius + (radius * ring * 0.85) / 2 - 6,
-              left: radius + 4,
-            },
-          ]}
-        >
-          {Math.round(maxRange * ring)}m
-        </Text>
-      ))}
+      {/* Range labels — placed just inside each ring along the N axis so the
+          rings (500/1000/1500/2000m) are visually distinguishable. Previous
+          formula divided the radius by 2, which stacked all four labels in
+          a 15px column near the centre and looked broken. */}
+      {RANGE_RINGS.map((ring) => {
+        const ringRadius = (size * ring) / 2;
+        return (
+          <Text
+            key={`range-${ring}`}
+            style={[
+              styles.rangeLabel,
+              {
+                color: theme.textMuted,
+                top: radius - ringRadius + 2,
+                left: radius + 4,
+              },
+            ]}
+          >
+            {Math.round(maxRange * ring)}m
+          </Text>
+        );
+      })}
 
       {/* Sweep line — thin radial line, not a 90° sector */}
       {isActive && (

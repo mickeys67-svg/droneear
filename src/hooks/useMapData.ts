@@ -89,10 +89,12 @@ export function useMapData() {
         .filter(Boolean),
     );
 
-    // 1. Acoustic tracks → radius circles (only unfused, not hidden)
-    // Guard against NaN/Infinity from a brief GPS glitch — feeding non-finite
-    // coords into offsetPosition produces NaN lat/lon markers that silently
-    // disappear from react-native-maps with no error.
+    // 1. Positioned acoustic-derived tracks → map markers.
+    // Acoustic-ONLY detection has no real position (no bearing/distance), so
+    // it is NOT placed on the map — doing so would pin every acoustic hit on
+    // top of the user. Only tracks carrying a real GPS-backed position
+    // (BLE Remote ID / fused) are plotted here; pure acoustic detection is
+    // surfaced on the scan screen, not the map.
     if (userLocation && Number.isFinite(userLocation.latitude) && Number.isFinite(userLocation.longitude)) {
       for (const track of currentThreats) {
         if (!track.isActive || track.detections.length === 0) continue;
@@ -100,6 +102,8 @@ export function useMapData() {
         if (hiddenTrackIds.includes(track.id)) continue;
 
         const last = track.detections[track.detections.length - 1];
+        // Skip acoustic-only tracks — no honest position to place them at.
+        if (last.source !== 'BLE_REMOTE_ID' && last.source !== 'FUSED') continue;
         if (!Number.isFinite(last.bearingDegrees) || !Number.isFinite(last.distanceMeters)) continue;
 
         const pos = offsetPosition(

@@ -13,7 +13,7 @@ interface DetectionState {
   currentThreats: ThreatTrack[];
   latestDetection: DetectionResult | null;
   audioLevel: number;         // 0.0 - 1.0 RMS
-  spectralData: number[];     // Current mel spectrogram snapshot (128 bins)
+  spectralData: number[];     // Current mel spectrogram snapshot (64 bins)
   inferenceTimeMs: number;    // Last inference latency
   batteryLevel: number;       // 0-100
 
@@ -86,7 +86,7 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   currentThreats: [],
   latestDetection: null,
   audioLevel: 0,
-  spectralData: new Array(128).fill(0),
+  spectralData: new Array(64).fill(0),
   inferenceTimeMs: 0,
   batteryLevel: 100,
   micQuality: 'GOOD' as MicQuality,
@@ -159,9 +159,16 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
           latestDetection: result,
         };
       } else {
-        // Create new track with Kalman init
-        const { x, y } = KalmanFilter2D.polarToCartesian(result.bearingDegrees, result.distanceMeters);
-        const kalmanState = kalman.init(x, y);
+        // Create new track. Kalman tracking only makes sense for detections
+        // with a REAL position (BLE Remote ID / fused) — acoustic-only
+        // detections have no bearing/distance, so they get no Kalman state
+        // and no ETA prediction (predictedETA stays null).
+        const hasPosition = result.source === 'BLE_REMOTE_ID' || result.source === 'FUSED';
+        let kalmanState: ThreatTrack['kalmanState'] = null;
+        if (hasPosition) {
+          const { x, y } = KalmanFilter2D.polarToCartesian(result.bearingDegrees, result.distanceMeters);
+          kalmanState = kalman.init(x, y);
+        }
 
         const newTrack: ThreatTrack = {
           id: result.id,
@@ -207,19 +214,44 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
 
   clearThreats: () => set({ currentThreats: [], latestDetection: null, hiddenTrackIds: [], selectedTrackId: null }),
 
-  setAudioLevel: (level) => set({ audioLevel: level }),
+  // Audio callbacks fire at 20-30Hz with always-different float values. If
+  // we set unconditionally, every subscriber (HomeScreen, TacticalRadar,
+  // header badges) re-renders ~25× per second and the whole page visibly
+  // shakes/flickers. Quantize before writing and early-return when the
+  // quantized value is unchanged so the store only notifies on real motion.
+  setAudioLevel: (level) => {
+    const q = Math.round(level * 100) / 100; // 2 decimals → ~100 buckets
+    if (get().audioLevel === q) return;
+    set({ audioLevel: q });
+  },
 
   setSpectralData: (data) => set({ spectralData: data }),
 
-  setInferenceTime: (ms) => set({ inferenceTimeMs: ms }),
+  setInferenceTime: (ms) => {
+    if (get().inferenceTimeMs === ms) return;
+    set({ inferenceTimeMs: ms });
+  },
 
   acknowledgeDetection: () => set({ latestDetection: null }),
 
-  setBatteryLevel: (level) => set({ batteryLevel: level }),
+  setBatteryLevel: (level) => {
+    if (get().batteryLevel === level) return;
+    set({ batteryLevel: level });
+  },
 
-  setMicQuality: (quality, snrDb, warning) => set({ micQuality: quality, micSnrDb: snrDb, micWarning: warning }),
+  setMicQuality: (quality, snrDb, warning) => {
+    const qSnr = Math.round(snrDb);
+    const st = get();
+    if (st.micQuality === quality && st.micSnrDb === qSnr && st.micWarning === warning) return;
+    set({ micQuality: quality, micSnrDb: qSnr, micWarning: warning });
+  },
 
-  setRawInference: (category, confidence) => set({ lastRawCategory: category, lastRawConfidence: confidence }),
+  setRawInference: (category, confidence) => {
+    const qConf = Math.round(confidence * 100) / 100;
+    const st = get();
+    if (st.lastRawCategory === category && st.lastRawConfidence === qConf) return;
+    set({ lastRawCategory: category, lastRawConfidence: qConf });
+  },
 
   showToast: (message, durationMs = 4000, tone = 'info') => {
     set({ transientToast: { message, until: Date.now() + durationMs, tone } });
@@ -229,8 +261,8 @@ export const useDetectionStore = create<DetectionState>((set, get) => ({
   setFeedbackPending: (pending, detectionId = null) => set({ feedbackPending: pending, feedbackDetectionId: detectionId }),
 
   // Cap fusedDetections to avoid unbounded growth on long sessions — each
-  // detection carries a 128-bin spectralSignature Float array, so multi-hour
-  // scanning otherwise climbs to tens of MB of retained memory.
+  // detection carries a 64-bin spectralSignature array, so multi-hour
+  // scanning otherwise climbs into tens of MB of retained memory.
   setFusedDetections: (detections) => set({
     fusedDetections: detections.length > 500 ? detections.slice(-500) : detections,
   }),

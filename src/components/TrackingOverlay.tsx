@@ -24,8 +24,14 @@ import { useTranslation } from '@/src/i18n/useTranslation';
 
 export interface TrackingOverlayProps {
   trackId: string;
+  /** Headline label — the acoustic CATEGORY that was classified. */
   droneName: string;
   category: string;
+  /** Optional "≈ similar model" example — never a positive identification. */
+  similarModel?: string;
+  /** True only for GPS-backed (BLE Remote ID / fused) tracks. When false the
+      distance/bearing are not shown — acoustic detection has no position. */
+  hasPosition: boolean;
   distance: number;      // meters
   bearing: number;       // degrees 0-360
   confidence: number;    // 0-1
@@ -54,6 +60,8 @@ export function TrackingOverlay({
   trackId,
   droneName,
   category,
+  similarModel,
+  hasPosition,
   distance,
   bearing,
   confidence,
@@ -103,11 +111,18 @@ export function TrackingOverlay({
         </TouchableOpacity>
       </View>
 
-      {/* ── Drone name + category ── */}
+      {/* ── Category headline + optional "≈ similar model" example ── */}
       <View style={styles.nameRow}>
-        <Text style={styles.droneName} numberOfLines={1}>
-          {droneName}
-        </Text>
+        <View style={{ flex: 1, marginRight: 10 }}>
+          <Text style={styles.droneName} numberOfLines={1}>
+            {droneName}
+          </Text>
+          {similarModel && (
+            <Text style={styles.similarModel} numberOfLines={1}>
+              ≈ {similarModel}
+            </Text>
+          )}
+        </View>
         <View style={[styles.categoryBadge, { borderColor: `${theme.primary}40`, backgroundColor: `${theme.primary}1F` }]}>
           <Text style={[styles.categoryText, { color: theme.primary }]}>{category}</Text>
         </View>
@@ -115,24 +130,29 @@ export function TrackingOverlay({
 
       {/* ── Stats row ── */}
       <View style={styles.statsRow}>
-        {/* Distance */}
-        <View style={styles.statCard}>
-          <Text style={glassStyles.dataLabel}>{t.distance}</Text>
-          <View style={styles.statValueRow}>
-            <Text style={styles.statPrefix}>~</Text>
-            <Text style={styles.statValue}>{Math.round(safeDistance)}</Text>
-            <Text style={styles.statUnit}>m</Text>
-          </View>
-        </View>
+        {/* Distance + Bearing — only for GPS-backed tracks. Acoustic-only
+            detection has no position, so these are omitted entirely rather
+            than showing a fabricated 0 m / 0°. */}
+        {hasPosition && (
+          <>
+            <View style={styles.statCard}>
+              <Text style={glassStyles.dataLabel}>{t.distance}</Text>
+              <View style={styles.statValueRow}>
+                <Text style={styles.statPrefix}>~</Text>
+                <Text style={styles.statValue}>{Math.round(safeDistance)}</Text>
+                <Text style={styles.statUnit}>m</Text>
+              </View>
+            </View>
 
-        {/* Bearing */}
-        <View style={styles.statCard}>
-          <Text style={glassStyles.dataLabel}>{t.bearing}</Text>
-          <View style={styles.statValueRow}>
-            <Text style={styles.statValue}>{Math.round(safeBearing)}°</Text>
-            <Text style={[styles.statCompass, { color: theme.primary }]}>{compass}</Text>
-          </View>
-        </View>
+            <View style={styles.statCard}>
+              <Text style={glassStyles.dataLabel}>{t.bearing}</Text>
+              <View style={styles.statValueRow}>
+                <Text style={styles.statValue}>{Math.round(safeBearing)}°</Text>
+                <Text style={[styles.statCompass, { color: theme.primary }]}>{compass}</Text>
+              </View>
+            </View>
+          </>
+        )}
 
         {/* Confidence */}
         <View style={styles.statCard}>
@@ -208,8 +228,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
-    flex: 1,
-    marginRight: 10,
+  },
+  similarModel: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 2,
   },
   categoryBadge: {
     paddingHorizontal: 10,

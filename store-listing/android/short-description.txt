@@ -1,1 +1,1 @@
-Detect nearby drones using acoustic analysis and BLE/WiFi Remote ID scanning.
+Detect nearby drones via Remote ID broadcasts and acoustic sensing — 100% on-device.

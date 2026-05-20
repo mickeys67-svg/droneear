@@ -5,7 +5,6 @@
 
 import { FFTProcessor } from '../src/core/audio/FFTProcessor';
 import { MelSpectrogram } from '../src/core/audio/MelSpectrogram';
-import { ModelManager } from '../src/core/ml/ModelManager';
 import { KalmanFilter2D } from '../src/core/detection/KalmanFilter';
 import { DOAEstimator } from '../src/core/detection/DOAEstimator';
 import { SEVERITY_THRESHOLDS } from '../src/constants/micConfig';
@@ -33,86 +32,31 @@ describe('Integration: Full Pipeline', () => {
     return audio;
   }
 
-  describe('Audio → FFT → Mel → Model', () => {
-    it('should process synthetic drone audio through full pipeline', async () => {
-      // Step 1: Generate drone audio (~200Hz fundamental with harmonics)
+  describe('Audio → FFT → Mel pipeline', () => {
+    it('should process synthetic drone audio through the FFT + Mel front-end', () => {
+      // Generate drone-like audio (~200Hz fundamental with harmonics).
       const droneAudio = generateDroneAudio(200, 8, fftSize);
       expect(droneAudio.length).toBe(fftSize);
 
-      // Step 2: FFT
+      // FFT
       const spectrum = fft.computeMagnitudeSpectrum(droneAudio);
       expect(spectrum.length).toBe(fftSize / 2 + 1);
 
-      // Verify drone harmonics appear in spectrum
+      // Drone harmonics should appear in the spectrum.
       const peaks = fft.findPeaks(spectrum, sampleRate, 10);
       expect(peaks.length).toBeGreaterThanOrEqual(1);
-      // At least one peak should be near 200Hz or its harmonics
-      const hasDroneFreq = peaks.some(p => p.freq < 2000);
-      expect(hasDroneFreq).toBe(true);
+      expect(peaks.some((p) => p.freq < 2000)).toBe(true);
 
-      // Step 3: Mel Spectrogram
+      // Mel spectrogram + normalization.
       const melFrame = mel.computeMelFrame(spectrum);
       expect(melFrame.length).toBe(128);
-
       const normalized = mel.normalize(melFrame);
       expect(normalized.length).toBe(128);
-      // Check normalization
       const mean = normalized.reduce((a, b) => a + b) / normalized.length;
       expect(Math.abs(mean)).toBeLessThan(0.01);
 
-      // Step 4: MFCC
-      const mfcc = mel.computeMFCC(melFrame);
-      expect(mfcc.length).toBe(30);
-
-      // Step 5: ML Model
-      const model = new ModelManager();
-      await model.loadModel();
-
-      const frames = Array(10).fill(normalized);
-      const predictions = await model.predict(frames);
-
-      expect(predictions.size).toBe(6);
-
-      // All probabilities should be valid
-      let probSum = 0;
-      for (const [, prob] of predictions) {
-        expect(prob).toBeGreaterThanOrEqual(0);
-        expect(prob).toBeLessThanOrEqual(1);
-        probSum += prob;
-      }
-      expect(probSum).toBeCloseTo(1.0, 2);
-    });
-
-    it('should differentiate drone vs silence', async () => {
-      const model = new ModelManager();
-      await model.loadModel();
-
-      // Drone signal
-      const droneAudio = generateDroneAudio(300, 6, fftSize);
-      const droneSpectrum = fft.computeMagnitudeSpectrum(droneAudio);
-      const droneMel = mel.normalize(mel.computeMelFrame(droneSpectrum));
-      const droneFrames = Array(10).fill(droneMel);
-
-      // Silence
-      const silenceAudio = new Float32Array(fftSize).fill(0);
-      const silenceSpectrum = fft.computeMagnitudeSpectrum(silenceAudio);
-      const silenceMel = mel.normalize(mel.computeMelFrame(silenceSpectrum));
-      const silenceFrames = Array(10).fill(silenceMel);
-
-      const dronePredictions = await model.predict(droneFrames);
-      const silencePredictions = await model.predict(silenceFrames);
-
-      // Ambient class should score higher for silence
-      const droneAmbient = dronePredictions.get('BACKGROUND') || 0;
-      const silenceAmbient = silencePredictions.get('BACKGROUND') || 0;
-
-      // Drone signal should have higher non-ambient probability
-      const droneNonAmbient = 1 - droneAmbient;
-      const silenceNonAmbient = 1 - silenceAmbient;
-
-      // Not strictly guaranteed due to template matching, but the pipeline should be consistent
-      expect(droneNonAmbient).toBeGreaterThanOrEqual(0);
-      expect(silenceNonAmbient).toBeGreaterThanOrEqual(0);
+      // MFCC.
+      expect(mel.computeMFCC(melFrame).length).toBe(30);
     });
   });
 
@@ -198,22 +142,5 @@ describe('Integration: Full Pipeline', () => {
       expect(perFrame).toBeLessThan(50); // Must be under 50ms for real-time
     });
 
-    it('should run ML inference in under 100ms', async () => {
-      const model = new ModelManager();
-      await model.loadModel();
-
-      const frames = Array(96).fill(null).map(() => {
-        const f = new Float32Array(128);
-        for (let i = 0; i < 128; i++) f[i] = Math.random() - 0.5;
-        return f;
-      });
-
-      const start = performance.now();
-      await model.predict(frames);
-      const elapsed = performance.now() - start;
-
-      console.log(`  ML inference: ${elapsed.toFixed(2)}ms`);
-      expect(elapsed).toBeLessThan(100);
-    });
   });
 });

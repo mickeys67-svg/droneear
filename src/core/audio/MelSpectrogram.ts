@@ -1,10 +1,11 @@
 /**
  * Mel Spectrogram and MFCC feature extraction.
  *
- * Converts raw FFT magnitude spectrum into perceptually-weighted
- * mel-scaled representation suitable for ML model input.
- *
- * Reference: 128 mel bands, 125Hz-8kHz (drone frequency range)
+ * Converts raw FFT magnitude spectrum into a perceptually-weighted
+ * mel-scaled representation. Bin count / FFT size / sample rate are passed
+ * by the caller — the acoustic pipeline uses the canonical fingerprint spec
+ * (64 mel bands, 16 kHz, 125Hz–8kHz; see fingerprintConfig). The constructor
+ * defaults below are legacy and are always overridden by the caller.
  */
 
 export class MelSpectrogram {

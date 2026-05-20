@@ -126,15 +126,11 @@ describe('DetectionFusionEngine', () => {
       expect(result[0].acousticTrackId).toBe(det.id);
     });
 
-    it('boosts confidence by 1.3x (capped at 0.99)', () => {
+    it('uses fixed BLE-confirmed confidence (no acoustic boost)', () => {
       const bleLat = userPos.latitude + 0.0005;
       const bleLon = userPos.longitude + 0.0005;
-      const bearing = haversineBearing(
-        userPos.latitude, userPos.longitude, bleLat, bleLon,
-      );
 
       const det = makeDetection({
-        bearingDegrees: bearing,
         confidence: 0.85,
         timestamp: Date.now(),
       });
@@ -148,8 +144,10 @@ describe('DetectionFusionEngine', () => {
       });
 
       expect(result).toHaveLength(1);
-      // 0.85 * 1.3 = 1.105 → capped at 0.99
-      expect(result[0].confidence).toBe(0.99);
+      // BLE Remote ID is digital proof — confidence is the fixed confirmed
+      // value (0.97), independent of the acoustic confidence; the old 1.3x
+      // boost was removed.
+      expect(result[0].confidence).toBe(0.97);
     });
 
     it('uses GPS-based distance instead of acoustic estimate', () => {
@@ -180,16 +178,15 @@ describe('DetectionFusionEngine', () => {
       expect(result[0].distanceMeters).not.toBe(999);
     });
 
-    it('rejects match when bearing difference > 30°', () => {
+    it('matches by time proximity regardless of acoustic bearing', () => {
+      // Acoustic detection no longer carries a bearing (single uncalibrated
+      // mic cannot determine direction). Matching is time-only, so a bearing
+      // value on the acoustic side must NOT affect whether a match occurs.
       const bleLat = userPos.latitude + 0.0005;
       const bleLon = userPos.longitude + 0.0005;
-      const bearing = haversineBearing(
-        userPos.latitude, userPos.longitude, bleLat, bleLon,
-      );
 
-      // Acoustic bearing is 40° off from BLE bearing
       const det = makeDetection({
-        bearingDegrees: (bearing + 40) % 360,
+        bearingDegrees: 0, // acoustic has no real bearing
         timestamp: Date.now(),
       });
       const track = makeTrack(det);
@@ -201,7 +198,9 @@ describe('DetectionFusionEngine', () => {
         }),
       });
 
-      expect(result).toHaveLength(0);
+      expect(result).toHaveLength(1);
+      // FUSED takes its bearing from the BLE drone's GPS, not the acoustic 0.
+      expect(result[0].bearingDegrees).toBeGreaterThan(0);
     });
 
     it('rejects match when time difference > 5 seconds', () => {

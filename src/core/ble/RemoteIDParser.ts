@@ -62,14 +62,21 @@ export class RemoteIDParser {
     if (!data || data.length < 2) return [];
 
     const results: Partial<RemoteIDData>[] = [];
-    const msgSize = 25; // Standard ODID message size
 
-    // Message pack starts with header byte (0xF) + count
+    // A Message Pack (message type 0xF) has a 3-byte preamble per ASTM
+    // F3411-22a §7:
+    //   byte 0: [MsgType:4 = 0xF][ProtocolVersion:4]
+    //   byte 1: single-message size (normally 25)
+    //   byte 2: number of messages in the pack
+    // The packed messages follow back-to-back starting at byte 3.
+    // (Previous code read the count from byte 1 and started at byte 2,
+    //  which misaligned every message in a multi-message pack.)
     const headerType = (data[0] >> 4) & 0x0F;
-    if (headerType === 0xF && data.length >= 2) {
-      const msgCount = data[1];
+    if (headerType === 0xF && data.length >= 3) {
+      const msgSize = data[1] || 25;
+      const msgCount = data[2];
       for (let i = 0; i < msgCount; i++) {
-        const offset = 2 + i * msgSize;
+        const offset = 3 + i * msgSize;
         if (offset + msgSize > data.length) break;
         const msg = data.slice(offset, offset + msgSize);
         const parsed = this.parseMessage(msg);
@@ -131,15 +138,28 @@ export class RemoteIDParser {
   private static parseLocation(data: Uint8Array): Partial<RemoteIDData> | null {
     if (data.length < 18) return null;
 
-    // Byte 1: status (operational status)
-    // Byte 2: direction (heading in degrees / 2, so 0-179 = 0-358°)
-    const headingRaw = data[2];
-    const heading = headingRaw <= 179 ? headingRaw * 2 : undefined;
+    // Byte 1 flags (ASTM F3411-22a §7): low nibble holds
+    //   bit 0 — Speed Multiplier
+    //   bit 1 — E/W Direction Segment
+    const flags = data[1];
+    const ewSegment = (flags & 0x02) !== 0;
+    const speedMultFlag = (flags & 0x01) !== 0;
 
-    // Byte 3: speed in 0.25 m/s units (multiplier in high bit)
-    const speedMultiplier = (data[3] & 0x80) ? 0.75 : 0.25;
-    const speedRaw = data[3] & 0x7F;
-    const speed = speedRaw < 127 ? speedRaw * speedMultiplier : undefined;
+    // Byte 2: Track Direction, encoded 0-179. The true heading is this value
+    // plus 180° when the E/W direction segment bit is set — giving the full
+    // 0-359° range. (Previous code multiplied by 2 and ignored the segment
+    // bit, so it silently dropped every heading ≥ 180°.)
+    const dirRaw = data[2];
+    const heading = dirRaw <= 179 ? dirRaw + (ewSegment ? 180 : 0) : undefined;
+
+    // Byte 3: Speed. speedMult=0 → value × 0.25 m/s; speedMult=1 →
+    // value × 0.75 + 255 × 0.25 m/s. 255 = invalid/unknown.
+    const speedRaw = data[3];
+    const speed = speedRaw === 255
+      ? undefined
+      : speedMultFlag
+        ? speedRaw * 0.75 + 255 * 0.25
+        : speedRaw * 0.25;
 
     // Byte 4: vertical speed in 0.5 m/s, offset by 63
     const vsRaw = data[4];

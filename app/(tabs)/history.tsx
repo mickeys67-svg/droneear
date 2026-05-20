@@ -98,6 +98,8 @@ export default function HistoryScreen() {
     const confPercent = (item.confidence * 100).toFixed(0);
     const confColor = getConfidenceColor(item.confidence);
     const sevColor = getSeverityColor(item.severity);
+    // Distance is only real for GPS-backed (BLE Remote ID / fused) detections.
+    const hasPosition = item.source === 'BLE_REMOTE_ID' || item.source === 'FUSED';
 
     return (
       <TouchableOpacity
@@ -113,29 +115,34 @@ export default function HistoryScreen() {
             <Text style={styles.droneIconText}>🛸</Text>
           </View>
           <View style={styles.cardInfo}>
+            {/* Title is the ACOUSTIC CATEGORY — that is what the classifier
+                actually determined. A specific drone model is never claimed
+                as the headline; it appears below as a clearly-marked
+                "≈ similar" example only. */}
             <View style={styles.cardNameRow}>
               <Text style={[styles.cardName, { color: theme.text }]} numberOfLines={1}>
-                {item.similarDrones?.[0]?.name || getCategoryShort(item.threatCategory)}
+                {getCategoryShort(item.threatCategory)}
               </Text>
-              <View style={[styles.categoryBadge, { backgroundColor: sevColor + '22', borderColor: sevColor + '44' }]}>
-                <Text style={[styles.categoryBadgeText, { color: sevColor }]} numberOfLines={1}>
-                  {/* Strip "(...)" suffix so Korean/CJK labels like "멀티로터
-                      (소형 드론)" don't get awkwardly sliced mid-word in the
-                      narrow badge. We keep just the head ("멀티로터"). */}
-                  {getCategoryShort(item.threatCategory).split('(')[0].trim()}
-                </Text>
-              </View>
               {item.source && item.source !== 'ACOUSTIC' && (
-                <View style={[styles.categoryBadge, { backgroundColor: item.source === 'FUSED' ? '#00E5CC22' : '#4488FF22', borderColor: item.source === 'FUSED' ? '#00E5CC44' : '#4488FF44', marginLeft: 4 }]}>
+                <View style={[styles.categoryBadge, { backgroundColor: item.source === 'FUSED' ? '#00E5CC22' : '#4488FF22', borderColor: item.source === 'FUSED' ? '#00E5CC44' : '#4488FF44' }]}>
                   <Text style={[styles.categoryBadgeText, { color: item.source === 'FUSED' ? '#00E5CC' : '#4488FF' }]}>
                     {item.source === 'FUSED' ? 'FUSED' : item.source === 'BLE_REMOTE_ID' ? 'BLE' : 'WiFi'}
                   </Text>
                 </View>
               )}
             </View>
+            {item.similarDrones?.[0]?.name && (
+              <Text style={[styles.cardSimilar, { color: theme.textMuted }]} numberOfLines={1}>
+                ≈ {item.similarDrones[0].name}
+              </Text>
+            )}
             <View style={styles.cardSecondary}>
-              <Text style={[styles.cardDistance, { color: theme.primary }]}>~{Math.round(item.distanceMeters)}m</Text>
-              <Text style={[styles.cardDot, { color: theme.textMuted }]}> · </Text>
+              {hasPosition && (
+                <>
+                  <Text style={[styles.cardDistance, { color: theme.primary }]}>~{Math.round(item.distanceMeters)}m</Text>
+                  <Text style={[styles.cardDot, { color: theme.textMuted }]}> · </Text>
+                </>
+              )}
               <Text style={[styles.cardTime, { color: theme.textDim }]}>{time}</Text>
             </View>
           </View>
@@ -152,10 +159,13 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-      {/* Header */}
+      {/* Header — brand on top, actions stacked beneath on a separate row.
+          Previous single-row layout had the Korean export/clear labels
+          ("데이터 내보내기" / "전체 삭제") overflowing past the right edge of
+          the screen and getting clipped by the safe-area inset. */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.logoText}>
+        <View style={styles.headerTitleRow}>
+          <Text style={styles.logoText} numberOfLines={1}>
             <Text style={{ color: theme.text }}>Drone</Text>
             <Text style={{ color: theme.primary }}>Ear</Text>
           </Text>
@@ -179,7 +189,7 @@ export default function HistoryScreen() {
                 );
               }}
             >
-              <Text style={[styles.headerBtnText, { color: theme.primary }]}>{t.exportData}</Text>
+              <Text style={[styles.headerBtnText, { color: theme.primary }]} numberOfLines={1}>{t.exportData}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               accessibilityRole="button"
@@ -196,7 +206,7 @@ export default function HistoryScreen() {
                 );
               }}
             >
-              <Text style={[styles.headerBtnText, { color: GLASS.glowRed }]}>{t.clearAll}</Text>
+              <Text style={[styles.headerBtnText, { color: GLASS.glowRed }]} numberOfLines={1}>{t.clearAll}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -251,7 +261,7 @@ export default function HistoryScreen() {
         // German/Hindi translation), and a plain View would clip everything
         // below the tab bar without any way to reach it.
         <ScrollView
-          contentContainerStyle={[styles.empty, { paddingTop: 40, paddingBottom: 80 }]}
+          contentContainerStyle={[styles.emptyScroll, { paddingTop: 40, paddingBottom: 160 }]}
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.emptyIcon}>📋</Text>
@@ -341,36 +351,39 @@ export default function HistoryScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Drone Icon + Name */}
+                {/* Drone Icon + Name — headline is the acoustic category
+                    (the classified result). The specific model is shown only
+                    as a "≈ similar" example below, never as a positive ID. */}
                 <View style={styles.modalDroneInfo}>
                   <View style={[styles.modalDroneIconWrap, { borderColor: getSeverityColor(selectedDetection.severity) }]}>
                     <Text style={styles.modalDroneIcon}>🛸</Text>
                   </View>
                   <Text style={[styles.modalDroneName, { color: theme.text }]}>
-                    {selectedDetection.similarDrones?.[0]?.name || getCategoryShort(selectedDetection.threatCategory)}
+                    {getCategoryShort(selectedDetection.threatCategory)}
                   </Text>
-                  <View style={[styles.categoryBadge, { backgroundColor: getSeverityColor(selectedDetection.severity) + '22', borderColor: getSeverityColor(selectedDetection.severity) + '44', marginTop: 6 }]}>
-                    <Text style={[styles.categoryBadgeText, { color: getSeverityColor(selectedDetection.severity) }]} numberOfLines={1}>
-                      {/* Drop "(...)" suffix so CJK labels stay readable */}
-                      {getCategoryShort(selectedDetection.threatCategory).split('(')[0].trim()}
+                  {selectedDetection.similarDrones?.[0]?.name && (
+                    <Text style={[styles.modalDroneSimilar, { color: theme.textMuted }]}>
+                      ≈ {selectedDetection.similarDrones[0].name}
                     </Text>
-                  </View>
+                  )}
                   <Text style={[styles.modalDroneTime, { color: theme.textDim }]}>
                     {new Date(selectedDetection.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </View>
 
-                {/* Stats Grid - Row 1: Distance + Confidence */}
+                {/* Stats Grid - Row 1: Distance (GPS-backed only) + Confidence */}
                 <View style={styles.modalStats}>
-                  <View style={[styles.modalStatCard]}>
-                    <Text style={[glassStyles.dataLabel, { color: theme.textDim, marginBottom: 6 }]}>
-                      {t.distance || 'Distance'}
-                    </Text>
-                    <Text style={[glassStyles.statValueLarge, { color: theme.text }]}>
-                      ~{Math.round(selectedDetection.distanceMeters)}
-                    </Text>
-                    <Text style={[glassStyles.statUnit, { color: theme.textDim }]}>{t.meters || 'meters'}</Text>
-                  </View>
+                  {(selectedDetection.source === 'BLE_REMOTE_ID' || selectedDetection.source === 'FUSED') && (
+                    <View style={[styles.modalStatCard]}>
+                      <Text style={[glassStyles.dataLabel, { color: theme.textDim, marginBottom: 6 }]}>
+                        {t.distance || 'Distance'}
+                      </Text>
+                      <Text style={[glassStyles.statValueLarge, { color: theme.text }]}>
+                        ~{Math.round(selectedDetection.distanceMeters)}
+                      </Text>
+                      <Text style={[glassStyles.statUnit, { color: theme.textDim }]}>{t.meters || 'meters'}</Text>
+                    </View>
+                  )}
                   <View style={[styles.modalStatCard]}>
                     <Text style={[glassStyles.dataLabel, { color: theme.textDim, marginBottom: 6 }]}>
                       {t.confidence || 'Confidence'}
@@ -382,16 +395,18 @@ export default function HistoryScreen() {
                   </View>
                 </View>
 
-                {/* Stats Grid - Row 2: Bearing + Frequency */}
+                {/* Stats Grid - Row 2: Bearing (GPS-backed only) + Frequency */}
                 <View style={styles.modalStats}>
-                  <View style={[styles.modalStatCard]}>
-                    <Text style={[glassStyles.dataLabel, { color: theme.textDim, marginBottom: 6 }]}>
-                      {t.bearing || 'Bearing'}
-                    </Text>
-                    <Text style={[styles.modalStatValueMd, { color: theme.text }]}>
-                      {selectedDetection.bearingDegrees.toFixed(0)}°
-                    </Text>
-                  </View>
+                  {(selectedDetection.source === 'BLE_REMOTE_ID' || selectedDetection.source === 'FUSED') && (
+                    <View style={[styles.modalStatCard]}>
+                      <Text style={[glassStyles.dataLabel, { color: theme.textDim, marginBottom: 6 }]}>
+                        {t.bearing || 'Bearing'}
+                      </Text>
+                      <Text style={[styles.modalStatValueMd, { color: theme.text }]}>
+                        {selectedDetection.bearingDegrees.toFixed(0)}°
+                      </Text>
+                    </View>
+                  )}
                   <View style={[styles.modalStatCard]}>
                     <Text style={[glassStyles.dataLabel, { color: theme.textDim, marginBottom: 6 }]}>
                       {t.frequency || 'Frequency'}
@@ -459,43 +474,51 @@ const StatBadge: React.FC<{ label: string; value: string; color: TacticalTheme; 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
 
-  // Header
+  // Header — two stacked rows (title + actions). Korean export/clear labels
+  // do not fit in a single row alongside the "DroneEar" wordmark on iPhone.
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: 'column',
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
+    gap: 10,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
+    flexShrink: 1,
   },
   logoText: {
     fontSize: 26,
     fontWeight: '900',
     letterSpacing: 1.5,
+    flexShrink: 1,
   },
   subtitle: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 3,
-    marginTop: 2,
   },
   headerActions: {
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   headerBtn: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    minHeight: 48,
+    minHeight: 44,
     justifyContent: 'center',
+    flexShrink: 1,
   },
   headerBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
 
   // Stats
@@ -601,6 +624,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flexShrink: 1,
   },
+  cardSimilar: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
   categoryBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -652,6 +680,14 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  // Scroll variant: use flexGrow so short content still centers vertically
+  // but long translations (German/Hindi/Korean) can scroll past the tab
+  // bar instead of being clipped at the bottom edge.
+  emptyScroll: {
+    flexGrow: 1,
     alignItems: 'center',
     paddingHorizontal: 40,
   },
@@ -729,6 +765,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '900',
     marginBottom: 2,
+    textAlign: 'center',
+  },
+  modalDroneSimilar: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 4,
   },
   modalDroneTime: {
     fontSize: 13,

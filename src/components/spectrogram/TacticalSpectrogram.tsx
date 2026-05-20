@@ -15,11 +15,15 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useTheme } from '../../hooks/useTheme';
+import { useDetectionStore } from '../../stores/detectionStore';
 interface TacticalSpectrogramProps {
-  spectralData: number[]; // 128 mel bins
-  audioLevel: number;     // 0.0 - 1.0
+  // Spectrogram now subscribes to detection store directly so per-frame
+  // spectralData/audioLevel updates don't re-render the entire HomeScreen
+  // (which was producing visible page-wide flicker at 20-30Hz).
+  spectralData?: number[];
+  audioLevel?: number;
   isActive: boolean;
-  numBars?: number;       // Number of visible bars (downsampled from 128)
+  numBars?: number;
   height?: number;
 }
 
@@ -66,8 +70,8 @@ const AnimatedBar = memo<{
 AnimatedBar.displayName = 'AnimatedBar';
 
 export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
-  spectralData,
-  audioLevel,
+  spectralData: spectralDataProp,
+  audioLevel: audioLevelProp,
   isActive,
   numBars = 32,
   height = 60,
@@ -75,10 +79,16 @@ export const TacticalSpectrogram: React.FC<TacticalSpectrogramProps> = memo(({
   const theme = useTheme();
   const { width: screenWidth } = useWindowDimensions();
 
+  // Subscribe directly so HomeScreen doesn't re-render every audio frame.
+  const storeSpectral = useDetectionStore((s) => s.spectralData);
+  const storeAudioLevel = useDetectionStore((s) => s.audioLevel);
+  const spectralData = spectralDataProp ?? storeSpectral;
+  const audioLevel = audioLevelProp ?? storeAudioLevel;
+
   // Stable zero-filled array for inactive state
   const zeroBars = useMemo(() => new Array(numBars).fill(0), [numBars]);
 
-  // Downsample 128 mel bins to numBars
+  // Downsample the mel bins to numBars
   const barValues = useMemo(() => {
     if (!isActive || spectralData.length === 0) {
       return zeroBars;

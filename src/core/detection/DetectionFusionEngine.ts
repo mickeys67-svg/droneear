@@ -1,15 +1,25 @@
 /**
- * Detection Fusion Engine — v1.0
+ * Detection Fusion Engine — v2.0 (two-tier model)
  *
- * Fuses acoustic detection tracks with BLE Remote ID data to produce
- * enriched FUSED detections. Matching criteria:
- * - Bearing alignment: ±30° (acoustic DOA vs BLE GPS bearing)
- * - Time proximity: <5 seconds between detections
+ * Produces FUSED detections — the "corroborated" tier — when a BLE Remote ID
+ * drone is seen at roughly the same time as an acoustic drone-like detection.
  *
- * FUSED detections gain:
- * - GPS-based distance (from BLE) instead of acoustic estimate
- * - 1.3x confidence boost (capped at 0.99)
- * - BLE metadata (serial, operator position, etc.)
+ * Detection tiers (see project 2-tier rework):
+ *   1. CONFIRMED   — BLE Remote ID alone (rendered directly from bleDevices)
+ *   2. CORROBORATED — BLE + acoustic time-match → this engine emits FUSED
+ *   3. ACOUSTIC    — acoustic only (beta), handled on the scan screen
+ *
+ * Matching is by TIME PROXIMITY ONLY. Acoustic detection no longer carries a
+ * bearing (single uncalibrated mic cannot determine direction honestly), so
+ * bearing-based matching was removed. A FUSED detection means "a Remote ID
+ * drone was present and a drone-like sound was heard around the same time".
+ *
+ * A FUSED detection takes its position (distance + bearing) entirely from the
+ * BLE drone's broadcast GPS — the acoustic side never contributes position.
+ * Confidence is the BLE-confirmed value: receiving a Remote ID broadcast is
+ * digital proof a drone exists, so there is no probabilistic guess and no
+ * acoustic-based confidence boost (the old 1.3x boost conflated two
+ * independent sources and was removed).
  */
 
 import type { DetectionResult, ThreatTrack, RemoteIDData } from '../../types';
@@ -73,21 +83,15 @@ export function haversineBearing(
   return ((bearing % 360) + 360) % 360;
 }
 
-/**
- * Angular difference between two bearings, accounting for 360° wrap.
- */
-function bearingDifference(a: number, b: number): number {
-  if (!isFinite(a) || !isFinite(b)) return 180;
-  const diff = Math.abs(a - b) % 360;
-  return diff > 180 ? 360 - diff : diff;
-}
-
 // ===== Fusion Engine =====
 
-const BEARING_THRESHOLD_DEG = 30;
+// Acoustic detection and a BLE sighting are treated as the same event when
+// they occur within this window of each other.
 const TIME_THRESHOLD_MS = 5000;
-const CONFIDENCE_BOOST = 1.3;
-const MAX_CONFIDENCE = 0.99;
+
+// A FUSED detection is backed by a BLE Remote ID broadcast — digital proof a
+// drone exists. Its confidence is this fixed high value, not a guess.
+const BLE_CONFIRMED_CONFIDENCE = 0.97;
 
 export class DetectionFusionEngine {
   private userPosition: UserPosition | null = null;
@@ -120,14 +124,12 @@ export class DetectionFusionEngine {
 
     if (activeTracks.length === 0 || bleEntries.length === 0) return [];
 
-    // Build candidate matches with scores
+    // Build candidate matches scored by time proximity only.
     type Candidate = {
       track: ThreatTrack;
       bleId: string;
       bleData: RemoteIDData;
-      bearingDiff: number;
       timeDiff: number;
-      score: number;
     };
 
     const candidates: Candidate[] = [];
@@ -136,27 +138,14 @@ export class DetectionFusionEngine {
       const lastDetection = track.detections[track.detections.length - 1];
 
       for (const [bleId, bleData] of bleEntries) {
-        // Compute bearing from user to BLE device
-        const bleBearing = haversineBearing(
-          this.userPosition.latitude, this.userPosition.longitude,
-          bleData.uavLatitude!, bleData.uavLongitude!,
-        );
-
-        const bDiff = bearingDifference(lastDetection.bearingDegrees, bleBearing);
-        if (bDiff > BEARING_THRESHOLD_DEG) continue;
-
         const tDiff = Math.abs(lastDetection.timestamp - (bleData.lastSeen || 0));
         if (tDiff > TIME_THRESHOLD_MS) continue;
-
-        // Score: lower is better (bearing weight + time weight)
-        const score = bDiff / BEARING_THRESHOLD_DEG + tDiff / TIME_THRESHOLD_MS;
-
-        candidates.push({ track, bleId, bleData, bearingDiff: bDiff, timeDiff: tDiff, score });
+        candidates.push({ track, bleId, bleData, timeDiff: tDiff });
       }
     }
 
-    // Greedy 1:1 matching (best score first)
-    candidates.sort((a, b) => a.score - b.score);
+    // Greedy 1:1 matching — closest in time first.
+    candidates.sort((a, b) => a.timeDiff - b.timeDiff);
 
     const usedTracks = new Set<string>();
     const usedBLE = new Set<string>();
@@ -170,20 +159,26 @@ export class DetectionFusionEngine {
 
       const lastDetection = c.track.detections[c.track.detections.length - 1];
 
-      // Compute GPS-based distance
+      // Position comes entirely from the BLE drone's broadcast GPS.
       const gpsDistance = haversineDistance(
         this.userPosition.latitude, this.userPosition.longitude,
         c.bleData.uavLatitude!, c.bleData.uavLongitude!,
       );
-
-      const fusedConfidence = Math.min(lastDetection.confidence * CONFIDENCE_BOOST, MAX_CONFIDENCE);
+      const gpsBearing = haversineBearing(
+        this.userPosition.latitude, this.userPosition.longitude,
+        c.bleData.uavLatitude!, c.bleData.uavLongitude!,
+      );
 
       const fused: FusedDetection = {
         ...lastDetection,
         id: `fused_${c.track.id}_${c.bleId}`,
         source: 'FUSED',
-        confidence: fusedConfidence,
+        // BLE Remote ID is digital proof — confidence is the fixed confirmed
+        // value, not the acoustic guess and not a boosted multiple of it.
+        confidence: BLE_CONFIRMED_CONFIDENCE,
         distanceMeters: Math.round(gpsDistance),
+        bearingDegrees: Math.round(gpsBearing),
+        approachRate: 0,
         remoteIdData: c.bleData,
         acousticTrackId: c.track.id,
         bleDeviceId: c.bleId,

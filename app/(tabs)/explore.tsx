@@ -9,6 +9,8 @@ import React from 'react';
 import { StyleSheet, Text, View, ScrollView, SafeAreaView } from 'react-native';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
+import { categoryLabel } from '@/src/i18n/categoryLabels';
+import { getDetectionCapabilities } from '@/src/core/DroneDatabase';
 import { GLASS, glassStyles } from '@/src/constants/glass';
 import type { TacticalTheme } from '@/src/types';
 
@@ -65,6 +67,48 @@ export default function GuideScreen() {
           <BulletItem text={t.guideTip2} theme={theme} />
           <BulletItem text={t.guideTip3} theme={theme} />
           <BulletItem text={t.guideTip4} theme={theme} />
+        </View>
+
+        {/* Detectable Models — honest scope of what the free acoustic model
+            can detect today vs what is planned. MULTIROTOR is data-backed
+            (DroneAudioset, MIT); other classes are marked "coming soon". */}
+        <View style={[glassStyles.card, styles.section]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.iconCircle, { borderColor: `${theme.primary}40` }]}>
+              <Text style={styles.iconEmoji}>🛸</Text>
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.primary }]}>
+              {t.guideDetectableTitle || 'Detectable Models'}
+            </Text>
+          </View>
+          <Text style={[styles.bodyText, { color: theme.textDim, marginBottom: 12 }]}>
+            {t.guideDetectableDesc || 'Aircraft types the current free model can detect.'}
+          </Text>
+          {getDetectionCapabilities().map((cap) => {
+            const available = cap.availability === 'AVAILABLE';
+            const badgeColor = available ? GLASS.glowCyan : theme.textMuted;
+            return (
+              <View key={cap.pattern} style={styles.capRow}>
+                <View style={styles.capHeader}>
+                  <Text style={[styles.capName, { color: available ? theme.text : theme.textDim }]}>
+                    {categoryLabel(t, cap.pattern)}
+                  </Text>
+                  <View style={[styles.capBadge, { borderColor: badgeColor, backgroundColor: `${badgeColor}1A` }]}>
+                    <Text style={[styles.capBadgeText, { color: badgeColor }]}>
+                      {available
+                        ? (t.detectBadgeAvailable || 'Available')
+                        : (t.detectBadgeComingSoon || 'Coming soon')}
+                    </Text>
+                  </View>
+                </View>
+                {available && cap.examples.length > 0 && (
+                  <Text style={[styles.capExamples, { color: theme.textMuted }]}>
+                    {(t.detectExamplesLabel || 'Examples')}: {cap.examples.join(', ')}
+                  </Text>
+                )}
+              </View>
+            );
+          })}
         </View>
 
         {/* Detection Range */}
@@ -234,6 +278,20 @@ const styles = StyleSheet.create({
   bulletRow: { flexDirection: 'row', marginBottom: 10, gap: 10, alignItems: 'flex-start' },
   bulletDot: { width: 6, height: 6, borderRadius: 3, marginTop: 7 },
   bulletText: { fontSize: 13, lineHeight: 20, flex: 1 },
+
+  // Detectable models
+  capRow: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  capHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  capName: { fontSize: 13, fontWeight: '700', flexShrink: 1 },
+  capBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, borderWidth: 1 },
+  capBadgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.4 },
+  capExamples: { fontSize: 11, lineHeight: 16, marginTop: 5 },
 
   // Range table
   rangeDesc: { fontSize: 13, lineHeight: 20, marginBottom: 14 },

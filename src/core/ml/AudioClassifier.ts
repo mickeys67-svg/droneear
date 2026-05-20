@@ -1,19 +1,32 @@
 /**
- * Real-time Audio Classifier
+ * Real-time Audio Classifier — v1 (acoustic fingerprint matching)
  *
- * Orchestrates the full pipeline:
- * Audio Frame → FFT → Mel Spectrogram → ML Inference → Detection Result
+ * Pipeline:  Audio Frame → FFT → Mel Spectrogram → fingerprint → reference
+ *            match → Detection Result
  *
- * Implements sliding window with temporal smoothing (3-frame voting)
- * to reduce false positives.
+ * The previous heuristic engine (rule-based + Gaussian, no training data)
+ * scored 0% against real recordings and was removed. v1 instead matches the
+ * live sound's log-mel fingerprint against a library of fingerprints
+ * extracted from REAL drone recordings (see AcousticFingerprint /
+ * referenceFingerprints). Validated on real audio at ~80% balanced accuracy,
+ * 95% recall on unseen drone models — see __tests__/FingerprintRealData.
+ *
+ * The whole pipeline runs at the canonical fingerprint spec (fingerprintConfig)
+ * so the live fingerprint and the bundled reference fingerprints are computed
+ * identically — front-end parity is mandatory or matching silently fails.
+ *
+ * Temporal voting (consecutive-window agreement) suppresses one-off matches.
  */
 
 import { FFTProcessor } from '../audio/FFTProcessor';
 import { MelSpectrogram } from '../audio/MelSpectrogram';
-import { HybridEngine } from './HybridEngine';
-import { DOAEstimator } from '../detection/DOAEstimator';
+import { AcousticFingerprintMatcher } from './AcousticFingerprint';
+import { REFERENCE_FINGERPRINTS, BACKGROUND_FINGERPRINTS } from './referenceFingerprints';
+import {
+  FP_SAMPLE_RATE, FP_FFT_SIZE, FP_MEL_BINS, FP_FMIN, FP_FMAX, FP_VOTE_WINDOW, FP_VOTE_NEEDED,
+} from './fingerprintConfig';
 import { getTopSimilarDrones } from '../DroneDatabase';
-import { SEVERITY_THRESHOLDS, DRONE_FREQUENCY_RANGES } from '../../constants/micConfig';
+import { SEVERITY_THRESHOLDS } from '../../constants/micConfig';
 import type {
   AudioFrame,
   DetectionResult,
@@ -21,47 +34,40 @@ import type {
   ThreatSeverity,
   SpectralData,
   InferenceMetrics,
+  ModelStatus,
 } from '../../types';
 
 interface ClassifierConfig {
-  fftSize: number;
-  numMelBins: number;
-  windowSizeFrames: number;   // Number of mel frames per inference window
-  hopSizeFrames: number;       // Overlap between windows
-  confidenceThreshold: number;
-  temporalVotingWindow: number; // Number of consecutive detections to confirm
+  /** Mel frames accumulated per fingerprint window (~1s of audio). */
+  windowSizeFrames: number;
+  /** Frames advanced between windows. */
+  hopSizeFrames: number;
+  /** Sustained-detection voting window (number of recent windows examined). */
+  voteWindow: number;
+  /** Matched windows required within voteWindow to declare a detection. */
+  voteNeeded: number;
 }
 
 const DEFAULT_CONFIG: ClassifierConfig = {
-  fftSize: 2048,
-  numMelBins: 128,
-  windowSizeFrames: 96,        // ~2 seconds of context at 44.1kHz
-  hopSizeFrames: 48,           // 50% overlap
-  confidenceThreshold: 0.60,
-  temporalVotingWindow: 3,
+  windowSizeFrames: 16,   // ~1.0s at 16kHz / 1024-sample frames
+  hopSizeFrames: 8,       // ~0.5s step
+  // Sustained-detection voting (calibrated — see fingerprintConfig): 12/8
+  // gives 100% drone detection and 100% background-clean per session.
+  voteWindow: FP_VOTE_WINDOW,
+  voteNeeded: FP_VOTE_NEEDED,
 };
 
 export class AudioClassifierEngine {
   private fft: FFTProcessor;
   private mel: MelSpectrogram;
-  private model: HybridEngine;
+  private matcher: AcousticFingerprintMatcher;
   private config: ClassifierConfig;
+  private status: ModelStatus = 'UNLOADED';
 
-  // Sliding window buffer
+  // Sliding window of raw log-mel frames.
   private melBuffer: Float32Array[] = [];
-  private recentPredictions: Array<{ category: ThreatCategory; confidence: number }> = [];
-
-  // Metrics
-  private doaEstimator: DOAEstimator;
-
-  // DOA tracking
-  private doaChannels = 1; // 1=mono, 2=stereo (set by DroneMonitor based on profile)
-  // Pre-allocated stereo de-interleave buffers (avoid GC in hot path)
-  private _leftCh: Float32Array | null = null;
-  private _rightCh: Float32Array | null = null;
-  private lastDominantFreq = 0;
-  private lastBearing = 0;
-  private compassHeading = 0; // Updated via setCompassHeading()
+  // Recent windows — true = matched a reference. Used for temporal voting.
+  private recentMatches: boolean[] = [];
 
   private totalInferences = 0;
   private totalInferenceTimeMs = 0;
@@ -70,252 +76,167 @@ export class AudioClassifierEngine {
   private onDetection: ((result: DetectionResult) => void) | null = null;
   private onSpectralData: ((data: SpectralData) => void) | null = null;
   private onMetrics: ((metrics: InferenceMetrics) => void) | null = null;
-  // Debug callback — fires for *every* inference (even when confidence is below
-  // threshold, or when the verdict is BACKGROUND/AMBIENT, or when temporal
-  // voting fails). Lets the listen screen show "the model heard X with Y%
-  // confidence" so users testing with non-drone sounds understand why nothing
-  // shows up in History. Only wired when debugMode is on.
+  // Fires every window with the best reference similarity, so the listen
+  // screen's HEARING pill always shows what the matcher is seeing.
   private onRawInference: ((category: string, confidence: number) => void) | null = null;
 
   constructor(config: Partial<ClassifierConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.fft = new FFTProcessor(this.config.fftSize);
-    this.mel = new MelSpectrogram(
-      this.config.numMelBins,
-      this.config.fftSize,
-      44100, // Default, updated on first frame
-      125,   // fMin: drone frequency lower bound
-      8000,  // fMax: drone frequency upper bound
-    );
-    this.model = new HybridEngine();
-    this.doaEstimator = new DOAEstimator(44100, 0.12, 343);
+    this.fft = new FFTProcessor(FP_FFT_SIZE);
+    this.mel = new MelSpectrogram(FP_MEL_BINS, FP_FFT_SIZE, FP_SAMPLE_RATE, FP_FMIN, FP_FMAX);
+    this.matcher = new AcousticFingerprintMatcher();
   }
 
   /**
-   * Update compass heading for absolute bearing calculation.
+   * Compass heading / stereo channels were used for acoustic DOA, which was
+   * removed (an uncalibrated phone mic cannot determine direction). Kept as
+   * no-ops so existing callers need no change; real bearing comes from BLE.
    */
-  setCompassHeading(heading: number): void {
-    this.compassHeading = heading;
-  }
+  setCompassHeading(_heading: number): void { /* no-op — acoustic DOA removed */ }
+  setStereoChannels(_channels: number): void { /* no-op — acoustic DOA removed */ }
 
   /**
-   * Set stereo channel count (from device profile).
-   * Determines if DOA bearing estimation is possible.
-   */
-  setStereoChannels(channels: number): void {
-    this.doaChannels = channels;
-  }
-
-  /**
-   * Initialize the classifier (loads ML model).
+   * Load the reference fingerprint library. Synchronous in practice — kept
+   * async so the ThreatDetector call site is unchanged.
    */
   async initialize(): Promise<void> {
-    await this.model.loadModel();
+    this.status = 'LOADING';
+    this.matcher.loadReferences(REFERENCE_FINGERPRINTS, BACKGROUND_FINGERPRINTS);
+    this.status = this.matcher.isReady ? 'READY' : 'ERROR';
+    if (!this.matcher.isReady) {
+      console.warn('[AudioClassifier] Reference fingerprints missing — acoustic detection disabled.');
+    }
   }
 
   /**
-   * Process a single audio frame through the full pipeline.
-   * Call this for every audio buffer received from AudioCapture.
+   * Process one audio frame. Each frame is one FFT window; mel frames are
+   * accumulated until a full fingerprint window is available, then matched.
    */
   async processFrame(frame: AudioFrame): Promise<DetectionResult | null> {
     const pipelineStart = performance.now();
 
-    // Step 1: FFT
+    // FFT → frequency peaks → mel frame.
     const magnitudeSpectrum = this.fft.computeMagnitudeSpectrum(frame.pcmData);
-
-    // Step 2: Find frequency peaks (for spectral data callback)
     const peaks = this.fft.findPeaks(magnitudeSpectrum, frame.sampleRate, 10);
-
-    // Step 3: Mel spectrogram
     const melFrame = this.mel.computeMelFrame(magnitudeSpectrum);
-    const normalizedMel = this.mel.normalize(melFrame);
 
-    // Emit spectral data for visualization
-    const spectralData: SpectralData = {
-      melSpectrogram: normalizedMel,
+    // Spectral data for the on-screen spectrogram (normalised for display).
+    this.onSpectralData?.({
+      melSpectrogram: this.mel.normalize(melFrame),
       mfcc: this.mel.computeMFCC(melFrame),
       frequencyBins: magnitudeSpectrum,
       dominantFrequencies: peaks.map((p) => p.freq),
       timestamp: frame.timestamp,
-    };
-    this.onSpectralData?.(spectralData);
+    });
 
-    // Step 4: Accumulate mel frames in sliding window (cap to prevent unbounded growth)
+    // Accumulate raw log-mel frames (cap growth).
     if (this.melBuffer.length > this.config.windowSizeFrames * 2) {
       this.melBuffer = this.melBuffer.slice(-this.config.windowSizeFrames);
     }
-    this.melBuffer.push(normalizedMel);
+    this.melBuffer.push(melFrame);
+    if (this.melBuffer.length < this.config.windowSizeFrames) return null;
 
-    // Only run inference when we have enough frames
-    if (this.melBuffer.length < this.config.windowSizeFrames) {
-      return null;
-    }
-
-    // Step 5: ML Inference
+    // Fingerprint-match the current window.
     const inferenceStart = performance.now();
-    const windowFrames = this.melBuffer.slice(-this.config.windowSizeFrames);
-    const predictions = await this.model.predict(windowFrames);
+    const window = this.melBuffer.slice(-this.config.windowSizeFrames);
+    // Discriminative match (drone vs background references). bestSimilarity is
+    // the raw drone similarity, shown on the HEARING pill regardless of match.
+    const matchResult = this.matcher.match(window);
+    const best = this.matcher.bestSimilarity(window);
     const inferenceTimeMs = performance.now() - inferenceStart;
 
-    // Advance sliding window
+    // Advance the sliding window.
     this.melBuffer.splice(0, this.config.hopSizeFrames);
 
-    // Step 6: Find best prediction
-    let bestCategory: ThreatCategory = 'BACKGROUND';
-    let bestConfidence = 0;
-    for (const [category, confidence] of predictions) {
-      if (confidence > bestConfidence) {
-        bestConfidence = confidence;
-        bestCategory = category;
-      }
+    const similarity = best?.similarity ?? 0;
+    const matched = matchResult != null;
+
+    // Sustained-detection temporal voting — require enough recent windows to
+    // also have matched (12/8). A momentary false match never accumulates;
+    // a real drone, present for seconds, easily does.
+    this.recentMatches.push(matched);
+    if (this.recentMatches.length > this.config.voteWindow) {
+      this.recentMatches.shift();
     }
 
-    // Step 7: Temporal smoothing (voting)
-    this.recentPredictions.push({ category: bestCategory, confidence: bestConfidence });
-    if (this.recentPredictions.length > this.config.temporalVotingWindow) {
-      this.recentPredictions.shift();
-    }
-
-    // Track metrics
     this.totalInferences++;
     this.totalInferenceTimeMs += inferenceTimeMs;
-
     const totalTimeMs = performance.now() - pipelineStart;
     this.onMetrics?.({
       inferenceTimeMs,
       preprocessTimeMs: totalTimeMs - inferenceTimeMs,
       totalTimeMs,
-      modelVersion: this.model.info?.version || 'unknown',
+      modelVersion: 'fingerprint-v1',
       delegate: 'CPU',
     });
 
-    // Always emit the raw best-category/confidence so the debug panel can show
-    // *something* even when the verdict is filtered out below — users testing
-    // with non-drone sounds otherwise see no feedback at all.
-    this.onRawInference?.(String(bestCategory), bestConfidence);
+    // Always report the live similarity for the HEARING pill / debug panel.
+    this.onRawInference?.(matched ? 'MULTIROTOR' : 'BACKGROUND', similarity);
 
-    // Step 8: Apply confidence threshold and temporal voting
-    if (bestCategory === 'BACKGROUND' || (bestCategory as string) === 'AMBIENT' || bestConfidence < this.config.confidenceThreshold) {
-      return null;
-    }
+    if (!matched) return null;
 
-    // Check temporal consistency
-    const votingThreshold = Math.ceil(this.config.temporalVotingWindow * 0.6);
-    const votes = this.recentPredictions.filter((p) => p.category === bestCategory).length;
-    if (votes < votingThreshold) {
-      return null; // Not enough consecutive detections
-    }
+    // Sustained-detection gate: enough of the recent window votes must match.
+    const votes = this.recentMatches.filter(Boolean).length;
+    if (votes < this.config.voteNeeded) return null;
 
-    // Step 9: DOA bearing estimation
-    // Only possible with stereo profile (channels=2) — interleaved L/R samples
-    let bearing = 0;
-    if (this.doaChannels === 2 && frame.pcmData.length >= 512 && frame.pcmData.length % 2 === 0) {
-      // De-interleave stereo: [L0,R0,L1,R1,...] → separate channels
-      const halfLen = frame.pcmData.length / 2;
-      // Reuse pre-allocated buffers (avoid GC in hot path)
-      if (!this._leftCh || this._leftCh.length !== halfLen) {
-        this._leftCh = new Float32Array(halfLen);
-        this._rightCh = new Float32Array(halfLen);
-      }
-      for (let i = 0; i < halfLen; i++) {
-        this._leftCh[i] = frame.pcmData[i * 2];
-        this._rightCh![i] = frame.pcmData[i * 2 + 1];
-      }
-      const relativeBearing = this.doaEstimator.estimateBearing(this._leftCh, this._rightCh!);
-      bearing = this.doaEstimator.toAbsoluteBearing(relativeBearing, this.compassHeading);
-      this.lastBearing = bearing;
-    } else {
-      // Mono: keep last known bearing (no DOA possible)
-      bearing = this.lastBearing;
-    }
-
-    // Step 10: Approach rate via Doppler on dominant frequency
-    let approachRate = 0;
-    const dominantFreq = peaks.length > 0 ? peaks[0].freq : 0;
-    if (this.lastDominantFreq > 0 && dominantFreq > 0) {
-      const knownFreq = this.getExpectedFrequency(bestCategory);
-      if (knownFreq > 0) {
-        approachRate = this.doaEstimator.estimateApproachRate(
-          this.lastDominantFreq, dominantFreq, knownFreq
-        );
-        // Clamp to reasonable range (-50 to 50 m/s)
-        approachRate = Math.max(-50, Math.min(50, approachRate));
-      }
-    }
-    this.lastDominantFreq = dominantFreq;
-
-    // Step 11: Build detection result
-    const severity = this.classifySeverity(bestConfidence);
+    // Build the detection. Acoustic detection carries NO position — distance,
+    // bearing and approach rate cannot be derived from a single uncalibrated
+    // mic; real position comes only from BLE Remote ID. Confidence is the
+    // fingerprint similarity to the closest real reference recording.
     const result: DetectionResult = {
       id: `det_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      threatCategory: bestCategory,
-      severity,
-      confidence: bestConfidence,
-      distanceMeters: this.estimateDistance(bestCategory, frame.rmsLevel),
-      bearingDegrees: isFinite(bearing) ? Math.round(bearing) : 0,
-      approachRate: isFinite(approachRate) ? Math.round(approachRate * 10) / 10 : 0,
+      threatCategory: 'MULTIROTOR' as ThreatCategory,
+      severity: this.classifySeverity(similarity),
+      confidence: similarity,
+      distanceMeters: 0,
+      bearingDegrees: 0,
+      approachRate: 0,
+      source: 'ACOUSTIC',
       timestamp: frame.timestamp,
-      spectralSignature: Array.from(normalizedMel),
+      spectralSignature: Array.from(this.mel.normalize(melFrame)),
       frequencyPeaks: peaks.map((p) => p.freq),
-      similarDrones: getTopSimilarDrones(bestCategory, 5),
+      similarDrones: getTopSimilarDrones('MULTIROTOR', 5),
     };
 
     this.onDetection?.(result);
     return result;
   }
 
-  /**
-   * Register detection callback.
-   */
   onDetect(callback: (result: DetectionResult) => void): void {
     this.onDetection = callback;
   }
 
-  /**
-   * Register spectral data callback (for visualization).
-   */
   onSpectral(callback: (data: SpectralData) => void): void {
     this.onSpectralData = callback;
   }
 
-  /**
-   * Register metrics callback (for performance monitoring).
-   */
   onInferenceMetrics(callback: (metrics: InferenceMetrics) => void): void {
     this.onMetrics = callback;
   }
 
-  /**
-   * Register raw inference callback — fires for every classified frame
-   * regardless of confidence threshold / temporal voting / category filter.
-   * Used by the debug panel so users testing with non-drone sounds can see
-   * "the model heard X with Y% confidence" instead of total silence.
-   */
   onRaw(callback: (category: string, confidence: number) => void): void {
     this.onRawInference = callback;
   }
 
   /**
-   * Update confidence threshold.
+   * v1 fingerprint matching uses its own calibrated discriminative gate
+   * (FP_MATCH_FLOOR / FP_MATCH_MARGIN in fingerprintConfig). The user-facing
+   * confidence slider does not apply — kept as a no-op so the settings call
+   * site is unchanged.
    */
-  setConfidenceThreshold(threshold: number): void {
-    this.config.confidenceThreshold = Math.max(0, Math.min(1, threshold));
-  }
+  setConfidenceThreshold(_threshold: number): void { /* no-op for v1 fingerprint */ }
 
-  /**
-   * Reset internal buffers.
-   */
   reset(): void {
     this.melBuffer = [];
-    this.recentPredictions = [];
+    this.recentMatches = [];
   }
 
   get averageInferenceMs(): number {
     return this.totalInferences > 0 ? this.totalInferenceTimeMs / this.totalInferences : 0;
   }
 
-  get modelStatus() {
-    return this.model.currentStatus;
+  get modelStatus(): ModelStatus {
+    return this.status;
   }
 
   // ===== Internal Helpers =====
@@ -326,68 +247,5 @@ export class AudioClassifierEngine {
     if (confidence >= SEVERITY_THRESHOLDS.MEDIUM) return 'MEDIUM';
     if (confidence >= SEVERITY_THRESHOLDS.LOW) return 'LOW';
     return 'NONE';
-  }
-
-  /**
-   * Estimate distance based on Sound Pressure Level (SPL).
-   * Uses known drone noise profiles and inverse square law.
-   *
-   * Reference SPL at 1m:
-   * - Multirotor: ~70 dB
-   * - Single-engine: ~85 dB
-   * - Single-rotor: ~100 dB
-   * - Jet propulsion: ~120 dB
-   */
-  private estimateDistance(category: ThreatCategory, rmsLevel: number): number {
-    const referenceSPL: Record<string, number> = {
-      MULTIROTOR: 70,
-      SINGLE_ENGINE: 85,
-      SINGLE_ROTOR: 100,
-      JET_PROPULSION: 120,
-      PROPELLER_FIXED: 95,
-      BACKGROUND: 0,
-      // Backward compat aliases
-      DRONE_SMALL: 70,
-      DRONE_LARGE: 85,
-      HELICOPTER: 100,
-      MISSILE: 120,
-      AIRCRAFT: 95,
-      AMBIENT: 0,
-    };
-
-    const refSPL = referenceSPL[category] || 70;
-
-    // Convert RMS to approximate dB SPL (rough approximation)
-    const measuredSPL = 20 * Math.log10(Math.max(rmsLevel, 1e-10)) + 94; // 94 dB SPL = 1 Pa
-
-    // Inverse square law: distance = 10^((refSPL - measuredSPL) / 20)
-    const estimatedDistance = Math.pow(10, (refSPL - measuredSPL) / 20);
-
-    // Clamp to reasonable range; guard against NaN/Infinity
-    const clamped = Math.max(50, Math.min(5000, Math.round(estimatedDistance)));
-    return isFinite(clamped) ? clamped : 500;
-  }
-
-  /**
-   * Get expected fundamental frequency for an acoustic pattern.
-   * Used for Doppler approach rate calculation.
-   */
-  private getExpectedFrequency(category: ThreatCategory): number {
-    const freqMap: Record<string, number> = {
-      MULTIROTOR: 200,       // Typical quadcopter blade pass frequency
-      SINGLE_ENGINE: 120,    // Larger props = lower BPF
-      SINGLE_ROTOR: 80,      // Main rotor BPF
-      JET_PROPULSION: 500,   // Jet/rocket noise center
-      PROPELLER_FIXED: 150,  // Prop aircraft
-      BACKGROUND: 0,
-      // Backward compat aliases
-      DRONE_SMALL: 200,
-      DRONE_LARGE: 120,
-      HELICOPTER: 80,
-      MISSILE: 500,
-      AIRCRAFT: 150,
-      AMBIENT: 0,
-    };
-    return freqMap[category] || 0;
   }
 }

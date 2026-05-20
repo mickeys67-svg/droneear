@@ -54,6 +54,12 @@ export function useThreatDetector() {
   // Environment detection state (exposed to UI)
   const [environmentState, setEnvironmentState] = useState<EnvironmentState | null>(null);
 
+  // Compass heading exposed to UI (radar front-up rotation + readout).
+  // Updated from magnetometer at ~5Hz, snapped to integer degrees so it
+  // only triggers re-renders when the value actually changes.
+  const [compassHeading, setCompassHeading] = useState(0);
+  const [compassAvailable, setCompassAvailable] = useState(false);
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [modelStatus, setModelStatus] = useState<string>('UNLOADED');
 
@@ -138,6 +144,14 @@ export function useThreatDetector() {
       onCompassUpdate: (compassData) => {
         // CRITICAL: Wire compass heading to AudioClassifier
         detectorRef.current?.setCompassHeading(compassData.heading);
+        // Also expose to UI so the radar can rotate to "front-up" and
+        // the screen can show a live HEADING readout. Snap to integer
+        // degrees so 5Hz magnetometer noise doesn't cause re-renders.
+        setCompassHeading((prev) => {
+          const next = Math.round(compassData.heading) % 360;
+          return prev === next ? prev : next;
+        });
+        setCompassAvailable((prev) => prev === compassData.available ? prev : compassData.available);
       },
       onAlarm: (issue) => {
         // Voice alarm for critical sensor issues
@@ -287,7 +301,7 @@ export function useThreatDetector() {
               const pct = Math.round(level * 100);
               useDetectionStore.getState().setBatteryLevel(pct);
               if (pct < 20 && detectorRef.current) {
-                detectorRef.current.setFrameSkipRate(4);
+                detectorRef.current.setFrameSkipRate(3);
               }
             } catch (err) {
               console.warn('[DroneMonitor] Battery check failed:', err);
@@ -383,10 +397,13 @@ export function useThreatDetector() {
     const battPercent = Math.round(battLevel * 100);
     setBatteryLevel(battPercent);
 
-    // Adaptive frame skip
-    if (battPercent < 20) detectorRef.current.setFrameSkipRate(4);
-    else if (battPercent < 50) detectorRef.current.setFrameSkipRate(3);
-    else detectorRef.current.setFrameSkipRate(2);
+    // Adaptive frame skip — battery saver. Normal battery runs skip=1: the
+    // v1 detection calibration (12/8 voting) was validated at skip=1, and the
+    // fingerprint matcher is cheap. Low battery throttles gracefully —
+    // detection still works, just with longer latency.
+    if (battPercent < 20) detectorRef.current.setFrameSkipRate(3);
+    else if (battPercent < 50) detectorRef.current.setFrameSkipRate(2);
+    else detectorRef.current.setFrameSkipRate(1);
 
     const session: DetectionSession = {
       id: `session_${Date.now()}`,
@@ -487,7 +504,7 @@ export function useThreatDetector() {
 
         // Low battery performance throttling
         if (pct < 20 && detectorRef.current) {
-          detectorRef.current.setFrameSkipRate(4);
+          detectorRef.current.setFrameSkipRate(3);
         }
 
         // Battery alert thresholds (50%, 30%, 15%) — show once per threshold
@@ -605,6 +622,10 @@ export function useThreatDetector() {
 
     // Environment detection state
     environmentState,
+
+    // Compass / heading (for radar front-up rotation and HEADING readout)
+    compassHeading,
+    compassAvailable,
 
     // BLE Remote ID state
     bleAvailable,

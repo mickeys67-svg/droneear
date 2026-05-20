@@ -174,8 +174,10 @@ export default function MapScreen() {
         return (
           <TrackingOverlay
             trackId={trackedTrack.id}
-            droneName={trackedDetection.similarDrones?.[0]?.name || catText}
+            droneName={catText}
             category={catText}
+            similarModel={trackedDetection.similarDrones?.[0]?.name}
+            hasPosition={trackedDetection.source === 'BLE_REMOTE_ID' || trackedDetection.source === 'FUSED'}
             distance={trackedDetection.distanceMeters}
             bearing={trackedDetection.bearingDegrees}
             confidence={trackedDetection.confidence}
@@ -195,15 +197,17 @@ export default function MapScreen() {
             <View style={styles.sheetDroneInfo}>
               <Text style={styles.sheetDroneIcon}>🛸</Text>
               <View style={styles.sheetDroneNameWrap}>
+                {/* Headline = acoustic category (the classified result).
+                    A specific model appears only as a "≈ similar" example. */}
                 <Text style={[styles.sheetDroneName, { color: theme.text }]}>
-                  {selectedMarker.detection?.similarDrones?.[0]?.name || selectedMarker.title || t.droneSmall}
+                  {selectedMarker.detection
+                    ? categoryLabel(t, selectedMarker.detection.threatCategory)
+                    : selectedMarker.title || t.droneSmall}
                 </Text>
-                {selectedMarker.detection?.similarDrones?.[0]?.category && (
-                  <View style={[styles.sheetCategoryBadge, { borderColor: `${theme.primary}4D`, backgroundColor: `${theme.primary}1A` }]}>
-                    <Text style={[styles.sheetCategoryText, { color: theme.primary }]}>
-                      {selectedMarker.detection.similarDrones[0].category}
-                    </Text>
-                  </View>
+                {selectedMarker.detection?.similarDrones?.[0]?.name && (
+                  <Text style={[styles.sheetDroneSimilar, { color: theme.textMuted }]} numberOfLines={1}>
+                    ≈ {selectedMarker.detection.similarDrones[0].name}
+                  </Text>
                 )}
               </View>
             </View>
@@ -466,6 +470,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '900',
     color: '#FFFFFF',
+  },
+  sheetDroneSimilar: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 3,
   },
   sheetCategoryBadge: {
     marginTop: 4,

@@ -14,9 +14,8 @@ import Constants from 'expo-constants';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
-import { DEVICE_PROFILES } from '@/src/constants/micConfig';
 import { GLASS, glassStyles } from '@/src/constants/glass';
-import type { DeviceProfile, ThemeMode, TacticalTheme } from '@/src/types';
+import type { ThemeMode, TacticalTheme } from '@/src/types';
 import type { SupportedLocale } from '@/src/i18n/translations';
 
 const LANGUAGE_OPTIONS: { locale: SupportedLocale; label: string; nativeLabel: string }[] = [
@@ -40,8 +39,6 @@ const LANGUAGE_OPTIONS: { locale: SupportedLocale; label: string; nativeLabel: s
 export default function SettingsScreen() {
   const theme = useTheme();
   const t = useTranslation();
-  const profile = useSettingsStore((s) => s.profile);
-  const setProfile = useSettingsStore((s) => s.setProfile);
   const themeMode = useSettingsStore((s) => s.themeMode);
   const setThemeMode = useSettingsStore((s) => s.setThemeMode);
   const locale = useSettingsStore((s) => s.locale);
@@ -194,53 +191,21 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        {/* ===== PROFILE ===== */}
+        {/* ===== MICROPHONE ===== */}
+        {/* The previous 4 selectable mic profiles were fake differentiation —
+            their channel/gain/source settings did not meaningfully change
+            detection. Replaced with a single read-only "Auto" info card: the
+            app uses the phone's default mic, or an external mic when the OS
+            routes one in on connection. */}
         <View style={[glassStyles.card, styles.section]}>
-          <Text style={[styles.sectionLabel, { color: theme.textDim }]}>{t.profileSection || 'PROFILE'}</Text>
-          <View style={styles.profileGrid}>
-            {Object.entries(DEVICE_PROFILES).map(([key, config]) => (
-              <TouchableOpacity
-                key={key}
-                style={[
-                  styles.profileCard,
-                  {
-                    backgroundColor: profile === key ? `${theme.primary}12` : GLASS.cardBg,
-                    borderColor: profile === key ? `${theme.primary}50` : GLASS.borderSubtle,
-                  },
-                ]}
-                onPress={() => setProfile(key as DeviceProfile)}
-                accessibilityRole="button"
-                accessibilityLabel={`Device profile: ${config.label}`}
-                accessibilityState={{ selected: profile === key }}
-              >
-                {profile === key && (
-                  <View style={[styles.profileCheck, { backgroundColor: theme.primary }]}>
-                    <Text style={[styles.profileCheckText, { color: theme.mode !== 'DAY' ? '#FFF' : '#000' }]}>✓</Text>
-                  </View>
-                )}
-                <Text style={[styles.profileLabel, { color: profile === key ? theme.primary : theme.text }]}>
-                  {config.label}
-                </Text>
-                <Text style={[styles.profileDesc, { color: theme.textDim }]} numberOfLines={2}>
-                  {config.description}
-                </Text>
-                {/* Real-world example so users don't have to guess which
-                    profile fits their phone. Pulled from i18n so each
-                    locale picks something idiomatic. */}
-                {(() => {
-                  const example =
-                    key === 'BALANCED' ? t.profileExampleBalanced :
-                    key === 'SAMSUNG_OPTIMIZED' ? t.profileExampleSamsung :
-                    key === 'HIGH_SENSITIVITY' ? t.profileExampleHighSensitivity :
-                    key === 'RAW_EXPERT' ? t.profileExampleRawExpert : undefined;
-                  return example ? (
-                    <Text style={[styles.profileExample, { color: theme.textMuted }]} numberOfLines={2}>
-                      {example}
-                    </Text>
-                  ) : null;
-                })()}
-              </TouchableOpacity>
-            ))}
+          <Text style={[styles.sectionLabel, { color: theme.textDim }]}>{t.profileSection || 'MICROPHONE'}</Text>
+          <View style={[styles.profileCard, { backgroundColor: `${theme.primary}12`, borderColor: `${theme.primary}50` }]}>
+            <Text style={[styles.profileLabel, { color: theme.primary }]}>
+              {t.micAutoLabel || 'Auto'}
+            </Text>
+            <Text style={[styles.profileDesc, { color: theme.textDim }]}>
+              {t.micAutoDesc || 'Uses your phone\'s microphone automatically. Plug in an external microphone and the app switches to it.'}
+            </Text>
           </View>
         </View>
 
@@ -374,13 +339,9 @@ const styles = StyleSheet.create({
   toggleDesc: { fontSize: 11, marginTop: 2 },
 
   // Profile grid
-  profileGrid: { gap: 8 },
-  profileCard: { padding: 14, borderRadius: 12, borderWidth: 1, position: 'relative' },
+  profileCard: { padding: 14, borderRadius: 12, borderWidth: 1 },
   profileLabel: { fontSize: 14, fontWeight: '700' },
   profileDesc: { fontSize: 11, marginTop: 4, lineHeight: 16 },
-  profileExample: { fontSize: 10, marginTop: 2, lineHeight: 14, fontStyle: 'italic' },
-  profileCheck: { position: 'absolute', top: 10, right: 10, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
-  profileCheckText: { fontSize: 12, fontWeight: '900' },
 
   // Info rows
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8 },

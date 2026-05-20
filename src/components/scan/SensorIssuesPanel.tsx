@@ -20,30 +20,38 @@ export function SensorIssuesPanel({ issues }: SensorIssuesPanelProps) {
   return (
     <View style={[glassStyles.card, styles.container]}>
       {issues.map((issue, idx) => {
-        const issueColor = issue.severity === 'CRITICAL' ? theme.danger : issue.severity === 'HIGH' ? theme.warning : theme.textMuted;
+        // CRITICAL keeps the danger color (genuine blocker). Everything else
+        // is informational guidance — render it in a calm muted tone with
+        // a dim text colour so quality notices don't read as app errors.
+        const isCritical = issue.severity === 'CRITICAL';
+        const dotColor = isCritical ? theme.danger : theme.textMuted;
+        const textColor = isCritical ? theme.danger : theme.textDim;
+        // Translate the stable messageKey; fall back to English message.
+        const label = (t as unknown as Record<string, unknown>)[issue.messageKey];
+        const text = typeof label === 'string' ? label : issue.message;
         return (
           <View key={`${issue.sensor}-${idx}`} style={[styles.row, { borderBottomColor: `${theme.border}40` }]}>
-            <View style={[styles.dot, { backgroundColor: issueColor }]} />
-            <Text style={[styles.text, { color: issueColor }]} numberOfLines={1}>
-              {issue.message}
+            <View style={[styles.dot, { backgroundColor: dotColor }]} />
+            <Text style={[styles.text, { color: textColor }]} numberOfLines={2}>
+              {text}
             </Text>
             {issue.action === 'SETTINGS' && (
               <TouchableOpacity
-                style={[styles.actionBtn, { borderColor: issueColor }]}
+                style={[styles.actionBtn, { borderColor: textColor }]}
                 onPress={() => Linking.openSettings()}
                 accessibilityRole="button"
                 accessibilityLabel={t.openSettings}
               >
-                <Text style={[styles.actionText, { color: issueColor }]}>{t.openSettings}</Text>
+                <Text style={[styles.actionText, { color: textColor }]}>{t.openSettings}</Text>
               </TouchableOpacity>
             )}
             {issue.action === 'CHANGE_PROFILE' && (
               <TouchableOpacity
-                style={[styles.actionBtn, { borderColor: issueColor }]}
+                style={[styles.actionBtn, { borderColor: textColor }]}
                 onPress={() => Alert.alert(t.bearingDirection || 'Bearing', t.bearingDisclaimer)}
                 accessibilityRole="button"
               >
-                <Text style={[styles.actionText, { color: issueColor }]}>{t.stereo || 'STEREO'}</Text>
+                <Text style={[styles.actionText, { color: textColor }]}>{t.stereo || 'STEREO'}</Text>
               </TouchableOpacity>
             )}
           </View>

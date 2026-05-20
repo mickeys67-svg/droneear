@@ -44,8 +44,13 @@ export class ThreatDetector {
   private callbacks: ThreatDetectorCallbacks;
   private isInitialized = false;
   private frameSkipCounter = 0;
-  private frameSkipRate = 2;
-  private currentProfile: DeviceProfile = 'BALANCED';
+  // 1 = process every captured frame. The old value (2) skipped half the
+  // audio to relieve the heavy v1 heuristic engine; the v1 fingerprint
+  // matcher is cheap (a small FFT + cosine compare every hop), and the
+  // detection calibration (12/8 voting) was validated on the no-skip
+  // cadence — so the running pipeline must not skip.
+  private frameSkipRate = 1;
+  private currentProfile: DeviceProfile = 'AUTO';
 
   // Recording health watchdog
   private lastFrameTime = 0;
@@ -56,7 +61,7 @@ export class ThreatDetector {
 
   constructor(callbacks: ThreatDetectorCallbacks = {}) {
     this.callbacks = callbacks;
-    this.audioCapture = new AudioCapture('BALANCED');
+    this.audioCapture = new AudioCapture('AUTO');
     this.classifier = new AudioClassifierEngine();
   }
 

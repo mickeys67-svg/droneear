@@ -21,7 +21,7 @@ export class AudioCapture {
   private frameCount = 0;
   private dataHandler: ((base64Data: string) => void) | null = null;
 
-  constructor(profileName: keyof typeof DEVICE_PROFILES = 'BALANCED') {
+  constructor(profileName: keyof typeof DEVICE_PROFILES = 'AUTO') {
     this.config = DEVICE_PROFILES[profileName];
   }
 

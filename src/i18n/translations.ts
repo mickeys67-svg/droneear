@@ -164,6 +164,21 @@ export interface Translations {
   micClippingHint?: string;
   signalQuality: string;
 
+  // Sensor status notices (shown in the listen-screen status panel).
+  // Worded as calm guidance, not errors. Optional so untranslated
+  // languages safely fall back to the English `message` string.
+  issueMicDenied?: string;
+  issueMicWind?: string;
+  issueMicNoise?: string;
+  issueMicClipping?: string;
+  issueMicLowSignal?: string;
+  issueCompassUnavailable?: string;
+  issueCompassDegraded?: string;
+  issueStereoUnavailable?: string;
+  issueMonoProfile?: string;
+  issueRecordingLost?: string;
+  issueBluetoothUnavailable?: string;
+
   // Accuracy Disclaimers
   distanceDisclaimer: string;
   bearingDirection?: string;
@@ -207,6 +222,17 @@ export interface Translations {
   guideProfilesTitle: string;
   guideLimitsTitle: string;
   guideLimitsDesc: string;
+
+  // Single "Auto" microphone card (Settings). Optional → English fallback.
+  micAutoLabel?: string;
+  micAutoDesc?: string;
+
+  // Detectable models scope (Guide screen). Optional → English fallback.
+  guideDetectableTitle?: string;
+  guideDetectableDesc?: string;
+  detectBadgeAvailable?: string;
+  detectBadgeComingSoon?: string;
+  detectExamplesLabel?: string;
 
   // Detection Range Guide
   guideRangeTitle: string;
@@ -541,6 +567,18 @@ const ko: Translations = {
   micClippingHint: '소음원에서 멀리 이동하세요',
   signalQuality: '신호 품질',
 
+  issueMicDenied: '마이크 권한이 꺼져 있어 청취할 수 없습니다',
+  issueMicWind: '바람 소음으로 신호가 약합니다 — 마이크를 가려 주세요',
+  issueMicNoise: '주변이 시끄러워 신호가 약합니다 — 조용한 곳으로 이동해 보세요',
+  issueMicClipping: '소리가 너무 커서 왜곡됩니다 — 소음원에서 멀어지세요',
+  issueMicLowSignal: '마이크 신호가 약해 탐지 거리가 짧아집니다',
+  issueCompassUnavailable: '나침반을 쓸 수 없어 방향은 상대값으로만 표시됩니다',
+  issueCompassDegraded: '나침반 정확도가 낮습니다 — 금속에서 떨어져 주세요',
+  issueStereoUnavailable: '현재 프로필에서는 스테레오를 쓸 수 없습니다',
+  issueMonoProfile: '모노 프로필에서는 방향 추정을 쓸 수 없습니다',
+  issueRecordingLost: '녹음이 중단되었습니다 — 다시 시도해 주세요',
+  issueBluetoothUnavailable: '블루투스를 쓸 수 없어 BLE Remote ID 스캔이 꺼졌습니다',
+
   // Accuracy
   distanceDisclaimer: '거리는 음압 기반 추정값이며 환경에 따라 오차가 있을 수 있습니다.',
   bearingDirection: '방향 추정',
@@ -582,6 +620,13 @@ const ko: Translations = {
   guideTip3: '바람이 강한 날에는 마이크를 손이나 천으로 차단해 주세요.',
   guideTip4: '고감도 모드는 조용한 환경에서, 표준 모드는 일반 환경에서 사용하세요.',
   guideProfilesTitle: '프로파일 안내',
+  micAutoLabel: '자동',
+  micAutoDesc: '휴대폰 마이크를 자동으로 사용합니다. 외장 마이크를 연결하면 자동으로 전환됩니다.',
+  guideDetectableTitle: '탐지 가능 기종',
+  guideDetectableDesc: '현재 무료로 제공되는 음향 모델로 탐지할 수 있는 기종입니다. 나머지 유형은 데이터 확보 후 추후 제공됩니다.',
+  detectBadgeAvailable: '제공 중',
+  detectBadgeComingSoon: '추후 제공',
+  detectExamplesLabel: '예시',
   guideLimitsTitle: '식별 한계',
   guideLimitsDesc: '이 앱은 음향 기반 식별이므로 다음과 같은 한계가 있습니다:\n• 무소음 드론은 식별 불가\n• 거리 추정은 환경에 따라 오차 발생\n• 방향 추정은 단일 마이크에서 제한적\n• 강한 바람/소음은 정확도 저하 원인\n• 모든 드론 유형을 식별하지 못할 수 있음',
 
@@ -908,6 +953,18 @@ const en: Translations = {
   micClippingHint: 'Move away from loud sound source',
   signalQuality: 'Signal Quality',
 
+  issueMicDenied: 'Microphone access is off — listening is unavailable',
+  issueMicWind: 'Wind noise is weakening the signal — shield the microphone',
+  issueMicNoise: 'Noisy surroundings weaken the signal — try a quieter spot',
+  issueMicClipping: 'Sound is too loud and distorting — move away from the source',
+  issueMicLowSignal: 'Microphone signal is weak — detection range is reduced',
+  issueCompassUnavailable: 'Compass unavailable — direction is shown as relative only',
+  issueCompassDegraded: 'Compass accuracy is low — move away from metal',
+  issueStereoUnavailable: 'Stereo is not available on the current profile',
+  issueMonoProfile: 'Mono profile — direction estimate is unavailable',
+  issueRecordingLost: 'Recording stopped — please retry',
+  issueBluetoothUnavailable: 'Bluetooth is off — BLE Remote ID scan is disabled',
+
   distanceDisclaimer: 'Distance is estimated from sound pressure and may vary with environment.',
   bearingDirection: 'Bearing',
   bearingDisclaimer: 'Direction estimation is limited with a single microphone. Use stereo profile for better accuracy.',
@@ -946,6 +1003,13 @@ const en: Translations = {
   guideTip3: 'Shield the microphone from wind with your hand or cloth.',
   guideTip4: 'Use High Sensitivity in quiet areas, Balanced in noisy environments.',
   guideProfilesTitle: 'Profile Guide',
+  micAutoLabel: 'Auto',
+  micAutoDesc: 'Uses your phone\'s microphone automatically. Plug in an external microphone and the app switches to it.',
+  guideDetectableTitle: 'Detectable Models',
+  guideDetectableDesc: 'Aircraft types the current free acoustic model can detect. Other types will be added once their datasets are secured.',
+  detectBadgeAvailable: 'Available',
+  detectBadgeComingSoon: 'Coming soon',
+  detectExamplesLabel: 'Examples',
   guideLimitsTitle: 'Identification Limitations',
   guideLimitsDesc: 'This app uses acoustic identification with these limitations:\n• Silent drones cannot be identified\n• Distance estimates vary with environment\n• Direction estimation limited with single mic\n• Strong wind/noise reduces accuracy\n• Not all drone types may be identified',
 

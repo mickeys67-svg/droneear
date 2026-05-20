@@ -65,6 +65,11 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
   const safeBearing = isFinite(detection.bearingDegrees) ? detection.bearingDegrees : 0;
   const safeConfidence = isFinite(detection.confidence) ? detection.confidence : 0;
 
+  // Distance/bearing are only real for BLE Remote ID / fused detections
+  // (drone-broadcast GPS). Acoustic-only detections have no position and
+  // must not display fabricated distance/bearing/approach numbers.
+  const hasPosition = detection.source === 'BLE_REMOTE_ID' || detection.source === 'FUSED';
+
   const bearingStr = safeBearing > 0
     ? `${safeBearing.toFixed(0)}° (${getBearingLabel(safeBearing, t)})`
     : t.directionLimited;
@@ -104,21 +109,24 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
 
       {/* Stat Highlights */}
       <View style={styles.statRow}>
-        {/* Distance Stat */}
-        <View style={styles.statCard}>
-          <Text style={[glassStyles.dataLabel, { color: `${theme.text}77` }]}>
-            {t.distance} (~)
-          </Text>
-          <View style={styles.statValueRow}>
-            <Text style={[styles.statValueLarge, { color: severityColor }]}>
-              ~{Math.round(detection.distanceMeters)}
+        {/* Distance Stat — only shown when the detection has a real GPS
+            position (BLE Remote ID / fused). Acoustic-only has no distance. */}
+        {hasPosition && (
+          <View style={styles.statCard}>
+            <Text style={[glassStyles.dataLabel, { color: `${theme.text}77` }]}>
+              {t.distance} (~)
             </Text>
-            <Text style={[styles.statUnit, { color: `${severityColor}AA` }]}>m</Text>
+            <View style={styles.statValueRow}>
+              <Text style={[styles.statValueLarge, { color: severityColor }]}>
+                ~{Math.round(detection.distanceMeters)}
+              </Text>
+              <Text style={[styles.statUnit, { color: `${severityColor}AA` }]}>m</Text>
+            </View>
+            <Text style={[styles.disclaimer, { color: theme.textMuted }]}>
+              {t.distanceDisclaimer}
+            </Text>
           </View>
-          <Text style={[styles.disclaimer, { color: theme.textMuted }]}>
-            {t.distanceDisclaimer}
-          </Text>
-        </View>
+        )}
 
         {/* Confidence Stat */}
         <View style={styles.statCard}>
@@ -141,22 +149,39 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
 
       {/* Data Grid */}
       <View style={styles.body}>
-        <DataRow
-          label={t.bearing}
-          value={bearingStr}
-          color={theme.text}
-          sublabel={safeBearing > 0 ? undefined : t.bearingDisclaimer}
-          sublabelColor={theme.textMuted}
-        />
-        {isFinite(detection.approachRate) && detection.approachRate < 0 && (
+        {/* Bearing / approach — only for GPS-backed detections. Acoustic-only
+            detection cannot determine direction or approach rate. */}
+        {hasPosition ? (
+          <>
+            <DataRow
+              label={t.bearing}
+              value={bearingStr}
+              color={theme.text}
+              sublabel={safeBearing > 0 ? undefined : t.bearingDisclaimer}
+              sublabelColor={theme.textMuted}
+            />
+            {isFinite(detection.approachRate) && detection.approachRate < 0 && (
+              <DataRow
+                label={t.approach}
+                value={`${Math.abs(detection.approachRate).toFixed(1)} m/s`}
+                color={theme.danger}
+              />
+            )}
+          </>
+        ) : (
           <DataRow
-            label={t.approach}
-            value={`${Math.abs(detection.approachRate).toFixed(1)} m/s`}
-            color={theme.danger}
+            label={t.bearing}
+            value={t.directionLimited}
+            color={theme.textMuted}
+            sublabel={t.bearingDisclaimer}
+            sublabelColor={theme.textMuted}
           />
         )}
 
-        {/* Similar drone models */}
+        {/* Similar drone models — examples of drones that commonly fall in
+            this acoustic class. The percentage is intentionally NOT shown
+            per model: it would be a static popularity weight, not an
+            acoustic match probability, and reads as a false positive ID. */}
         {detection.similarDrones && detection.similarDrones.length > 0 && (
           <View style={styles.similarSection}>
             <Text style={[glassStyles.dataLabel, { color: `${theme.text}77`, marginBottom: 6 }]}>
@@ -164,9 +189,12 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
             </Text>
             {detection.similarDrones.slice(0, 3).map((drone, i) => (
               <Text key={i} style={[styles.similarItem, { color: theme.textDim }]}>
-                {drone.name} ({(drone.probability * 100).toFixed(0)}%)
+                ≈ {drone.name}
               </Text>
             ))}
+            <Text style={[styles.similarNote, { color: theme.textMuted }]}>
+              {t.acousticDisclaimer}
+            </Text>
           </View>
         )}
 
@@ -186,7 +214,9 @@ export const ThreatAlert: React.FC<ThreatAlertProps> = ({ detection, onAcknowled
 
       {/* Action Buttons */}
       <View style={styles.actionRow}>
-        {onTrack && (
+        {/* Track is only meaningful for GPS-backed detections — you cannot
+            track a position the acoustic path never determined. */}
+        {onTrack && hasPosition && (
           <TouchableOpacity
             style={[
               styles.actionBtn,
@@ -410,6 +440,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginLeft: 8,
     marginBottom: 3,
+  },
+  similarNote: {
+    fontSize: 10,
+    fontStyle: 'italic',
+    marginTop: 4,
+    marginLeft: 8,
+    lineHeight: 14,
   },
 
   // ===== Accuracy Bar =====

@@ -55,8 +55,6 @@ function HomeScreenInner() {
     isScanning,
     latestDetection,
     currentThreats,
-    audioLevel,
-    spectralData,
     inferenceTimeMs,
     modelStatus,
     batteryLevel,
@@ -67,9 +65,12 @@ function HomeScreenInner() {
     sensorState,
     sensorIssues,
     environmentState,
+    compassHeading,
+    compassAvailable,
     bleAvailable,
     bleScanActive,
     bleDeviceCount,
+    bleDevices,
     wifiAvailable,
     wifiScanActive,
     startScanning,
@@ -77,6 +78,12 @@ function HomeScreenInner() {
     acknowledgeDetection,
     submitFeedback,
   } = useThreatDetector();
+
+  // audioLevel/spectralData intentionally NOT destructured here — they fire
+  // 20-30Hz and would re-render the entire HomeScreen every audio frame
+  // (which the user perceived as the whole page "flickering / shaking").
+  // TacticalSpectrogram and DebugItem subscribe to the detection store
+  // directly so per-frame updates stay scoped to those leaves.
 
   // Raw inference (best category + confidence even when filtered out)
   const lastRawCategory = useDetectionStore((s) => s.lastRawCategory);
@@ -88,6 +95,8 @@ function HomeScreenInner() {
   const selectedTrackId = useDetectionStore((s) => s.selectedTrackId);
   const selectTrack = useDetectionStore((s) => s.selectTrack);
   const feedbackDetectionId = useDetectionStore((s) => s.feedbackDetectionId);
+  // Phone GPS — lets the radar place BLE Remote ID drones at their true range.
+  const userLocation = useDetectionStore((s) => s.userLocation);
 
   // Derive tracking data from selected track (FIX-C1: guard empty detections)
   const trackedTrack = selectedTrackId
@@ -168,8 +177,10 @@ function HomeScreenInner() {
         return (
           <TrackingOverlay
             trackId={trackedTrack.id}
-            droneName={trackedDetection.similarDrones?.[0]?.name || categoryLabel}
+            droneName={categoryLabel}
             category={categoryLabel}
+            similarModel={trackedDetection.similarDrones?.[0]?.name}
+            hasPosition={trackedDetection.source === 'BLE_REMOTE_ID' || trackedDetection.source === 'FUSED'}
             distance={trackedDetection.distanceMeters ?? 0}
             bearing={trackedDetection.bearingDegrees ?? 0}
             confidence={trackedDetection.confidence ?? 0}
@@ -185,25 +196,36 @@ function HomeScreenInner() {
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-        {/* Header — 2-tone brand + glass badges */}
+        {/* Header — 2-tone brand + glass badges. Brand shrinks first; badge
+            stays single-line so "LISTENING" / "청취 중" never overflow the
+            screen edge (the previous layout clipped the badge tail). */}
         <View style={styles.header}>
-          <Text style={[styles.brandText, { color: theme.text }]} accessibilityRole="header">
+          <Text
+            style={[styles.brandText, { color: theme.text }]}
+            accessibilityRole="header"
+            numberOfLines={1}
+          >
             Drone<Text style={{ color: theme.primary }}>Ear</Text>
           </Text>
           <View style={styles.headerRight}>
             {isScanning && (
-              <View style={[styles.glassBadge, { borderColor: `${theme.primary}40`, backgroundColor: `${theme.primary}10` }]}>
-                <Text style={[styles.badgeText, { color: theme.primary }]}>
+              <View style={[styles.glassBadge, styles.glassBadgeTimer, { borderColor: `${theme.primary}40`, backgroundColor: `${theme.primary}10` }]}>
+                <Text style={[styles.badgeText, { color: theme.primary }]} numberOfLines={1}>
                   {formatTime(scanSeconds)}
                 </Text>
               </View>
             )}
-            <View style={[styles.glassBadge, {
+            <View style={[styles.glassBadge, styles.glassBadgeStatus, {
               backgroundColor: isScanning ? `${theme.primary}12` : isError ? `${theme.danger}12` : GLASS.cardBg,
               borderColor: isScanning ? `${theme.primary}40` : isError ? `${theme.danger}40` : GLASS.borderSubtle,
             }]}>
               <View style={[styles.statusDot, { backgroundColor: isScanning ? theme.primary : isError ? theme.danger : theme.textMuted }]} />
-              <Text style={[styles.badgeText, { color: isError ? theme.danger : isScanning ? theme.primary : theme.textDim }]}>
+              <Text
+                style={[styles.badgeText, { color: isError ? theme.danger : isScanning ? theme.primary : theme.textDim }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+              >
                 {isLoading ? t.loading : isError ? t.error : isScanning ? t.scanning : t.standby}
               </Text>
             </View>
@@ -241,13 +263,17 @@ function HomeScreenInner() {
           <SensorIssuesPanel issues={sensorIssues} />
         )}
 
-        {/* Tactical Radar */}
+        {/* Tactical Radar — front-up when compass is available so the top
+            of the radar shows where the phone is facing. */}
         <View style={styles.radarSection}>
           <TacticalRadar
             size={280}
             isActive={isScanning}
             threats={currentThreats}
+            bleDevices={bleDevices}
+            userLocation={userLocation}
             maxRange={2000}
+            headingDegrees={compassAvailable ? compassHeading : null}
           />
           <Text
             style={[styles.scanStatus, { color: theme.primary, opacity: isScanning ? 1 : 0.4 }]}
@@ -257,6 +283,22 @@ function HomeScreenInner() {
               ? t.scanningTracks(activeThreats.length)
               : t.sensorOffline}
           </Text>
+
+          {/* HEADING readout — shows the phone's current compass facing so the
+              user knows the front-up radar is alive and which way is north.
+              Falls back to "—" when the magnetometer is unavailable. */}
+          {isScanning && (
+            <View style={[styles.headingPill, { borderColor: `${theme.primary}30`, backgroundColor: `${theme.primary}08` }]}>
+              <Text style={[styles.headingPillLabel, { color: theme.textMuted }]}>
+                HEADING
+              </Text>
+              <Text style={[styles.headingPillValue, { color: compassAvailable ? theme.text : theme.textDim }]} numberOfLines={1}>
+                {compassAvailable
+                  ? `${String(compassHeading).padStart(3, '0')}° ${cardinalFromDegrees(compassHeading)}`
+                  : '— —'}
+              </Text>
+            </View>
+          )}
 
           {/* BLE / WiFi scan status badges */}
           {isScanning && (
@@ -310,10 +352,8 @@ function HomeScreenInner() {
           )}
         </View>
 
-        {/* Spectrogram */}
+        {/* Spectrogram — subscribes to detection store internally */}
         <TacticalSpectrogram
-          spectralData={spectralData}
-          audioLevel={audioLevel}
           isActive={isScanning}
           numBars={32}
           height={70}
@@ -325,7 +365,7 @@ function HomeScreenInner() {
             <View style={[glassStyles.card, styles.debugPanel]}>
               <DebugItem label="Model" value={modelStatus} color={theme} />
               <DebugItem label="Inference" value={`${inferenceTimeMs.toFixed(1)}ms`} color={theme} />
-              <DebugItem label="RMS" value={audioLevel.toFixed(3)} color={theme} />
+              <DebugRmsItem color={theme} />
               <DebugItem label="Tracks" value={String(activeThreats.length)} color={theme} />
               <DebugItem label="Time" value={formatTime(scanSeconds)} color={theme} />
               <DebugItem label="Batt" value={`${batteryLevel}%`} color={theme} />
@@ -399,6 +439,20 @@ const DebugItem: React.FC<{ label: string; value: string; color: TacticalTheme }
   </View>
 );
 
+// Isolate audioLevel subscription so per-frame RMS updates only re-render
+// this leaf, not the whole HomeScreen debug panel.
+const DebugRmsItem: React.FC<{ color: TacticalTheme }> = ({ color }) => {
+  const audioLevel = useDetectionStore((s) => s.audioLevel);
+  return <DebugItem label="RMS" value={audioLevel.toFixed(2)} color={color} />;
+};
+
+// 8-point compass label for the HEADING readout (N, NE, E, SE, ...).
+function cardinalFromDegrees(deg: number): string {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const i = Math.round(((deg % 360) + 360) % 360 / 45) % 8;
+  return dirs[i];
+}
+
 class HomeErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   state = { hasError: false };
   static getDerivedStateFromError() { return { hasError: true }; }
@@ -432,20 +486,42 @@ const styles = StyleSheet.create({
   // is comfortable without losing breathing room on large screens.
   container: {
     padding: SMALL_SCREEN ? 12 : 16,
-    paddingBottom: SMALL_SCREEN ? 80 : 100,
+    // Extra bottom padding so the HEARING pill + SCAN button clear the
+    // floating tab bar; the previous 100pt let the pill get clipped on
+    // standard iPhones.
+    paddingBottom: SMALL_SCREEN ? 120 : 140,
   },
 
   // Header
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SMALL_SCREEN ? 10 : 16, marginTop: SMALL_SCREEN ? 4 : 8 },
-  brandText: { fontSize: SMALL_SCREEN ? 22 : 26, fontWeight: '900', letterSpacing: 2 },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  glassBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, gap: 8 },
-  statusDot: { width: 8, height: 8, borderRadius: 4 },
-  badgeText: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SMALL_SCREEN ? 10 : 16, marginTop: SMALL_SCREEN ? 4 : 8, gap: 8 },
+  brandText: { fontSize: SMALL_SCREEN ? 22 : 26, fontWeight: '900', letterSpacing: 2, flexShrink: 1 },
+  // headerRight has flexShrink so the status badge keeps room when the brand
+  // is wide; badges have tighter internal padding so the LISTENING tail
+  // doesn't get clipped against the screen edge.
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
+  glassBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, gap: 6 },
+  glassBadgeTimer: { paddingHorizontal: 8 },
+  glassBadgeStatus: { maxWidth: 140 },
+  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  badgeText: { fontSize: 12, fontWeight: '800', letterSpacing: 0.6 },
 
   // Radar
   radarSection: { alignItems: 'center', marginVertical: SMALL_SCREEN ? 12 : 20 },
   scanStatus: { fontSize: 14, fontWeight: '800', letterSpacing: 2.5, marginTop: SMALL_SCREEN ? 10 : 14, textTransform: 'uppercase' },
+
+  // HEADING readout pill — visible compass direction the phone is facing.
+  headingPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  headingPillLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8 },
+  headingPillValue: { fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] } as any,
 
   // Debug panel
   debugPanel: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 12, flexWrap: 'wrap' },

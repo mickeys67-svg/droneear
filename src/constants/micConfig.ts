@@ -1,45 +1,25 @@
 import { type DeviceProfile, type MicConfig } from '../types';
 
+// Single automatic microphone configuration. Mono capture at 16 kHz from the
+// phone's default input — which the OS already routes to an external mic when
+// one is connected. 16 kHz is the canonical fingerprint rate (fingerprintConfig)
+// so the live audio and the reference library stay front-end-identical; mono
+// because acoustic direction-of-arrival was removed (a single uncalibrated
+// phone mic cannot determine direction).
 export const DEVICE_PROFILES: Record<DeviceProfile, MicConfig> = {
-  BALANCED: {
+  AUTO: {
     audioSource: 6,          // VOICE_RECOGNITION
-    sampleRate: 44100,       // 44.1kHz - covers full drone harmonic range
+    // 16 kHz: the drone acoustic signature lives below 8 kHz, and this is the
+    // canonical rate the v1 fingerprint matcher and its reference library are
+    // built at (see fingerprintConfig). Capturing natively at 16 kHz keeps
+    // the live fingerprint and the bundled references front-end-identical.
+    sampleRate: 16000,
     channels: 1,
     bitsPerSample: 16,
-    bufferSize: 2048,        // ~46ms latency at 44.1kHz
+    bufferSize: 1024,        // one FFT window (~64ms at 16kHz)
     gainMultiplier: 1.0,
-    label: 'Balanced',
-    description: 'Standard 44.1kHz. Covers full drone propeller frequency range (100Hz-8kHz).',
-  },
-  SAMSUNG_OPTIMIZED: {
-    audioSource: 9,          // UNPROCESSED (Android 7.0+)
-    sampleRate: 44100,
-    channels: 2,             // Stereo for DOA estimation
-    bitsPerSample: 16,
-    bufferSize: 2048,
-    gainMultiplier: 1.2,
-    label: 'Samsung Galaxy',
-    description: 'Unprocessed stereo audio. GCC-PHAT directional estimation enabled.',
-  },
-  HIGH_SENSITIVITY: {
-    audioSource: 6,
-    sampleRate: 44100,
-    channels: 1,
-    bitsPerSample: 16,
-    bufferSize: 1024,        // Lower buffer for faster response
-    gainMultiplier: 2.0,
-    label: 'High Sensitivity',
-    description: '2x gain boost. Optimized for long-range detection. Higher false positive rate in noisy environments.',
-  },
-  RAW_EXPERT: {
-    audioSource: 9,          // UNPROCESSED
-    sampleRate: 48000,       // 48kHz for maximum frequency resolution
-    channels: 2,
-    bitsPerSample: 16,
-    bufferSize: 4096,        // Larger buffer for better FFT resolution
-    gainMultiplier: 1.0,
-    label: 'Expert Raw',
-    description: '48kHz unprocessed stereo. Maximum frequency resolution. High CPU usage.',
+    label: 'Auto',
+    description: 'Automatic — uses the phone\'s default microphone, or an external mic when connected.',
   },
 };
 

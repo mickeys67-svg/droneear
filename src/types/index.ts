@@ -42,9 +42,10 @@ export interface DetectionResult {
   bearingDegrees: number;      // 0-360, relative to device heading
   approachRate: number;        // m/s, negative = approaching
   timestamp: number;           // Unix timestamp ms
-  spectralSignature: number[]; // Mel spectrogram snapshot (128 bins)
+  spectralSignature: number[]; // Mel spectrogram snapshot (64 bins)
   frequencyPeaks: number[];    // Dominant frequency peaks in Hz
-  /** Similar drone models with probability (from DroneDatabase) */
+  /** Example drone models in the detected acoustic class (from DroneDatabase).
+      NOT a positive identification — these are reference examples only. */
   similarDrones?: SimilarDrone[];
   /** Detection source (acoustic, BLE Remote ID, or fused) */
   source?: DetectionSource;
@@ -54,7 +55,6 @@ export interface DetectionResult {
 
 export interface SimilarDrone {
   name: string;         // e.g. "DJI Mavic 3"
-  probability: number;  // 0.0 - 1.0
   category: 'civilian' | 'industrial' | 'military' | 'racing' | 'other';
 }
 
@@ -152,7 +152,12 @@ export interface KalmanState {
 
 // ===== Audio Types =====
 
-export type DeviceProfile = 'BALANCED' | 'SAMSUNG_OPTIMIZED' | 'HIGH_SENSITIVITY' | 'RAW_EXPERT';
+// Single automatic profile. The previous 4 named profiles differed only in
+// settings (channels / gain / audioSource) that did not meaningfully change
+// detection — gain never reached the FFT, stereo capture was not even
+// de-interleaved — so they were fake differentiation and were collapsed into
+// one honest "Auto" configuration that uses the phone's default microphone.
+export type DeviceProfile = 'AUTO';
 
 export interface MicConfig {
   audioSource: number;
@@ -174,7 +179,7 @@ export interface AudioFrame {
 }
 
 export interface SpectralData {
-  melSpectrogram: Float32Array;  // 128 mel bins
+  melSpectrogram: Float32Array;  // 64 mel bins
   mfcc: Float32Array;           // 30 MFCC coefficients
   frequencyBins: Float32Array;  // Raw FFT magnitude spectrum
   dominantFrequencies: number[];

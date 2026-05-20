@@ -41,7 +41,7 @@ interface SettingsState extends AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings & { locale: SupportedLocale; voiceAlert: boolean; onboardingComplete: boolean } = {
-  profile: 'BALANCED',
+  profile: 'AUTO',
   themeMode: 'DAY',
   // Lowered from 0.75 → 0.60 so phone-speaker test sounds (e.g. YouTube
   // drone clips, which the mic picks up at lower SPL than a real drone)
@@ -69,15 +69,8 @@ export const useSettingsStore = create<SettingsState>()(
       setLocale: (locale) => set({ locale }),
       setVoiceAlert: (enabled) => set({ voiceAlert: enabled }),
       setOnboardingComplete: (done) => set({ onboardingComplete: done }),
-      setProfile: (profile) => {
-        const valid: DeviceProfile[] = ['BALANCED', 'SAMSUNG_OPTIMIZED', 'HIGH_SENSITIVITY', 'RAW_EXPERT'];
-        if (!valid.includes(profile)) {
-          console.warn(`[SettingsStore] Invalid profile "${profile}", using BALANCED`);
-          set({ profile: 'BALANCED' });
-        } else {
-          set({ profile });
-        }
-      },
+      // Only one profile ('AUTO') remains; setter kept for API compatibility.
+      setProfile: (_profile) => set({ profile: 'AUTO' }),
       setThemeMode: (mode) => set({ themeMode: mode }),
       setConfidenceThreshold: (threshold) => set({ confidenceThreshold: Math.max(0, Math.min(1, threshold)) }),
       setAlertVibration: (enabled) => set({ alertVibration: enabled }),
@@ -95,13 +88,17 @@ export const useSettingsStore = create<SettingsState>()(
       // Bump this when the persisted shape changes. zustand/persist will
       // discard older payloads (or run migrate) instead of merging mismatched
       // schemas, which previously could leave stale fields polluting state.
-      version: 1,
+      version: 2,
       migrate: (persisted: unknown, _version: number) => {
-        // No schema breaks yet; future migrations key on _version. Fold any
-        // unexpected payload back onto defaults so a corrupted store can't
-        // crash the app on startup.
+        // Fold any unexpected payload back onto defaults so a corrupted store
+        // can't crash the app on startup.
         if (!persisted || typeof persisted !== 'object') return DEFAULT_SETTINGS;
-        return persisted as SettingsState;
+        const p = persisted as SettingsState;
+        // v2: the 4 mic profiles (BALANCED / SAMSUNG_OPTIMIZED /
+        // HIGH_SENSITIVITY / RAW_EXPERT) were collapsed into a single 'AUTO'.
+        // Any persisted legacy value is remapped so it stays valid.
+        if (p.profile !== 'AUTO') p.profile = 'AUTO';
+        return p;
       },
       partialize: (state) => ({
         profile: state.profile,

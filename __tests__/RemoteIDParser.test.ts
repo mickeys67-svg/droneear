@@ -27,8 +27,9 @@ describe('RemoteIDParser', () => {
     it('should parse Location message (type 0x1)', () => {
       const data = new Uint8Array(25);
       data[0] = 0x1 << 4; // messageType=1 (Location)
-      data[1] = 0x00; // status
-      data[2] = 90; // heading: 90 * 2 = 180 degrees
+      // Byte 1 flags: bit 1 = E/W Direction Segment (heading >= 180°).
+      data[1] = 0x02;
+      data[2] = 90; // Track Direction 90 + 180 (E/W segment) = 270°
       data[3] = 40; // speed raw
       data[4] = 73; // vertical speed: (73-63)*0.5 = 5 m/s
 
@@ -50,7 +51,7 @@ describe('RemoteIDParser', () => {
       expect(result).not.toBeNull();
       expect(result!.uavLatitude).toBeCloseTo(37.5665, 3);
       expect(result!.uavLongitude).toBeCloseTo(126.978, 3);
-      expect(result!.heading).toBe(180);
+      expect(result!.heading).toBe(270);
       expect(result!.verticalSpeed).toBe(5);
     });
 

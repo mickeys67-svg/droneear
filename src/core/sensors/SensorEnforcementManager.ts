@@ -34,7 +34,10 @@ export interface SensorState {
 export interface SensorIssue {
   sensor: keyof SensorState;
   status: SensorStatus;
-  message: string;       // User-facing message (i18n key or fallback)
+  message: string;       // English fallback text
+  // Stable i18n key — the UI translates this; falls back to `message` when
+  // the active language has no entry. Keeps the core layer translation-free.
+  messageKey: string;
   action: 'SETTINGS' | 'RETRY' | 'CHANGE_PROFILE' | 'REPOSITION' | 'NONE';
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
 }
@@ -117,6 +120,7 @@ export class SensorEnforcementManager {
         sensor: 'microphone',
         status: 'DENIED',
         message: 'Microphone permission denied. Cannot detect threats.',
+        messageKey: 'issueMicDenied',
         action: 'SETTINGS',
         severity: 'CRITICAL',
       });
@@ -140,22 +144,19 @@ export class SensorEnforcementManager {
 
     const prevMicState = this.sensorState.microphone;
     if (quality === 'POOR') {
+      // Weak mic signal is an informational quality notice, NOT a failure.
+      // It surfaces silently in the sensor-issues panel. We deliberately do
+      // NOT fire an escalating haptic/voice alarm here — a quiet room
+      // legitimately reads as low SNR, and repeating vibration made the app
+      // feel broken/error-y to users. Escalating alarms stay reserved for
+      // CRITICAL blockers (permission denied, recording crash).
       this.sensorState.microphone = 'DEGRADED';
-      const action = warning === 'WIND' ? 'REPOSITION' : warning === 'CLIPPING' ? 'CHANGE_PROFILE' : 'REPOSITION';
-      this.startEscalatingAlarm('mic_quality', {
-        sensor: 'microphone',
-        status: 'DEGRADED',
-        message: `Mic quality: ${quality}. ${warning || 'Low SNR'}.`,
-        action,
-        severity: 'HIGH',
-      });
     } else {
       if (this.sensorState.microphone === 'DEGRADED') {
         this.sensorState.microphone = 'OK';
       }
-      this.clearAlarm('mic_quality');
     }
-    if (prevMicState !== this.sensorState.microphone || quality === 'POOR') {
+    if (prevMicState !== this.sensorState.microphone) {
       this.emitState();
     }
   }
@@ -174,6 +175,7 @@ export class SensorEnforcementManager {
         sensor: 'recording',
         status: 'UNAVAILABLE',
         message: `Recording error: ${error}`,
+        messageKey: 'issueRecordingLost',
         action: 'RETRY',
         severity: 'CRITICAL',
       });
@@ -226,29 +228,37 @@ export class SensorEnforcementManager {
     const issues: SensorIssue[] = [];
 
     if (this.sensorState.microphone === 'DENIED') {
-      issues.push({ sensor: 'microphone', status: 'DENIED', message: 'Mic permission denied', action: 'SETTINGS', severity: 'CRITICAL' });
+      issues.push({ sensor: 'microphone', status: 'DENIED', message: 'Mic permission denied', messageKey: 'issueMicDenied', action: 'SETTINGS', severity: 'CRITICAL' });
     } else if (this.sensorState.microphone === 'DEGRADED') {
-      issues.push({ sensor: 'microphone', status: 'DEGRADED', message: `Mic quality poor: ${this.micWarning || 'low SNR'}`, action: 'REPOSITION', severity: 'HIGH' });
+      // Quality notice, not a failure — pick a specific calm message per
+      // cause so it reads as guidance ("move somewhere quieter") rather
+      // than a raw error string.
+      const micKey =
+        this.micWarning === 'WIND' ? 'issueMicWind' :
+        this.micWarning === 'CLIPPING' ? 'issueMicClipping' :
+        this.micWarning === 'NOISE' ? 'issueMicNoise' :
+        'issueMicLowSignal';
+      issues.push({ sensor: 'microphone', status: 'DEGRADED', message: 'Microphone signal is weak — detection range is reduced.', messageKey: micKey, action: 'REPOSITION', severity: 'MEDIUM' });
     }
 
     if (this.sensorState.compass === 'UNAVAILABLE') {
-      issues.push({ sensor: 'compass', status: 'UNAVAILABLE', message: 'Compass unavailable. Bearing is relative only.', action: 'NONE', severity: 'MEDIUM' });
+      issues.push({ sensor: 'compass', status: 'UNAVAILABLE', message: 'Compass unavailable. Bearing is relative only.', messageKey: 'issueCompassUnavailable', action: 'NONE', severity: 'MEDIUM' });
     } else if (this.sensorState.compass === 'DEGRADED') {
-      issues.push({ sensor: 'compass', status: 'DEGRADED', message: 'Compass accuracy low. Move away from metal.', action: 'REPOSITION', severity: 'MEDIUM' });
+      issues.push({ sensor: 'compass', status: 'DEGRADED', message: 'Compass accuracy low. Move away from metal.', messageKey: 'issueCompassDegraded', action: 'REPOSITION', severity: 'MEDIUM' });
     }
 
     if (this.sensorState.stereo === 'UNAVAILABLE' && this.isStereoProfile) {
-      issues.push({ sensor: 'stereo', status: 'UNAVAILABLE', message: 'Stereo not available on current profile.', action: 'CHANGE_PROFILE', severity: 'HIGH' });
+      issues.push({ sensor: 'stereo', status: 'UNAVAILABLE', message: 'Stereo not available on current profile.', messageKey: 'issueStereoUnavailable', action: 'CHANGE_PROFILE', severity: 'MEDIUM' });
     } else if (!this.isStereoProfile) {
-      issues.push({ sensor: 'stereo', status: 'DEGRADED', message: 'Mono profile: DOA bearing unavailable. Switch to stereo profile.', action: 'CHANGE_PROFILE', severity: 'MEDIUM' });
+      issues.push({ sensor: 'stereo', status: 'DEGRADED', message: 'Mono profile: direction estimate unavailable.', messageKey: 'issueMonoProfile', action: 'CHANGE_PROFILE', severity: 'MEDIUM' });
     }
 
     if (this.sensorState.recording === 'UNAVAILABLE') {
-      issues.push({ sensor: 'recording', status: 'UNAVAILABLE', message: 'Recording stopped unexpectedly.', action: 'RETRY', severity: 'CRITICAL' });
+      issues.push({ sensor: 'recording', status: 'UNAVAILABLE', message: 'Recording stopped unexpectedly.', messageKey: 'issueRecordingLost', action: 'RETRY', severity: 'CRITICAL' });
     }
 
     if (this.sensorState.bluetooth === 'UNAVAILABLE') {
-      issues.push({ sensor: 'bluetooth', status: 'UNAVAILABLE', message: 'Bluetooth unavailable. BLE Remote ID scanning disabled.', action: 'SETTINGS', severity: 'MEDIUM' });
+      issues.push({ sensor: 'bluetooth', status: 'UNAVAILABLE', message: 'Bluetooth unavailable. BLE Remote ID scanning disabled.', messageKey: 'issueBluetoothUnavailable', action: 'SETTINGS', severity: 'MEDIUM' });
     }
 
     return issues;

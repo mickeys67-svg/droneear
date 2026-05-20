@@ -18,6 +18,7 @@ interface ActiveThreatsListProps {
       confidence: number;
       distanceMeters: number;
       severity: string;
+      source?: string;
     }>;
   }>;
   onSelectTrack: (trackId: string) => void;
@@ -47,13 +48,19 @@ export const ActiveThreatsList = memo(function ActiveThreatsList({ activeThreats
           latest.severity === 'CRITICAL' ? theme.danger :
           latest.severity === 'HIGH' ? theme.warning :
           theme.primary;
+        // Distance is only real for GPS-backed (BLE Remote ID / fused) tracks.
+        const hasPosition = latest.source === 'BLE_REMOTE_ID' || latest.source === 'FUSED';
         return (
           <TouchableOpacity
             key={track.id}
             style={[styles.row, { borderBottomColor: theme.border }]}
             onPress={() => onSelectTrack(track.id)}
             accessibilityRole="button"
-            accessibilityLabel={`Track ${latest.threatCategory} ${t.distance} ${latest.distanceMeters}m`}
+            accessibilityLabel={
+              hasPosition
+                ? `Track ${latest.threatCategory} ${t.distance} ${latest.distanceMeters}m`
+                : `Track ${latest.threatCategory}`
+            }
           >
             <View style={[styles.dot, { backgroundColor: severityColor }]} />
             <View style={styles.info}>
@@ -64,9 +71,11 @@ export const ActiveThreatsList = memo(function ActiveThreatsList({ activeThreats
                 {getConfidenceLabel(latest.confidence, t)}
               </Text>
             </View>
-            <Text style={[styles.dist, { color: theme.primary }]}>
-              ~{Math.round(latest.distanceMeters)}m
-            </Text>
+            {hasPosition && (
+              <Text style={[styles.dist, { color: theme.primary }]}>
+                ~{Math.round(latest.distanceMeters)}m
+              </Text>
+            )}
             <Text style={[styles.conf, { color: theme.textDim }]}>
               {(latest.confidence * 100).toFixed(0)}%
             </Text>
