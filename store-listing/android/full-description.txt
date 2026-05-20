@@ -18,7 +18,7 @@ SECONDARY — Acoustic Detection (Beta)
 Other Features
 - Real-time map showing Remote ID drone positions
 - Detection history
-- Environment detection (indoor/outdoor) with adaptive sensitivity
+- Environment awareness — alerts you when indoor or noisy conditions reduce detection accuracy
 - 3 display themes: Day, Night, AMOLED
 
 15 Languages Supported
