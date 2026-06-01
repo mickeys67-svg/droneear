@@ -37,9 +37,9 @@ export default function TabLayout() {
           backgroundColor: GLASS.panelBg,
           borderTopColor: GLASS.borderSubtle,
           borderTopWidth: 1,
-          height: 82,
+          height: 88,
           paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-          paddingTop: 8,
+          paddingTop: 6,
           paddingHorizontal: 8,
           elevation: 0,
         },
@@ -47,7 +47,7 @@ export default function TabLayout() {
           fontSize: 11,
           fontWeight: '700',
           letterSpacing: 0.8,
-          marginTop: 4,
+          marginTop: 2,
         },
         tabBarAllowFontScaling: false,
         tabBarIconStyle: {
@@ -149,7 +149,7 @@ const tabStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: 52,
-    height: 40,
+    height: 36,
     borderRadius: 10,
   },
   iconWrapActive: {
@@ -157,9 +157,13 @@ const tabStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: GLASS.borderSubtle,
   },
+  // Sits just under the icon INSIDE the icon wrap (bottom:0). Previously
+  // bottom:-10 pushed it down into the label row, drawing a cyan line straight
+  // through the active tab's text ("LOG"). Keeping it inside the wrap clears
+  // the label entirely.
   activeIndicator: {
     position: 'absolute',
-    bottom: -10,
+    bottom: 0,
     width: 20,
     height: 3,
     borderRadius: 1.5,

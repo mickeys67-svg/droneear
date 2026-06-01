@@ -253,7 +253,7 @@ export default function HistoryScreen() {
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
             >
-              <Text style={[styles.filterPillText, { color: pillText }]}>{SEVERITY_LABEL[sev] || sev}</Text>
+              <Text style={[styles.filterPillText, { color: pillText }]} numberOfLines={1}>{SEVERITY_LABEL[sev] || sev}</Text>
             </TouchableOpacity>
           );
         })}
@@ -569,12 +569,16 @@ const styles = StyleSheet.create({
   filterScroll: {
     flexGrow: 0,
     flexShrink: 0,
-    height: 56,
+    height: 60,
     marginBottom: 14,
   },
   filterRow: {
     paddingHorizontal: 20,
     paddingRight: 28,
+    // Vertical padding pushes the pills inward from the band edges so their
+    // top/bottom (rounded corners) can't be clipped — without it the 40px
+    // pills sat flush against the band's top edge and got cut off.
+    paddingVertical: 10,
     gap: 8,
     alignItems: 'center',
   },
