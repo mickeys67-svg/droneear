@@ -138,7 +138,12 @@ export class DetectionFusionEngine {
       const lastDetection = track.detections[track.detections.length - 1];
 
       for (const [bleId, bleData] of bleEntries) {
-        const tDiff = Math.abs(lastDetection.timestamp - (bleData.lastSeen || 0));
+        // Skip entries with no valid timestamp instead of defaulting to 0 —
+        // a `|| 0` sentinel could spuriously fuse if a detection timestamp is
+        // itself near epoch (uninitialized/mocked).
+        const seen = bleData.lastSeen;
+        if (typeof seen !== 'number' || !Number.isFinite(seen)) continue;
+        const tDiff = Math.abs(lastDetection.timestamp - seen);
         if (tDiff > TIME_THRESHOLD_MS) continue;
         candidates.push({ track, bleId, bleData, timeDiff: tDiff });
       }

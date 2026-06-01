@@ -124,7 +124,7 @@ export default function HistoryScreen() {
                 {getCategoryShort(item.threatCategory)}
               </Text>
               {item.source && item.source !== 'ACOUSTIC' && (
-                <View style={[styles.categoryBadge, { backgroundColor: item.source === 'FUSED' ? '#00E5CC22' : '#4488FF22', borderColor: item.source === 'FUSED' ? '#00E5CC44' : '#4488FF44' }]}>
+                <View style={[styles.categoryBadge, { flexShrink: 0, backgroundColor: item.source === 'FUSED' ? '#00E5CC22' : '#4488FF22', borderColor: item.source === 'FUSED' ? '#00E5CC44' : '#4488FF44' }]}>
                   <Text style={[styles.categoryBadgeText, { color: item.source === 'FUSED' ? '#00E5CC' : '#4488FF' }]}>
                     {item.source === 'FUSED' ? 'FUSED' : item.source === 'BLE_REMOTE_ID' ? 'BLE' : 'WiFi'}
                   </Text>
@@ -228,7 +228,12 @@ export default function HistoryScreen() {
       </View>
 
       {/* Severity Filter Tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterScroll}
+        contentContainerStyle={styles.filterRow}
+      >
         {SEVERITY_FILTERS.map(sev => {
           const SEVERITY_LABEL: Record<string, string> = {
             ALL: t.all || 'ALL',
@@ -403,7 +408,7 @@ export default function HistoryScreen() {
                         {t.bearing || 'Bearing'}
                       </Text>
                       <Text style={[styles.modalStatValueMd, { color: theme.text }]}>
-                        {selectedDetection.bearingDegrees.toFixed(0)}°
+                        {Number.isFinite(selectedDetection.bearingDegrees) ? `${selectedDetection.bearingDegrees.toFixed(0)}°` : '—'}
                       </Text>
                     </View>
                   )}
@@ -556,11 +561,21 @@ const styles = StyleSheet.create({
   },
 
   // Filters
+  // A horizontal ScrollView in a flex column has no intrinsic height and gets
+  // shrunk by flexGrow siblings (the empty-state / list area), which clipped
+  // the pills (cut-off "All" chip) and let the empty text bleed through the
+  // transparent inactive pills. Pinning an explicit height + flexGrow/shrink:0
+  // gives the pills a fixed band that can't collapse.
+  filterScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 56,
+    marginBottom: 14,
+  },
   filterRow: {
     paddingHorizontal: 20,
     paddingRight: 28,
     gap: 8,
-    marginBottom: 14,
     alignItems: 'center',
   },
   filterPill: {
@@ -568,7 +583,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    height: 48,
+    height: 40,
     minWidth: 72,
     justifyContent: 'center',
     alignItems: 'center',

@@ -139,7 +139,7 @@ export function TrackingOverlay({
               <Text style={glassStyles.dataLabel}>{t.distance}</Text>
               <View style={styles.statValueRow}>
                 <Text style={styles.statPrefix}>~</Text>
-                <Text style={styles.statValue}>{Math.round(safeDistance)}</Text>
+                <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{Math.round(safeDistance)}</Text>
                 <Text style={styles.statUnit}>m</Text>
               </View>
             </View>
@@ -147,7 +147,7 @@ export function TrackingOverlay({
             <View style={styles.statCard}>
               <Text style={glassStyles.dataLabel}>{t.bearing}</Text>
               <View style={styles.statValueRow}>
-                <Text style={styles.statValue}>{Math.round(safeBearing)}°</Text>
+                <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{Math.round(safeBearing)}°</Text>
                 <Text style={[styles.statCompass, { color: theme.primary }]}>{compass}</Text>
               </View>
             </View>

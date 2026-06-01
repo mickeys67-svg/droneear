@@ -140,10 +140,10 @@ export default function SettingsScreen() {
 
           {/* Confidence Threshold */}
           <View style={styles.settingRow}>
-            <Text style={[styles.settingLabel, { color: theme.text }]}>
+            <Text style={[styles.settingLabel, { color: theme.text }]} numberOfLines={1}>
               {t.confidenceThreshold}
             </Text>
-            <Text style={[styles.settingValue, { color: theme.primary }]}>
+            <Text style={[styles.settingValue, { color: theme.primary }]} numberOfLines={1}>
               {(confidenceThreshold * 100).toFixed(0)}%
             </Text>
           </View>
@@ -292,8 +292,8 @@ const ToggleRow: React.FC<{
 
 const InfoRow: React.FC<{ label: string; value: string; theme: TacticalTheme }> = ({ label, value, theme }) => (
   <View style={styles.infoRow}>
-    <Text style={[styles.infoLabel, { color: theme.textDim }]}>{label}</Text>
-    <Text style={[styles.infoValue, { color: theme.text }]}>{value}</Text>
+    <Text style={[styles.infoLabel, { color: theme.textDim, flexShrink: 1 }]} numberOfLines={1}>{label}</Text>
+    <Text style={[styles.infoValue, { color: theme.text, flexShrink: 0 }]} numberOfLines={1}>{value}</Text>
   </View>
 );
 
@@ -312,10 +312,12 @@ const styles = StyleSheet.create({
   sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 16 },
 
   // Settings rows
-  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  settingRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 8 },
   settingBlock: { marginBottom: 18 },
-  settingLabel: { fontSize: 14, fontWeight: '600' },
-  settingValue: { fontSize: 16, fontWeight: '800' },
+  // flexShrink so a long localized label ellipsizes instead of pushing the
+  // right-aligned value off the screen edge.
+  settingLabel: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  settingValue: { fontSize: 16, fontWeight: '800', flexShrink: 0 },
 
   // Theme toggle
   themeToggle: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },

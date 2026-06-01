@@ -60,7 +60,12 @@ export function ScanButton({ isScanning, isLoading, isError, disabled, onToggle 
           {isLoading ? (
             <ActivityIndicator size="small" color={theme.mode === 'NIGHT' ? '#FFF' : '#000'} />
           ) : (
-            <Text style={[styles.text, theme.mode === 'NIGHT' && { color: '#FFF' }]}>
+            <Text
+              style={[styles.text, theme.mode === 'NIGHT' && { color: '#FFF' }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
               {isScanning ? t.haltDetection : t.engageSensors}
             </Text>
           )}

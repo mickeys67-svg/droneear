@@ -55,12 +55,8 @@ function HomeScreenInner() {
     isScanning,
     latestDetection,
     currentThreats,
-    inferenceTimeMs,
     modelStatus,
     batteryLevel,
-    micQuality,
-    micSnrDb,
-    micWarning,
     feedbackPending,
     sensorState,
     sensorIssues,
@@ -85,9 +81,11 @@ function HomeScreenInner() {
   // TacticalSpectrogram and DebugItem subscribe to the detection store
   // directly so per-frame updates stay scoped to those leaves.
 
-  // Raw inference (best category + confidence even when filtered out)
-  const lastRawCategory = useDetectionStore((s) => s.lastRawCategory);
-  const lastRawConfidence = useDetectionStore((s) => s.lastRawConfidence);
+  // Raw inference (best category + confidence even when filtered out) is read
+  // inside the HearingPill / DebugHeardPanel leaves below — NOT here. These
+  // values change a few times per second; subscribing in this top-level
+  // component would re-render the whole SCAN screen on every update (part of
+  // the "page shaking" bug), so the subscription is scoped to the leaves.
 
   const activeThreats = currentThreats.filter((tr) => tr.isActive);
 
@@ -249,22 +247,16 @@ function HomeScreenInner() {
           onOpenSettings={() => Linking.openSettings()}
         />
 
-        {/* Mic Quality Monitor */}
-        {isScanning && (
-          <MicQualityPanel
-            micQuality={micQuality}
-            micSnrDb={micSnrDb}
-            micWarning={micWarning}
-          />
-        )}
-
-        {/* Sensor Enforcement Status */}
-        {isScanning && sensorIssues.length > 0 && (
-          <SensorIssuesPanel issues={sensorIssues} />
-        )}
-
         {/* Tactical Radar — front-up when compass is available so the top
-            of the radar shows where the phone is facing. */}
+            of the radar shows where the phone is facing.
+
+            IMPORTANT: the radar is rendered ABOVE the mic-quality / sensor
+            status panels on purpose. Those panels can change height (the mic
+            warning badge appears/disappears, sensor issues mount/unmount), and
+            if they sat above the radar that height change would push the radar
+            and everything below it up/down — the reported full-screen shake.
+            With them below the radar, the radar's vertical position depends
+            only on the header, so it can never be pushed. */}
         <View style={styles.radarSection}>
           <TacticalRadar
             size={280}
@@ -329,28 +321,20 @@ function HomeScreenInner() {
               the pipeline is alive. Until the first inference arrives we
               show "Analyzing..." so the gap between SCAN tap and the first
               classification isn't silent either. */}
-          {isScanning && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: `${theme.primary}30`, backgroundColor: `${theme.primary}08`, maxWidth: '90%' }}>
-              <Text style={{ fontSize: 11, color: theme.textMuted, fontWeight: '800', letterSpacing: 0.8 }}>
-                {(t.hearing || 'HEARING').toUpperCase()}:
-              </Text>
-              {lastRawCategory ? (
-                <>
-                  <Text style={{ fontSize: 12, color: theme.text, fontWeight: '700', flexShrink: 1 }} numberOfLines={1}>
-                    {categoryLabel(t, lastRawCategory)}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: theme.textDim, fontWeight: '600', fontVariant: ['tabular-nums'] }}>
-                    {Math.round(lastRawConfidence * 100)}%
-                  </Text>
-                </>
-              ) : (
-                <Text style={{ fontSize: 12, color: theme.textDim, fontWeight: '600', fontStyle: 'italic' }}>
-                  {t.analyzing || 'Analyzing...'}
-                </Text>
-              )}
-            </View>
-          )}
+          {isScanning && <HearingPill t={t} theme={theme} />}
         </View>
+
+        {/* Mic Quality Monitor — placed BELOW the radar so its warning badge
+            appearing/disappearing never pushes the radar (see note above).
+            Subscribes to the store internally; dwell-hysteresis in the hook
+            keeps the warning from toggling faster than ~once per 3-4s. */}
+        {isScanning && <MicQualityPanel />}
+
+        {/* Sensor Enforcement Status — also below the radar for the same
+            no-reflow reason. */}
+        {isScanning && sensorIssues.length > 0 && (
+          <SensorIssuesPanel issues={sensorIssues} />
+        )}
 
         {/* Spectrogram — subscribes to detection store internally */}
         <TacticalSpectrogram
@@ -364,26 +348,13 @@ function HomeScreenInner() {
           <>
             <View style={[glassStyles.card, styles.debugPanel]}>
               <DebugItem label="Model" value={modelStatus} color={theme} />
-              <DebugItem label="Inference" value={`${inferenceTimeMs.toFixed(1)}ms`} color={theme} />
+              <DebugInferenceItem color={theme} />
               <DebugRmsItem color={theme} />
               <DebugItem label="Tracks" value={String(activeThreats.length)} color={theme} />
               <DebugItem label="Time" value={formatTime(scanSeconds)} color={theme} />
               <DebugItem label="Batt" value={`${batteryLevel}%`} color={theme} />
             </View>
-            {lastRawCategory && (
-              <View style={[glassStyles.card, styles.debugPanel, { marginTop: 6 }]}>
-                <DebugItem
-                  label="Heard"
-                  value={lastRawCategory.replace('_', ' ')}
-                  color={theme}
-                />
-                <DebugItem
-                  label="Confidence"
-                  value={`${Math.round(lastRawConfidence * 100)}%`}
-                  color={theme}
-                />
-              </View>
-            )}
+            <DebugHeardPanel color={theme} />
           </>
         )}
 
@@ -444,6 +415,57 @@ const DebugItem: React.FC<{ label: string; value: string; color: TacticalTheme }
 const DebugRmsItem: React.FC<{ color: TacticalTheme }> = ({ color }) => {
   const audioLevel = useDetectionStore((s) => s.audioLevel);
   return <DebugItem label="RMS" value={audioLevel.toFixed(2)} color={color} />;
+};
+
+// Same isolation rationale as DebugRmsItem: inferenceTimeMs updates every
+// audio frame, so subscribe to it in this leaf rather than the whole screen.
+const DebugInferenceItem: React.FC<{ color: TacticalTheme }> = ({ color }) => {
+  const inferenceTimeMs = useDetectionStore((s) => s.inferenceTimeMs);
+  return <DebugItem label="Inference" value={`${inferenceTimeMs.toFixed(1)}ms`} color={color} />;
+};
+
+// Live "what the model is hearing" pill. Subscribes to lastRawCategory /
+// lastRawConfidence directly so the several-times-per-second confidence
+// updates re-render ONLY this small pill — not the whole SCAN screen (radar,
+// spectrogram, buttons). Memoized so a parent re-render alone won't touch it.
+const HearingPill = React.memo<{ t: ReturnType<typeof useTranslation>; theme: TacticalTheme }>(({ t, theme }) => {
+  const lastRawCategory = useDetectionStore((s) => s.lastRawCategory);
+  const lastRawConfidence = useDetectionStore((s) => s.lastRawConfidence);
+  return (
+    <View style={[styles.hearingPill, { borderColor: `${theme.primary}30`, backgroundColor: `${theme.primary}08` }]}>
+      <Text style={[styles.hearingLabel, { color: theme.textMuted }]}>
+        {(t.hearing || 'HEARING').toUpperCase()}:
+      </Text>
+      {lastRawCategory ? (
+        <>
+          <Text style={[styles.hearingValue, { color: theme.text }]} numberOfLines={1}>
+            {categoryLabel(t, lastRawCategory)}
+          </Text>
+          <Text style={[styles.hearingConf, { color: theme.textDim }]}>
+            {Math.round(lastRawConfidence * 100)}%
+          </Text>
+        </>
+      ) : (
+        <Text style={[styles.hearingAnalyzing, { color: theme.textDim }]}>
+          {t.analyzing || 'Analyzing...'}
+        </Text>
+      )}
+    </View>
+  );
+});
+HearingPill.displayName = 'HearingPill';
+
+// Debug "Heard / Confidence" panel — same isolation rationale as HearingPill.
+const DebugHeardPanel: React.FC<{ color: TacticalTheme }> = ({ color }) => {
+  const lastRawCategory = useDetectionStore((s) => s.lastRawCategory);
+  const lastRawConfidence = useDetectionStore((s) => s.lastRawConfidence);
+  if (!lastRawCategory) return null;
+  return (
+    <View style={[glassStyles.card, styles.debugPanel, { marginTop: 6 }]}>
+      <DebugItem label="Heard" value={lastRawCategory.replace('_', ' ')} color={color} />
+      <DebugItem label="Confidence" value={`${Math.round(lastRawConfidence * 100)}%`} color={color} />
+    </View>
+  );
 };
 
 // 8-point compass label for the HEADING readout (N, NE, E, SE, ...).
@@ -521,7 +543,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   headingPillLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8 },
-  headingPillValue: { fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] } as any,
+  // Fixed minWidth + left align so the pill width stays constant when the
+  // cardinal flips between 1-char (N/E/S/W) and 2-char (NE/SE/SW/NW) — without
+  // this the centered pill re-centers and twitches left-right on each change.
+  headingPillValue: { fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'], minWidth: 66, textAlign: 'left' } as any,
+
+  // HEARING pill — live model output. Isolated leaf (HearingPill) so its
+  // high-frequency confidence updates don't re-render the whole screen.
+  hearingPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    // FIXED width (not maxWidth) + fixed minHeight so the pill never resizes
+    // as the live category/percentage text changes every audio frame. With
+    // maxWidth the pill re-centered on each text change and visibly jittered
+    // left-right ("왔다리갔다리"). Content is left-clustered inside instead.
+    width: '90%',
+    minHeight: 32,
+  },
+  hearingLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.8 },
+  hearingValue: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
+  // flexShrink:0 + marginLeft auto so the % stays pinned right and is never the
+  // element squeezed off when the category label is long.
+  hearingConf: { fontSize: 12, fontWeight: '600', flexShrink: 0, marginLeft: 'auto', fontVariant: ['tabular-nums'] } as any,
+  hearingAnalyzing: { fontSize: 12, fontWeight: '600', fontStyle: 'italic' },
 
   // Debug panel
   debugPanel: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 12, flexWrap: 'wrap' },

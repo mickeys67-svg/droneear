@@ -83,6 +83,11 @@ export class EnvironmentDetector {
   }
 
   async start(): Promise<void> {
+    // Idempotent: tear down any existing subscriptions first so a double
+    // start() (e.g. remount, or a resume that re-starts detection) can't orphan
+    // the previous location/barometer listeners and interval — they would keep
+    // firing forever otherwise.
+    this.stop();
     await this.startGPSMonitoring();
     await this.startBarometerMonitoring();
 

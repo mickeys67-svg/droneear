@@ -202,6 +202,10 @@ export class ThreatDetector {
 
       try {
         this.startAudioCapture();
+        // Reset the frame clock so the watchdog measures time from this restart,
+        // not from the dead period (incl. the backoff sleep) that triggered
+        // recovery — otherwise it can immediately re-fire and stack recoveries.
+        this.lastFrameTime = Date.now();
         this.callbacks.onStatusChange?.('SCANNING');
         // Notify caller so SensorEnforcementManager can clear the stale
         // "Recording stopped unexpectedly" issue from the warning panel.

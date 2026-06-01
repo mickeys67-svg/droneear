@@ -311,7 +311,7 @@ export function EnvironmentWarningBanner({
                 accessibilityRole="button"
                 accessibilityLabel={STEP_SEQUENCE[STEP_SEQUENCE.indexOf(currentStep) - 1] === 'shelter' ? t.stepShelter : t.stepMoveOutdoor}
               >
-                <Text style={[styles.secondaryBtnText, { color: theme.textMuted }]}>
+                <Text style={[styles.secondaryBtnText, { color: theme.textMuted }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                   ← {STEP_SEQUENCE.indexOf(currentStep) === 2 ? t.stepMoveOutdoor : t.stepShelter}
                 </Text>
               </TouchableOpacity>
@@ -323,7 +323,7 @@ export function EnvironmentWarningBanner({
                 accessibilityRole="button"
                 accessibilityLabel={currentStep === 'shelter' ? t.stepMoveOutdoor : t.stepPositionMic}
               >
-                <Text style={[styles.primaryBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]}>
+                <Text style={[styles.primaryBtnText, theme.mode === 'NIGHT' && { color: '#FFF' }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                   {currentStep === 'shelter' ? t.stepMoveOutdoor : t.stepPositionMic} →
                 </Text>
               </TouchableOpacity>

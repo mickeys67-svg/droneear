@@ -93,12 +93,13 @@ export const useSettingsStore = create<SettingsState>()(
         // Fold any unexpected payload back onto defaults so a corrupted store
         // can't crash the app on startup.
         if (!persisted || typeof persisted !== 'object') return DEFAULT_SETTINGS;
-        const p = persisted as SettingsState;
+        const p = persisted as Partial<SettingsState>;
+        // Spread persisted values OVER defaults so a payload from an older
+        // schema that lacks newer keys (e.g. wifiScanEnabled, onboardingComplete)
+        // gets those defaults instead of `undefined` until a setter runs.
         // v2: the 4 mic profiles (BALANCED / SAMSUNG_OPTIMIZED /
         // HIGH_SENSITIVITY / RAW_EXPERT) were collapsed into a single 'AUTO'.
-        // Any persisted legacy value is remapped so it stays valid.
-        if (p.profile !== 'AUTO') p.profile = 'AUTO';
-        return p;
+        return { ...DEFAULT_SETTINGS, ...p, profile: 'AUTO' };
       },
       partialize: (state) => ({
         profile: state.profile,

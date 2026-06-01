@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView } from 'react-native';
 import { useTheme } from '@/src/hooks/useTheme';
 import { useTranslation } from '@/src/i18n/useTranslation';
 import { glassStyles, cyanGlow } from '@/src/constants/glass';
@@ -18,6 +18,11 @@ export function MicPermissionOverlay({ onDismiss }: MicPermissionOverlayProps) {
 
   return (
     <View style={[glassStyles.overlay, { backgroundColor: theme.background }]}>
+     <ScrollView
+       style={styles.scroll}
+       contentContainerStyle={styles.scrollContent}
+       showsVerticalScrollIndicator={false}
+     >
       {/* Permission Blocked badge */}
       <View style={[styles.badge, { backgroundColor: `${theme.danger}20`, borderColor: `${theme.danger}50` }]}>
         <Text style={[styles.badgeText, { color: theme.danger }]}>
@@ -69,11 +74,18 @@ export function MicPermissionOverlay({ onDismiss }: MicPermissionOverlayProps) {
           {t.continueWithout || 'Continue without microphone'}
         </Text>
       </TouchableOpacity>
+     </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // ScrollView so tall content (long translations on small phones like the
+  // iPhone SE) can scroll instead of clipping the bottom "Continue without"
+  // action off-screen — the overlay used to center non-scrolling content and
+  // bleed past both screen edges.
+  scroll: { width: '100%' },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 48, paddingHorizontal: 24 },
   badge: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, borderWidth: 1, marginBottom: 24 },
   badgeText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.5 },
   icon: { fontSize: 56, marginBottom: 20 },

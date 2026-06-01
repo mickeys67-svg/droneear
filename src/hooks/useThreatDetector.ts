@@ -9,7 +9,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { ThreatDetector } from '../core/detection/ThreatDetector';
 import { DetectionFusionEngine } from '../core/detection/DetectionFusionEngine';
 import { VoiceAlertManager } from '../core/audio/VoiceAlertManager';
-import { MicQualityMonitor } from '../core/audio/MicQualityMonitor';
+import { MicQualityMonitor, type MicQuality, type MicWarning } from '../core/audio/MicQualityMonitor';
 import { SensorEnforcementManager, type SensorState, type SensorIssue } from '../core/sensors/SensorEnforcementManager';
 import { EnvironmentDetector, type EnvironmentState } from '../core/sensors/EnvironmentDetector';
 import { getTranslation } from '../i18n/translations';
@@ -25,6 +25,24 @@ import * as Haptics from 'expo-haptics';
 import * as Battery from 'expo-battery';
 import * as Location from 'expo-location';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
+
+// ===== Compass anti-jitter (radar front-up rotation) =====
+// The magnetometer runs at 5Hz and, even on a perfectly still phone, its raw
+// heading dithers by several degrees. The radar rotates its cardinal labels
+// and threat dots by this heading, so feeding the raw value straight through
+// makes the whole radar vibrate continuously ("막 움직인다 / 고장났다"). We
+// low-pass the heading toward the raw reading and only commit a new on-screen
+// value once it has moved past a deadband, so the radar holds still until the
+// user genuinely rotates the phone. NOTE: this smoothing is UI-ONLY — the raw
+// heading is still sent to the AudioClassifier for DOA, so bearing accuracy is
+// unaffected.
+const HEADING_LP_ALPHA = 0.2;    // low-pass factor toward each raw reading
+const HEADING_DEADBAND_DEG = 3;  // ignore sub-threshold heading changes
+
+// Smallest signed circular difference a-b mapped into [-180, 180].
+function circularDelta(a: number, b: number): number {
+  return ((a - b + 540) % 360) - 180;
+}
 
 export function useThreatDetector() {
   const detectorRef = useRef<ThreatDetector | null>(null);
@@ -59,6 +77,10 @@ export function useThreatDetector() {
   // only triggers re-renders when the value actually changes.
   const [compassHeading, setCompassHeading] = useState(0);
   const [compassAvailable, setCompassAvailable] = useState(false);
+  // Low-pass accumulator (float) for the smoothed radar heading. Kept in a ref
+  // so it survives re-renders without itself triggering one. null until the
+  // first magnetometer sample seeds it.
+  const smoothedHeadingRef = useRef<number | null>(null);
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [modelStatus, setModelStatus] = useState<string>('UNLOADED');
@@ -67,12 +89,21 @@ export function useThreatDetector() {
   const isScanning = useDetectionStore((s) => s.isScanning);
   const latestDetection = useDetectionStore((s) => s.latestDetection);
   const currentThreats = useDetectionStore((s) => s.currentThreats);
-  const audioLevel = useDetectionStore((s) => s.audioLevel);
-  const spectralData = useDetectionStore((s) => s.spectralData);
-  const inferenceTimeMs = useDetectionStore((s) => s.inferenceTimeMs);
-  const micQuality = useDetectionStore((s) => s.micQuality);
-  const micSnrDb = useDetectionStore((s) => s.micSnrDb);
-  const micWarning = useDetectionStore((s) => s.micWarning);
+  // NOTE: audioLevel / spectralData are intentionally NOT subscribed here.
+  // They update at 20-30Hz and this hook runs inside the SCAN screen render,
+  // so subscribing would re-render the ENTIRE screen every audio frame
+  // (the "whole page shaking like it's broken" bug). The setters below still
+  // write them to the store; leaf consumers (TacticalSpectrogram, DebugRmsItem)
+  // subscribe to the store directly so per-frame updates stay scoped to them.
+  // inferenceTimeMs is also NOT subscribed here — onMetrics updates it every
+  // audio frame (frameSkipRate defaults to 1), so a top-level subscription
+  // would re-render the whole SCAN screen at frame rate even though the value
+  // is only shown in the debug panel. A DebugInferenceItem leaf reads it from
+  // the store directly instead.
+  // micQuality / micSnrDb / micWarning are NOT subscribed here either — the
+  // store's setMicQuality fires a few times per second (integer-snapped SNR),
+  // which would re-render the whole SCAN screen. MicQualityPanel subscribes to
+  // the store directly so those updates stay scoped to that one panel.
   const batteryLevel = useDetectionStore((s) => s.batteryLevel);
   const feedbackPending = useDetectionStore((s) => s.feedbackPending);
   const fusedDetections = useDetectionStore((s) => s.fusedDetections);
@@ -108,6 +139,27 @@ export function useThreatDetector() {
   const alertVibrationRef = useRef(alertVibration);
   useEffect(() => { alertVibrationRef.current = alertVibration; }, [alertVibration]);
 
+  // ===== Mic quality/warning hysteresis (SCAN-screen anti-shake) =====
+  // analyze() computes quality/warning from a SINGLE 20-30Hz audio frame
+  // (instantaneous windDetected / clippingRatio / SNR). Near a threshold these
+  // flip every frame. CONFIRMED root cause of the "Signal Quality 밑으로 전부
+  // 위아래로 떨림": the warning badge sits at the BOTTOM of MicQualityPanel, so
+  // a per-frame null↔warning flip grows/shrinks that panel and bounces EVERY
+  // element below it (radar, range labels, spectrogram) at frame rate — a
+  // layout reflow, not a re-render (which is why re-render-only fixes failed).
+  //
+  // Because the app can only be tested via App Store/TestFlight (no live
+  // reload), this MUST be impossible to shake, not merely less frequent. Two
+  // gates make the committed quality/warning change AT MOST once every
+  // MIN_DWELL_FRAMES (~3-4s): (1) a candidate must hold for HYSTERESIS_FRAMES,
+  // and (2) at least MIN_DWELL_FRAMES must have passed since the last commit.
+  // So the badge physically cannot toggle faster than ~once per 3s → no shake.
+  // snrDb is left live (it changes only a number, never the layout).
+  const HYSTERESIS_FRAMES = 15;  // candidate must hold ~0.5-0.8s before accepted
+  const MIN_DWELL_FRAMES = 90;   // and a committed value holds ~3-4s before it can change again
+  const micCommittedRef = useRef<{ quality: MicQuality; warning: MicWarning; dwell: number }>({ quality: 'GOOD', warning: null, dwell: MIN_DWELL_FRAMES });
+  const micCandidateRef = useRef<{ quality: MicQuality; warning: MicWarning; count: number }>({ quality: 'GOOD', warning: null, count: 0 });
+
   // BLE Remote ID Scanner
   const {
     bleAvailable, bleScanActive, bleDevices, bleDeviceCount,
@@ -142,15 +194,31 @@ export function useThreatDetector() {
         setSensorIssues(issues);
       },
       onCompassUpdate: (compassData) => {
-        // CRITICAL: Wire compass heading to AudioClassifier
+        // CRITICAL: Wire the RAW heading to the AudioClassifier — DOA bearing
+        // accuracy must not be deadbanded.
         detectorRef.current?.setCompassHeading(compassData.heading);
-        // Also expose to UI so the radar can rotate to "front-up" and
-        // the screen can show a live HEADING readout. Snap to integer
-        // degrees so 5Hz magnetometer noise doesn't cause re-renders.
-        setCompassHeading((prev) => {
-          const next = Math.round(compassData.heading) % 360;
-          return prev === next ? prev : next;
-        });
+
+        // Radar/HEADING readout get a smoothed + deadbanded heading so raw 5Hz
+        // magnetometer jitter (±several degrees even on a still phone) can't
+        // make the front-up radar's cardinal labels and threat dots vibrate
+        // every frame. We low-pass toward the raw reading, then only commit a
+        // new integer heading once it has drifted past HEADING_DEADBAND_DEG.
+        const raw = compassData.heading;
+        const prevSmooth = smoothedHeadingRef.current;
+        if (prevSmooth == null) {
+          smoothedHeadingRef.current = raw;
+          const seed = ((Math.round(raw) % 360) + 360) % 360;
+          setCompassHeading((prev) => (prev === seed ? prev : seed));
+        } else {
+          // Low-pass in circular space so the wrap at 360/0 is handled.
+          const smooth = (prevSmooth + circularDelta(raw, prevSmooth) * HEADING_LP_ALPHA + 360) % 360;
+          smoothedHeadingRef.current = smooth;
+          setCompassHeading((prev) => {
+            if (Math.abs(circularDelta(smooth, prev)) < HEADING_DEADBAND_DEG) return prev;
+            const next = ((Math.round(smooth) % 360) + 360) % 360;
+            return next === prev ? prev : next;
+          });
+        }
         setCompassAvailable((prev) => prev === compassData.available ? prev : compassData.available);
       },
       onAlarm: (issue) => {
@@ -197,14 +265,40 @@ export function useThreatDetector() {
         // FIXED: Real PCM data analysis for mic quality
         if (pcmData && pcmData.length > 0) {
           const report = micMonitorRef.current.analyze(pcmData);
-          setMicQuality(report.quality, report.snrDb, report.warning);
+
+          // Hysteresis + dwell: a reading must (1) hold for HYSTERESIS_FRAMES
+          // consecutive frames AND (2) at least MIN_DWELL_FRAMES must have
+          // elapsed since the last committed change. Together these cap the
+          // warning badge / sensor panel to ~one layout change per 3-4s, so it
+          // is physically impossible for them to flicker and bounce the radar.
+          const cand = micCandidateRef.current;
+          if (cand.quality === report.quality && cand.warning === report.warning) {
+            cand.count++;
+          } else {
+            cand.quality = report.quality;
+            cand.warning = report.warning;
+            cand.count = 1;
+          }
+          const committed = micCommittedRef.current;
+          committed.dwell++;
+          const wouldChange = committed.quality !== cand.quality || committed.warning !== cand.warning;
+          if (wouldChange && cand.count >= HYSTERESIS_FRAMES && committed.dwell >= MIN_DWELL_FRAMES) {
+            committed.quality = cand.quality;
+            committed.warning = cand.warning;
+            committed.dwell = 0;
+          }
+          const stableQuality = committed.quality;
+          const stableWarning = committed.warning;
+
+          // snrDb stays live (number-only update, no layout impact).
+          setMicQuality(stableQuality, report.snrDb, stableWarning);
 
           // Update sensor enforcement manager
-          sensorMgr.setMicQuality(report.quality, report.warning);
+          sensorMgr.setMicQuality(stableQuality, stableWarning);
 
           // Voice warning for mic issues
-          if (report.warning) {
-            voiceRef.current.announceMicWarning(report.quality, report.warning);
+          if (stableWarning) {
+            voiceRef.current.announceMicWarning(stableQuality, stableWarning);
           }
         }
       },
@@ -339,7 +433,7 @@ export function useThreatDetector() {
   // Update profile
   useEffect(() => {
     detectorRef.current?.setProfile(profile);
-    const config = DEVICE_PROFILES[profile];
+    const config = DEVICE_PROFILES[profile] ?? DEVICE_PROFILES.AUTO;
     sensorMgrRef.current.setStereoProfile(config.channels === 2);
   }, [profile]);
 
@@ -419,7 +513,7 @@ export function useThreatDetector() {
     micMonitorRef.current.reset();
 
     // Start sensor monitoring (compass, etc.)
-    const config = DEVICE_PROFILES[profile];
+    const config = DEVICE_PROFILES[profile] ?? DEVICE_PROFILES.AUTO;
     await sensorMgrRef.current.startMonitoring(config.channels === 2);
     sensorMgrRef.current.setRecordingState(true);
 
@@ -559,6 +653,11 @@ export function useThreatDetector() {
     sensorMgrRef.current.setRecordingState(false);
     envDetectorRef.current.stop();
 
+    // Drop the smoothed-heading accumulator so the NEXT scan re-seeds the radar
+    // straight to the first live magnetometer reading instead of easing over a
+    // few seconds from this session's stale heading.
+    smoothedHeadingRef.current = null;
+
     // Stop BLE + WiFi scanning
     await stopBLE().catch((e) => console.warn('[BLE] stopScanning failed:', e));
     await stopWiFi().catch((e) => console.warn('[WiFi] stopScanning failed:', e));
@@ -606,14 +705,8 @@ export function useThreatDetector() {
     isInitialized,
     latestDetection,
     currentThreats,
-    audioLevel,
-    spectralData,
-    inferenceTimeMs,
     modelStatus,
     batteryLevel,
-    micQuality,
-    micSnrDb,
-    micWarning,
     feedbackPending,
 
     // Sensor enforcement state

@@ -227,7 +227,7 @@ export default function MapScreen() {
             <View style={styles.sheetStatItem}>
               <Text style={[styles.sheetStatLabel, { color: theme.textMuted }]}>{t.distance || 'Distance'}</Text>
               <View style={styles.distanceRow}>
-                <Text style={[styles.distanceValue, { color: theme.text }]}>
+                <Text style={[styles.distanceValue, { color: theme.text }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
                   {selectedMarker.detection?.distanceMeters != null
                     ? `${Math.round(selectedMarker.detection.distanceMeters)}`
                     : '?'}
@@ -325,9 +325,11 @@ export default function MapScreen() {
             <TouchableOpacity
               style={[styles.dismissBtn, { borderColor: theme.mode === 'DAY' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)' }]}
               onPress={() => {
-                if (selectedMarker?.detection?.id) {
-                  hideTrackFromMap(selectedMarker.detection.id);
-                }
+                // Hide by TRACK id — useMapData filters markers against
+                // hiddenTrackIds.includes(track.id), so passing the detection
+                // id (the previous code) never matched and DISMISS did nothing.
+                const tid = selectedMarker?.trackId;
+                if (tid) hideTrackFromMap(tid);
                 handleDismissMarker();
               }}
               accessibilityRole="button"

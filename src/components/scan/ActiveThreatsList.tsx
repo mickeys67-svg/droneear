@@ -64,10 +64,10 @@ export const ActiveThreatsList = memo(function ActiveThreatsList({ activeThreats
           >
             <View style={[styles.dot, { backgroundColor: severityColor }]} />
             <View style={styles.info}>
-              <Text style={[styles.type, { color: theme.text }]}>
+              <Text style={[styles.type, { color: theme.text }]} numberOfLines={1}>
                 {categoryLabel(t, latest.threatCategory)}
               </Text>
-              <Text style={[styles.confLabel, { color: theme.textMuted }]}>
+              <Text style={[styles.confLabel, { color: theme.textMuted }]} numberOfLines={1}>
                 {getConfidenceLabel(latest.confidence, t)}
               </Text>
             </View>

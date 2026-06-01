@@ -81,6 +81,15 @@ export class KalmanFilter2D {
       }
     }
 
+    // Clamp the diagonal so a track that predicts for a very long time without
+    // measurements (acoustic-only tracks rarely update) can't accumulate
+    // unbounded covariance over a multi-hour session. No effect in normal
+    // operation — the cap is far above realistic values.
+    const P_MAX = 1e6;
+    for (let i = 0; i < 4; i++) {
+      if (newP[i][i] > P_MAX) newP[i][i] = P_MAX;
+    }
+
     return { x: newX, y: newY, vx, vy, P: newP };
   }
 
