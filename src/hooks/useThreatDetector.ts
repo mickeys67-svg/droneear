@@ -172,6 +172,106 @@ export function useThreatDetector() {
     startWiFi, stopWiFi,
   } = useWiFiScanner();
 
+  // ===== Stale-closure guards for the AppState handler =====
+  // startBLE/startWiFi are useCallbacks whose identity changes when
+  // bleAvailable/wifiAvailable flip false→true after their async availability
+  // checks resolve. The AppState 'change' handler is registered once (mount, []
+  // deps), so without these mirrors it captures the first-render copies (with
+  // availability=false baked in) and never restarts BLE/WiFi on resume. Mirror
+  // the latest versions + wifiAvailable into refs and read those in the handler.
+  // (stopBLE/stopWiFi are stable, so they don't need mirroring.)
+  const startBLERef = useRef(startBLE);
+  const startWiFiRef = useRef(startWiFi);
+  const wifiAvailableRef = useRef(wifiAvailable);
+  useEffect(() => { startBLERef.current = startBLE; }, [startBLE]);
+  useEffect(() => { startWiFiRef.current = startWiFi; }, [startWiFi]);
+  useEffect(() => { wifiAvailableRef.current = wifiAvailable; }, [wifiAvailable]);
+
+  // Shared battery tick used by BOTH the start-path and resume-path intervals.
+  // Reads the level, mirrors it to the store, adjusts the adaptive frame-skip
+  // rate in BOTH directions (so it is RESTORED when battery recovers, not only
+  // dropped at <20%), and fires the one-shot threshold alerts. Stable ([] deps,
+  // store actions via getState) so the [] AppState handler calls the same impl.
+  const runBatteryTick = useCallback(async () => {
+    try {
+      const level = await Battery.getBatteryLevelAsync();
+      const pct = Math.round(level * 100);
+      useDetectionStore.getState().setBatteryLevel(pct);
+
+      // Adaptive frame-skip — throttle on low battery, restore on recovery.
+      if (detectorRef.current) {
+        detectorRef.current.setFrameSkipRate(pct < 20 ? 3 : pct < 50 ? 2 : 1);
+      }
+
+      // Battery alert thresholds (50%, 30%, 15%) — show once per threshold.
+      const thresholds = [50, 30, 15];
+      for (const threshold of thresholds) {
+        if (pct <= threshold && !batteryAlertShownRef.current.has(threshold)) {
+          batteryAlertShownRef.current.add(threshold);
+          const currentLocale = useSettingsStore.getState().locale;
+          const tr = getTranslation(currentLocale);
+          const msg = pct <= 15
+            ? (tr.batteryCritical || `Battery critical: ${pct}%. Connect power immediately.`)
+            : pct <= 30
+            ? (tr.batteryLow || `Battery low: ${pct}%. Connect a power bank to continue scanning.`)
+            : (tr.batteryHalf || `Battery at ${pct}%. Consider connecting a power bank for extended scanning.`);
+          voiceRef.current.enqueueCustom(msg, pct <= 15 ? 1 : 2);
+          // Visual notice — non-blocking inline toast (see start-path notes).
+          if (pct <= 30) {
+            useDetectionStore.getState().showToast(msg, pct <= 15 ? 8000 : 6000, pct <= 15 ? 'danger' : 'warn');
+          }
+          break; // Only alert for the lowest matching threshold
+        }
+      }
+    } catch (err) {
+      console.warn('[DroneMonitor] Battery check failed:', err);
+    }
+  }, []);
+
+  // Establish (or re-establish) the GPS watch that feeds the fusion engine and
+  // map. Extracted from startScanning so the AppState resume branch can restart
+  // it — the OS tears the watcher down on suspend, and without this the fusion
+  // GPS feed never came back after one background cycle. Idempotent: any
+  // existing subscription is removed before a new one is created. Stable so the
+  // [] AppState handler can call it.
+  const startLocationWatch = useCallback(async () => {
+    try {
+      const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
+      if (existingStatus !== 'granted') {
+        // Show rationale before system permission dialog (Google Play requirement)
+        await new Promise<void>((resolve) => {
+          Alert.alert(
+            'Location Access',
+            'DroneEar uses your location to detect indoor/outdoor environment, display your position on the map, and calculate distance to detected drones. Location data stays on your device.',
+            [{ text: 'OK', onPress: () => resolve() }],
+          );
+        });
+      }
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        // Remove any stale watcher first so a resume can't leak a subscription.
+        if (locationSubRef.current) {
+          locationSubRef.current.remove();
+          locationSubRef.current = null;
+        }
+        locationSubRef.current = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.Balanced, distanceInterval: 15 },
+          (loc) => {
+            const pos = {
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+            };
+            fusionEngineRef.current.setUserPosition(pos);
+            // Share location with detection store (so useMapData doesn't need its own GPS watcher)
+            useDetectionStore.getState().setUserLocation(pos);
+          },
+        );
+      }
+    } catch (e) {
+      console.warn('[DroneMonitor] Location watch failed:', e);
+    }
+  }, []);
+
   // ===== Sync settings =====
   useEffect(() => { voiceRef.current.setLocale(locale); }, [locale]);
   useEffect(() => { voiceRef.current.setVoiceEnabled(voiceAlert); }, [voiceAlert]);
@@ -379,28 +479,25 @@ export function useThreatDetector() {
           stopWiFi().catch((e) => console.warn('[WiFi] background stop failed:', e));
         }
       } else if (nextState === 'active' && wasScanningRef.current) {
-        // Resuming from background — restart intervals + BLE/WiFi scans
+        // Resuming from background — restart intervals + BLE/WiFi scans + env
+        // detection + GPS watch. Use the *Ref mirrors so we call the LATEST
+        // startBLE/startWiFi (their identity changed once availability resolved).
         wasScanningRef.current = false;
         // Resume BLE + WiFi scans
         if (useSettingsStore.getState().bleScanEnabled) {
-          startBLE().catch((e) => console.warn('[BLE] foreground resume failed:', e));
+          startBLERef.current().catch((e) => console.warn('[BLE] foreground resume failed:', e));
         }
-        if (wifiAvailable) {
-          startWiFi().catch((e) => console.warn('[WiFi] foreground resume failed:', e));
+        if (wifiAvailableRef.current) {
+          startWiFiRef.current().catch((e) => console.warn('[WiFi] foreground resume failed:', e));
         }
+        // Restart environment detection — start() is idempotent (it stop()s
+        // first), so this safely revives env detection that died on suspend.
+        envDetectorRef.current?.start().catch((e) => console.warn('[Env] foreground resume failed:', e));
+        // Re-establish the GPS watch for the fusion engine + map (the OS tears
+        // the watcher down on suspend, so it must be recreated on resume).
+        startLocationWatch();
         if (!batteryIntervalRef.current) {
-          batteryIntervalRef.current = setInterval(async () => {
-            try {
-              const level = await Battery.getBatteryLevelAsync();
-              const pct = Math.round(level * 100);
-              useDetectionStore.getState().setBatteryLevel(pct);
-              if (pct < 20 && detectorRef.current) {
-                detectorRef.current.setFrameSkipRate(3);
-              }
-            } catch (err) {
-              console.warn('[DroneMonitor] Battery check failed:', err);
-            }
-          }, 60000);
+          batteryIntervalRef.current = setInterval(() => { runBatteryTick(); }, 60000);
         }
         if (!statusIntervalRef.current) {
           statusIntervalRef.current = setInterval(() => {
@@ -463,6 +560,11 @@ export function useThreatDetector() {
   // call (e.g. rapid double-tap of the scan button) can't slip past the guard
   // while the first call is still awaiting permissions/battery/etc.
   const scanStartingRef = useRef(false);
+
+  // Ref mirror so startScanning's rollback path can call the LATEST stopScanning
+  // without a temporal-dead-zone cycle (stopScanning is a useCallback declared
+  // below). Assigned in an effect after stopScanning is defined.
+  const stopScanningRef = useRef<(() => Promise<void>) | null>(null);
 
   const startScanning = useCallback(async () => {
     if (isScanningRef.current || scanStartingRef.current || !isInitializedRef.current) return;
@@ -535,37 +637,10 @@ export function useThreatDetector() {
 
     voiceRef.current.announceScanStart();
 
-    // Start location watch for fusion engine (with pre-permission rationale)
-    try {
-      const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
-      if (existingStatus !== 'granted') {
-        // Show rationale before system permission dialog (Google Play requirement)
-        await new Promise<void>((resolve) => {
-          Alert.alert(
-            'Location Access',
-            'DroneEar uses your location to detect indoor/outdoor environment, display your position on the map, and calculate distance to detected drones. Location data stays on your device.',
-            [{ text: 'OK', onPress: () => resolve() }],
-          );
-        });
-      }
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        locationSubRef.current = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.Balanced, distanceInterval: 15 },
-          (loc) => {
-            const pos = {
-              latitude: loc.coords.latitude,
-              longitude: loc.coords.longitude,
-            };
-            fusionEngineRef.current.setUserPosition(pos);
-            // Share location with detection store (so useMapData doesn't need its own GPS watcher)
-            useDetectionStore.getState().setUserLocation(pos);
-          },
-        );
-      }
-    } catch (e) {
-      console.warn('[DroneMonitor] Location watch failed:', e);
-    }
+    // Start location watch for fusion engine (with pre-permission rationale).
+    // Shared with the AppState resume branch so the GPS feed is restored the
+    // same way after a background cycle.
+    await startLocationWatch();
 
     // Start environment detection
     await envDetectorRef.current.start();
@@ -588,48 +663,11 @@ export function useThreatDetector() {
       }
     }, 30000);
 
-    // Battery monitoring (60s interval — battery changes slowly)
+    // Battery monitoring (60s interval — battery changes slowly). Uses the
+    // shared runBatteryTick so skip-rate recovery + threshold alerts behave
+    // identically here and in the AppState resume path.
     batteryAlertShownRef.current.clear();
-    batteryIntervalRef.current = setInterval(async () => {
-      try {
-        const level = await Battery.getBatteryLevelAsync();
-        const pct = Math.round(level * 100);
-        setBatteryLevel(pct);
-
-        // Low battery performance throttling
-        if (pct < 20 && detectorRef.current) {
-          detectorRef.current.setFrameSkipRate(3);
-        }
-
-        // Battery alert thresholds (50%, 30%, 15%) — show once per threshold
-        const thresholds = [50, 30, 15];
-        for (const threshold of thresholds) {
-          if (pct <= threshold && !batteryAlertShownRef.current.has(threshold)) {
-            batteryAlertShownRef.current.add(threshold);
-
-            // Voice alert
-            const currentLocale = useSettingsStore.getState().locale;
-            const tr = getTranslation(currentLocale);
-            const msg = pct <= 15
-              ? (tr.batteryCritical || `Battery critical: ${pct}%. Connect power immediately.`)
-              : pct <= 30
-              ? (tr.batteryLow || `Battery low: ${pct}%. Connect a power bank to continue scanning.`)
-              : (tr.batteryHalf || `Battery at ${pct}%. Consider connecting a power bank for extended scanning.`);
-            voiceRef.current.enqueueCustom(msg, pct <= 15 ? 1 : 2);
-
-            // Visual notice — uses the non-blocking inline toast instead of
-            // Alert.alert, so the user can keep interacting with the listen
-            // screen while the warning fades on its own.
-            if (pct <= 30) {
-              showToast(msg, pct <= 15 ? 8000 : 6000, pct <= 15 ? 'danger' : 'warn');
-            }
-            break; // Only alert for the lowest matching threshold
-          }
-        }
-      } catch (err) {
-        console.warn('[DroneMonitor] Battery check failed:', err);
-      }
-    }, 60000);
+    batteryIntervalRef.current = setInterval(() => { runBatteryTick(); }, 60000);
 
     // Periodic voice status
     statusIntervalRef.current = setInterval(() => {
@@ -637,10 +675,19 @@ export function useThreatDetector() {
       const active = threats.filter((t) => t.isActive).length;
       voiceRef.current.announceStatus(active);
     }, 30000);
+    } catch (err) {
+      // Rollback: a throw mid-startup would otherwise leave isScanning=true with
+      // partially-initialized subsystems (recording, sensors, scans, intervals)
+      // and no clean way to recover. Tear everything down so the next tap can
+      // retry from a known state.
+      console.error('[DroneMonitor] startScanning failed, rolling back:', err);
+      await stopScanningRef.current?.().catch((e) =>
+        console.warn('[DroneMonitor] rollback stopScanning failed:', e),
+      );
     } finally {
       scanStartingRef.current = false;
     }
-  }, [profile, bleScanEnabled, bleAvailable, startBLE, wifiAvailable, startWiFi]);
+  }, [profile, bleScanEnabled, bleAvailable, startBLE, wifiAvailable, startWiFi, startLocationWatch, runBatteryTick]);
 
   const stopScanning = useCallback(async () => {
     if (!detectorRef.current) return;
@@ -687,6 +734,9 @@ export function useThreatDetector() {
       envVoiceIntervalRef.current = null;
     }
   }, [stopBLE, stopWiFi, bleAvailable]);
+
+  // Keep the rollback mirror pointed at the latest stopScanning.
+  useEffect(() => { stopScanningRef.current = stopScanning; }, [stopScanning]);
 
   const setProfile = useCallback((newProfile: DeviceProfile) => {
     useSettingsStore.getState().setProfile(newProfile);

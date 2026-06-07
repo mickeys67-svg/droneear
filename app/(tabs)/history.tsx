@@ -284,18 +284,23 @@ export default function HistoryScreen() {
           <Text style={[styles.emptyHint, { color: theme.textMuted, marginTop: 12, paddingHorizontal: 24, textAlign: 'center', lineHeight: 18 }]}>
             {t.emptyHistoryWhyNot || 'Only sounds matching DroneEar\'s drone acoustic models are logged. Everyday sounds (voice, music, claps) are filtered out as background. Lower the confidence threshold in Settings, or enable Debug Mode to see what the model is hearing.'}
           </Text>
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
+          {/* Stack the two CTAs vertically and stretch them full-width. A
+              horizontal row put "START LISTENING" + "SETTINGS" (each with 32px
+              side padding) past the screen width; the centered row then clipped
+              both buttons at the screen edges. A column avoids that and stays
+              safe for longer translations (German/Korean). */}
+          <View style={styles.emptyCtaCol}>
             <TouchableOpacity
-              style={[glassStyles.btnPrimary, { backgroundColor: theme.primary }]}
+              style={[glassStyles.btnPrimary, styles.emptyCtaBtn, { backgroundColor: theme.primary }]}
               onPress={() => router.navigate('/(tabs)')}
             >
-              <Text style={[glassStyles.btnPrimaryText, theme.mode !== 'DAY' && { color: '#FFF' }]}>{t.engageSensors}</Text>
+              <Text style={[glassStyles.btnPrimaryText, theme.mode !== 'DAY' && { color: '#FFF' }]} numberOfLines={1}>{t.engageSensors}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[glassStyles.btnPrimary, { backgroundColor: 'transparent', borderWidth: 1, borderColor: GLASS.borderLight }]}
+              style={[glassStyles.btnPrimary, styles.emptyCtaBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: GLASS.borderLight }]}
               onPress={() => router.navigate('/(tabs)/settings')}
             >
-              <Text style={[glassStyles.btnPrimaryText, { color: theme.textDim }]}>{t.settings || 'Settings'}</Text>
+              <Text style={[glassStyles.btnPrimaryText, { color: theme.textDim }]} numberOfLines={1}>{t.settings || 'Settings'}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -722,6 +727,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 6,
     textAlign: 'center',
+  },
+  // Empty-state CTAs: stacked, full-width column so the long button labels
+  // ("START LISTENING") never overflow the screen and get clipped.
+  emptyCtaCol: {
+    alignSelf: 'stretch',
+    marginTop: 24,
+    gap: 10,
+  },
+  emptyCtaBtn: {
+    alignSelf: 'stretch',
   },
 
   // Footer
